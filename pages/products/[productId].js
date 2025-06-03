@@ -47,7 +47,7 @@ const ProductDetailPage = ({ handleAddToCart }) => {
             <div className="text-center py-16">
                 <Icon name="xCircle" className="w-16 h-16 text-red-400 mx-auto mb-4" />
                 <h1 className="text-2xl font-bold text-gray-800 mb-2">Product Not Found</h1>
-                <p className="text-gray-600 mb-6">The product you're looking for doesn't exist or has been removed.</p>
+                <p className="text-gray-600 mb-6">The product you&apos;re looking for doesn&apos;t exist or has been removed.</p>
                 <Button onClick={() => router.push('/products')} variant="primary">
                     Back to Products
                 </Button>

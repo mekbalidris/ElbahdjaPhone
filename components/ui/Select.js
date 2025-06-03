@@ -20,4 +20,6 @@ const Select = React.forwardRef(({ options, value, onChange, name, label, requir
     </div>
 ));
 
+Select.displayName = 'Select';
+
 export default Select; 

@@ -22,4 +22,6 @@ const Input = React.forwardRef(({ type = 'text', placeholder, value, onChange, n
     </div>
 ));
 
+Input.displayName = 'Input';
+
 export default Input; 
