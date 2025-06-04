@@ -45,7 +45,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
         if (!category) newErrors.category = "Category is required.";
         if (!price || isNaN(parseFloat(price)) || parseFloat(price) <= 0) newErrors.price = "Valid price is required.";
         if (!description.trim()) newErrors.description = "Description is required.";
-        if (!stock || isNaN(parseInt(stock)) || parseInt(stock) < 0) newErrors.stock = "Valid stock quantity is required.";
+        if (stock === '' || isNaN(parseInt(stock)) || parseInt(stock) < 0 || !Number.isInteger(parseFloat(stock))) newErrors.stock = "Valid stock quantity (whole number, 0 or more) is required.";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -127,7 +127,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
                             <Input label="Product Name" name="name" value={name} onChange={e => setName(e.target.value)} placeholder="e.g., Galaxy Nova X" required error={errors.name} />
                             <Select label="Category" name="category" options={CATEGORIES} value={category} onChange={e => setCategory(e.target.value)} required error={errors.category} />
                             <Input label="Price ($)" name="price" type="number" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g., 799.99" required error={errors.price} />
-                            <Input label="Stock Quantity" name="stock" type="number" value={stock} onChange={e => setStock(e.target.value)} placeholder="e.g., 50" required error={errors.stock} />
+                            <Input label="Stock (0 for Out of Stock)" name="stock" type="number" value={stock} onChange={e => setStock(e.target.value)} placeholder="e.g., 50" required error={errors.stock} />
                         </div>
                     </div>
                     <div className="mb-4">

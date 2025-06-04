@@ -6,6 +6,7 @@ import ProductFormModal from '../components/products/ProductFormModal';
 import OrderDetailsModal from '../components/orders/OrderDetailsModal';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
+import Input from '../components/ui/Input';
 
 const SellerDashboardPage = () => {
     const [products, setProducts] = useState([]);
@@ -17,6 +18,7 @@ const SellerDashboardPage = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const { currentUser, isLoading: authLoading } = useAuth();
     const router = useRouter();
+    const [productSearchTerm, setProductSearchTerm] = useState('');
 
     // Check for seller role and redirect if not authorized
     useEffect(() => {
@@ -70,8 +72,13 @@ const SellerDashboardPage = () => {
         }
     }, [currentUser, authLoading]);
 
-    // Filter products owned by the current user
-    const userProducts = products.filter(p => p.sellerId === currentUser?.id);
+    // Filter products owned by the current user and apply search filter
+    const filteredUserProducts = products.filter(p => 
+        p.sellerId === currentUser?.id &&
+        (p.name?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
+         p.description?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
+         p.category?.toLowerCase().includes(productSearchTerm.toLowerCase()))
+    );
 
     const handleAddProduct = async (productData) => {
         setIsLoadingProducts(true);
@@ -276,7 +283,7 @@ const SellerDashboardPage = () => {
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
                                                 <div className="ml-3">
-                                                    <p className="text-sm font-medium text-gray-900">Order #{order._id.slice(-6)}</p>
+                                                    <p className="text-sm font-medium text-gray-900">{order.items?.[0]?.name || 'Unnamed Order'} #{order._id?.slice(-6).toUpperCase() || 'N/A'}</p>
                                                     <p className="text-sm text-gray-500">
                                                         {new Date(order.createdAt).toLocaleDateString()}
                                                     </p>
@@ -289,7 +296,7 @@ const SellerDashboardPage = () => {
                                                       order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                                                       order.status === 'returned' ? 'bg-purple-100 text-purple-800' :
                                                       'bg-gray-100 text-gray-800'}`}>
-                                                    {order.status}
+                                                    {order.status || 'N/A'}
                                                 </span>
                                                 <span className="ml-4 text-sm font-medium text-gray-900">
                                                     ${order.totals?.total?.toFixed(2) || '0.00'}
@@ -304,25 +311,38 @@ const SellerDashboardPage = () => {
                 )}
 
                 {/* Products Section */}
-                <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-2xl font-bold text-gray-900">Your Products</h2>
-                    <Button
-                        onClick={() => setIsAddProductModalOpen(true)}
-                        variant="primary"
-                        iconLeft="plus"
-                    >
-                        Add New Product
-                    </Button>
+                <div className="mb-8">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <h2 className="text-2xl font-bold text-gray-900">Your Products</h2>
+                        <div className="flex flex-col sm:flex-row items-stretch gap-4 w-full sm:w-auto">
+                            <Input
+                                type="text"
+                                placeholder="Search your products..."
+                                value={productSearchTerm}
+                                onChange={(e) => setProductSearchTerm(e.target.value)}
+                                className="w-full sm:w-64 !h-[42px]"
+                            />
+                            <Button
+                                onClick={() => setIsAddProductModalOpen(true)}
+                                variant="primary"
+                                iconLeft="plus"
+                                className="whitespace-nowrap min-w-[160px] !h-[42px]"
+                            >
+                                <Icon name="plus" className="w-5 h-5 mr-2" />
+                                Add New Product
+                            </Button>
+                        </div>
+                    </div>
                 </div>
 
                 {isLoadingProducts ? (
                     <div className="flex justify-center items-center h-64">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
                     </div>
-                ) : userProducts.length > 0 ? (
+                ) : filteredUserProducts.length > 0 ? (
                     <div className="bg-white shadow overflow-hidden sm:rounded-md">
                         <ul className="divide-y divide-gray-200">
-                            {userProducts.map(product => (
+                            {filteredUserProducts.map(product => (
                                 <li key={product._id}>
                                     <div className="px-4 py-4 sm:px-6">
                                         <div className="flex items-center justify-between">
@@ -369,10 +389,6 @@ const SellerDashboardPage = () => {
                                                     {product.stock} in stock
                                                 </p>
                                             </div>
-                                            <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                                                <Icon name="star" className="flex-shrink-0 mr-1.5 h-5 w-5 text-yellow-400" />
-                                                {product.ratings} ({product.reviews || 0} reviews)
-                                            </div>
                                         </div>
                                     </div>
                                 </li>
@@ -382,14 +398,19 @@ const SellerDashboardPage = () => {
                 ) : (
                     <div className="text-center py-12 bg-white rounded-lg shadow">
                         <Icon name="package" className="mx-auto h-12 w-12 text-gray-400" />
-                        <h3 className="mt-2 text-sm font-medium text-gray-900">No products</h3>
-                        <p className="mt-1 text-sm text-gray-500">Get started by creating a new product.</p>
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">{productSearchTerm ? 'No products found matching your search' : 'No products yet'}</h3>
+                        {productSearchTerm ? (
+                            <p className="mt-1 text-sm text-gray-500">Try a different search term.</p>
+                        ) : (
+                            <p className="mt-1 text-sm text-gray-500">Get started by creating a new product.</p>
+                        )}
                         <div className="mt-6">
                             <Button
                                 onClick={() => setIsAddProductModalOpen(true)}
                                 variant="primary"
                                 iconLeft="plus"
                             >
+                                <Icon name="plus" className="w-5 h-5 mr-2" />
                                 Add New Product
                             </Button>
                         </div>

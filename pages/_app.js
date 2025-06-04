@@ -56,6 +56,11 @@ function AppContent({ Component, pageProps }) {
             return;
         }
 
+        if (product.stock <= 0) {
+            toast.error('This product is currently out of stock.');
+            return;
+        }
+
         try {
             const res = await fetch('/api/cart', {
                 method: 'POST',
@@ -63,14 +68,14 @@ function AppContent({ Component, pageProps }) {
                     'Content-Type': 'application/json',
                     'user-id': currentUser.id
                 },
-                body: JSON.stringify({ productId: product._id, quantity: 1 })
+                body: JSON.stringify({ productId: product._id })
             });
 
             if (!res.ok) throw new Error('Failed to add to cart');
             
             const data = await res.json();
             setCartItems(data.items || []);
-            toast.success('Added to cart!');
+            toast.success(`${product.name || 'Item'} added to cart!`);
             setIsCartModalOpen(true);
         } catch (err) {
             console.error('Error adding to cart:', err);
@@ -78,38 +83,17 @@ function AppContent({ Component, pageProps }) {
         }
     };
 
-    const handleUpdateCartQuantity = async (productId, quantity) => {
-        if (!currentUser) return;
-
-        try {
-            const res = await fetch('/api/cart', {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'user-id': currentUser.id
-                },
-                body: JSON.stringify({ productId, quantity })
-            });
-
-            if (!res.ok) throw new Error('Failed to update cart');
-            
-            const data = await res.json();
-            setCartItems(data.items || []);
-        } catch (err) {
-            console.error('Error updating cart:', err);
-            toast.error('Failed to update cart');
-        }
-    };
-
     const handleRemoveFromCart = async (productId) => {
         if (!currentUser) return;
 
         try {
-            const res = await fetch(`/api/cart?productId=${productId}`, {
+            const res = await fetch('/api/cart', {
                 method: 'DELETE',
                 headers: {
-                    'user-id': currentUser.id
-                }
+                    'user-id': currentUser.id,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId: productId })
             });
 
             if (!res.ok) throw new Error('Failed to remove from cart');
@@ -123,7 +107,6 @@ function AppContent({ Component, pageProps }) {
         }
     };
 
-    // Don't render anything until after mounting
     if (!isMounted) {
         return null;
     }
@@ -147,7 +130,6 @@ function AppContent({ Component, pageProps }) {
                     isOpen={isCartModalOpen}
                     onClose={() => setIsCartModalOpen(false)}
                     items={cartItems}
-                    onUpdateQuantity={handleUpdateCartQuantity}
                     onRemoveItem={handleRemoveFromCart}
                     isLoading={isLoadingCart}
                 />

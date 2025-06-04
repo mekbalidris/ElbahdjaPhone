@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import Button from '../ui/Button';
@@ -7,16 +7,52 @@ import { useRouter } from 'next/router';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 
-export default function CartModal({ isOpen, onClose, items = [], onUpdateQuantity, onRemoveItem, isLoading }) {
+export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, isLoading }) {
     const router = useRouter();
     const { currentUser } = useAuth();
+
+    const [orders, setOrders] = useState([]);
+    const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+    const [ordersError, setOrdersError] = useState(null);
+
     const subtotal = useMemo(() => {
         if (!items || !Array.isArray(items)) return 0;
-        return items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        return items.reduce((sum, item) => sum + (item.price || 0), 0);
     }, [items]);
 
     const shippingCost = 10.00;
     const total = subtotal + shippingCost;
+
+    // Fetch user's orders when the modal opens and the user is logged in
+    useEffect(() => {
+        if (isOpen && currentUser) {
+            const fetchOrders = async () => {
+                setIsLoadingOrders(true);
+                setOrdersError(null);
+                try {
+                    const res = await fetch('/api/orders', {
+                        headers: {
+                            'user-id': currentUser.id
+                        }
+                    });
+                    if (!res.ok) throw new Error('Failed to fetch orders');
+                    const data = await res.json();
+                    setOrders(data);
+                } catch (err) {
+                    console.error('Error fetching orders:', err);
+                    setOrdersError('Failed to load orders.');
+                    toast.error('Failed to load orders.');
+                } finally {
+                    setIsLoadingOrders(false);
+                }
+            };
+            fetchOrders();
+        } else if (!isOpen) {
+             // Clear orders data when the modal closes
+            setOrders([]);
+            setOrdersError(null);
+        }
+    }, [isOpen, currentUser]);
 
     const handleCheckout = () => {
         if (!currentUser) {
@@ -29,12 +65,18 @@ export default function CartModal({ isOpen, onClose, items = [], onUpdateQuantit
         router.push('/checkout');
     };
 
+    const handleViewOrder = (orderId) => {
+         onClose(); // Close the modal before navigating
+         router.push(`/orders/${orderId}`);
+    };
+
     if (isLoading) {
         return (
             <Dialog open={isOpen} onClose={onClose} className="relative z-50">
                 <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
                 <div className="fixed inset-0 flex items-center justify-center p-4">
-                    <Dialog.Panel className="mx-auto max-w-md w-full bg-white rounded-xl shadow-lg p-6">
+                    {/* Increased max-w to max-w-3xl for more space */}
+                    <Dialog.Panel className="mx-auto max-w-3xl w-full bg-white rounded-xl shadow-lg p-6">
                         <div className="flex justify-center items-center h-32">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                         </div>
@@ -48,10 +90,11 @@ export default function CartModal({ isOpen, onClose, items = [], onUpdateQuantit
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
             <div className="fixed inset-0 flex items-center justify-center p-4">
-                <Dialog.Panel className="mx-auto max-w-md w-full bg-white rounded-xl shadow-lg">
+                {/* Increased max-w to max-w-3xl for more space */}
+                <Dialog.Panel className="mx-auto max-w-[90vw] w-full bg-white rounded-xl shadow-lg overflow-y-auto">
                     <div className="flex items-center justify-between p-4 border-b">
                         <Dialog.Title className="text-lg font-semibold text-gray-900">
-                            Shopping Cart
+                            Shopping Cart & Orders
                         </Dialog.Title>
                         <button
                             onClick={onClose}
@@ -61,43 +104,29 @@ export default function CartModal({ isOpen, onClose, items = [], onUpdateQuantit
                         </button>
                     </div>
 
-                    <div className="p-4 max-h-[60vh] overflow-y-auto">
+                    {/* Shopping Cart Section */}
+                    <div className="p-4 border-b">
+                        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center"><Icon name="shoppingBag" className="w-5 h-5 mr-2 text-blue-500" /> Your Cart</h2>
                         {items && items.length > 0 ? (
                             <ul className="divide-y divide-gray-200">
-                                {items.map((item) => (
-                                    <li key={item.productId} className="py-4 flex">
+                                {items.map((item, index) => (
+                                    <li key={`${item.productId}-${index}`} className="py-4 flex">
                                         <img
-                                            src={item.imageUrl}
+                                            src={item.imageUrl || 'https://placehold.co/80x80/gray/ffffff?text=No+Image'}
                                             alt={item.name}
                                             className="h-20 w-20 rounded-lg object-cover"
                                         />
                                         <div className="ml-4 flex-1">
                                             <h3 className="text-sm font-medium text-gray-900">
-                                                {item.name}
+                                                {item.name || 'Unnamed Item'}
                                             </h3>
                                             <p className="mt-1 text-sm text-gray-500">
-                                                ${item.price.toFixed(2)}
+                                                ${(item.price || 0).toFixed(2)}
                                             </p>
                                             <div className="mt-2 flex items-center">
                                                 <button
-                                                    onClick={() => onUpdateQuantity(item.productId, Math.max(1, item.quantity - 1))}
-                                                    className="text-gray-400 hover:text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    disabled={item.quantity <= 1}
-                                                    title="Decrease quantity"
-                                                >
-                                                    <Icon name="minus" className="h-4 w-4" />
-                                                </button>
-                                                <span className="mx-2 text-gray-600 min-w-[2rem] text-center">{item.quantity}</span>
-                                                <button
-                                                    onClick={() => onUpdateQuantity(item.productId, item.quantity + 1)}
-                                                    className="text-gray-400 hover:text-gray-500"
-                                                    title="Increase quantity"
-                                                >
-                                                    <Icon name="plus" className="h-4 w-4" />
-                                                </button>
-                                                <button
                                                     onClick={() => onRemoveItem(item.productId)}
-                                                    className="ml-4 text-red-400 hover:text-red-500"
+                                                    className="ml-0 text-red-400 hover:text-red-500"
                                                     title="Remove item"
                                                 >
                                                     <Icon name="trash" className="h-4 w-4" />
@@ -138,6 +167,47 @@ export default function CartModal({ isOpen, onClose, items = [], onUpdateQuantit
                             </Button>
                         </div>
                     )}
+
+                    {/* Orders Section */}
+                    <div className="p-4">
+                        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center"><Icon name="package" className="w-5 h-5 mr-2 text-green-500" /> Your Orders</h2>
+                        {isLoadingOrders ? (
+                            <div className="flex justify-center items-center h-24">
+                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                            </div>
+                        ) : ordersError ? (
+                             <div className="text-center text-red-600">
+                                 <p>{ordersError}</p>
+                             </div>
+                        ) : orders && orders.length > 0 ? (
+                            <ul className="divide-y divide-gray-200">
+                                {orders.map(order => (
+                                    <li key={order._id} className="py-3 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => handleViewOrder(order._id)}>
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-900">{order.items?.[0]?.name || `Order #${order._id?.slice(-6).toUpperCase() || 'N/A'}`}</p>
+                                            <p className="text-xs text-gray-500">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>
+                                        </div>
+                                        <div className="flex items-center">
+                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full mr-2
+                                                 ${order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                                   order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                   order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                                   order.status === 'returned' ? 'bg-purple-100 text-purple-800' :
+                                                   'bg-gray-100 text-gray-800'}`}>
+                                                 {order.status || 'N/A'}
+                                             </span>
+                                             <span className="text-sm font-semibold text-gray-900">${order.totals?.total?.toFixed(2) || '0.00'}</span>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <div className="text-center text-gray-500">
+                                <p>No past orders found.</p>
+                            </div>
+                        )}
+                    </div>
+
                 </Dialog.Panel>
             </div>
         </Dialog>

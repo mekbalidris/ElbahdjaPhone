@@ -14,6 +14,7 @@ export default async function handler(req, res) {
         const db = client.db();
         const ordersCollection = db.collection('orders');
         const statisticsCollection = db.collection('statistics');
+        const productsCollection = db.collection('products');
 
         switch (method) {
             case 'GET':
@@ -56,7 +57,7 @@ export default async function handler(req, res) {
                     return res.status(404).json({ error: 'Order not found' });
                 }
 
-                // Handle revenue tracking for completed orders
+                // Handle revenue and stock tracking for completed orders
                 if (status === 'completed' && currentOrder.status !== 'completed') {
                     // Add the order total to the revenue
                     await statisticsCollection.updateOne(
@@ -69,6 +70,20 @@ export default async function handler(req, res) {
                         },
                         { upsert: true }
                     );
+
+                    // Decrease product stock for each item in the order
+                    if (currentOrder.items && currentOrder.items.length > 0) {
+                        const bulkOps = currentOrder.items.map(item => ({
+                            updateOne: {
+                                filter: { _id: new ObjectId(item.productId) },
+                                update: { $inc: { stock: -(item.quantity || 1) } }
+                            }
+                        }));
+                         if (bulkOps.length > 0) {
+                             await productsCollection.bulkWrite(bulkOps);
+                         }
+                    }
+
                 } else if (currentOrder.status === 'completed' && status !== 'completed') {
                     // Subtract the order total from revenue if uncompleting
                     await statisticsCollection.updateOne(
@@ -81,6 +96,19 @@ export default async function handler(req, res) {
                         },
                         { upsert: true }
                     );
+
+                     // Increase product stock for each item if order status changes from completed
+                    if (currentOrder.items && currentOrder.items.length > 0) {
+                         const bulkOps = currentOrder.items.map(item => ({
+                             updateOne: {
+                                 filter: { _id: new ObjectId(item.productId) },
+                                 update: { $inc: { stock: (item.quantity || 1) } }
+                             }
+                         }));
+                          if (bulkOps.length > 0) {
+                              await productsCollection.bulkWrite(bulkOps);
+                          }
+                    }
                 }
 
                 return res.status(200).json({ message: 'Order status updated successfully' });
@@ -92,7 +120,7 @@ export default async function handler(req, res) {
                     return res.status(404).json({ error: 'Order not found' });
                 }
 
-                // If the order was completed, subtract its revenue
+                // If the order was completed, subtract its revenue and increase stock
                 if (orderToDelete.status === 'completed') {
                     await statisticsCollection.updateOne(
                         { _id: 'main' },
@@ -104,6 +132,18 @@ export default async function handler(req, res) {
                         },
                         { upsert: true }
                     );
+                     // Increase product stock for each item when a completed order is deleted
+                    if (orderToDelete.items && orderToDelete.items.length > 0) {
+                        const bulkOps = orderToDelete.items.map(item => ({
+                            updateOne: {
+                                filter: { _id: new ObjectId(item.productId) },
+                                update: { $inc: { stock: (item.quantity || 1) } }
+                            }
+                        }));
+                         if (bulkOps.length > 0) {
+                            await productsCollection.bulkWrite(bulkOps);
+                         }
+                    }
                 }
 
                 // Delete the order
