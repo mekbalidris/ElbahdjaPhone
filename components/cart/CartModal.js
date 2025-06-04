@@ -4,16 +4,22 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import Button from '../ui/Button';
 import Icon from '../ui/Icon';
 import { useRouter } from 'next/router';
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-hot-toast'; // For notifications
 import { useAuth } from '../../context/AuthContext';
 
-export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, isLoading }) {
-    const router = useRouter();
+export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, isLoading: initialLoading }) {
+    const router = useRouter(); // Now uses the mock useRouter defined above
     const { currentUser } = useAuth();
 
     const [orders, setOrders] = useState([]);
     const [isLoadingOrders, setIsLoadingOrders] = useState(false);
     const [ordersError, setOrdersError] = useState(null);
+    
+    const [isOverallLoading, setIsOverallLoading] = useState(initialLoading);
+    useEffect(() => {
+        setIsOverallLoading(initialLoading);
+    }, [initialLoading]);
+
 
     const subtotal = useMemo(() => {
         if (!items || !Array.isArray(items)) return 0;
@@ -35,9 +41,17 @@ export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, i
                             'user-id': currentUser.id
                         }
                     });
-                    if (!res.ok) throw new Error('Failed to fetch orders');
-                    const data = await res.json();
-                    setOrders(data);
+                    if (!res.ok) {
+                      // Handle empty orders specifically if API returns 404 or empty array
+                      if(res.status === 404 || (res.headers.get('content-type')?.includes('application/json') && !(await res.clone().json()).length)){
+                          setOrders([]);
+                      } else {
+                        throw new Error('Failed to fetch orders');
+                      }
+                    } else {
+                       const data = await res.json();
+                       setOrders(data);
+                    }
                 } catch (err) {
                     console.error('Error fetching orders:', err);
                     setOrdersError('Failed to load orders.');
@@ -48,7 +62,6 @@ export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, i
             };
             fetchOrders();
         } else if (!isOpen) {
-             // Clear orders data when the modal closes
             setOrders([]);
             setOrdersError(null);
         }
@@ -57,28 +70,38 @@ export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, i
     const handleCheckout = () => {
         if (!currentUser) {
             toast.error('Please login to proceed to checkout');
-            router.push('/auth');
+            router.push('/auth'); // Uses mock router
             onClose();
             return;
         }
         onClose();
-        router.push('/checkout');
+        router.push('/checkout'); // Uses mock router
     };
 
     const handleViewOrder = (orderId) => {
-         onClose(); // Close the modal before navigating
-         router.push(`/orders/${orderId}`);
+        onClose(); 
+        router.push(`/orders/${orderId}`); // Uses mock router
     };
+    
+    // Simulate items for testing if not provided by props.
+    // Keep this empty by default, or add items if you want them to appear when `items` prop is not passed or empty.
+    const displayItems = items && items.length > 0 ? items : [
+        // Example:
+        // { productId: 'sample001', name: 'Sample Item A (Cart)', price: 19.99, imageUrl: 'https://placehold.co/80x80/7B68EE/FFFFFF?text=Shirt' },
+        // { productId: 'sample002', name: 'Awesome Mug', price: 12.50, imageUrl: 'https://placehold.co/80x80/6495ED/FFFFFF?text=Mug' },
+        // { productId: 'sample003', name: 'Fancy Hat', price: 35.00, imageUrl: 'https://placehold.co/80x80/4682B4/FFFFFF?text=Hat' },
+    ];
 
-    if (isLoading) {
+
+    if (isOverallLoading) {
         return (
             <Dialog open={isOpen} onClose={onClose} className="relative z-50">
                 <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
                 <div className="fixed inset-0 flex items-center justify-center p-4">
-                    {/* Increased max-w to max-w-3xl for more space */}
-                    <Dialog.Panel className="mx-auto max-w-3xl w-full bg-white rounded-xl shadow-lg p-6">
+                    <Dialog.Panel className="mx-auto w-[95vw] sm:w-[85vw] md:w-[70vw] lg:w-[60vw] xl:max-w-4xl max-h-[90vh] bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden p-6">
                         <div className="flex justify-center items-center h-32">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                            <p className="ml-3 text-gray-700">Loading...</p>
                         </div>
                     </Dialog.Panel>
                 </div>
@@ -88,128 +111,215 @@ export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, i
 
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-            <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+            {/* Overlay */}
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
+            
+            {/* Modal Panel Container */}
             <div className="fixed inset-0 flex items-center justify-center p-4">
-                {/* Increased max-w to max-w-3xl for more space */}
-                <Dialog.Panel className="mx-auto max-w-[90vw] w-full bg-white rounded-xl shadow-lg overflow-y-auto">
-                    <div className="flex items-center justify-between p-4 border-b">
-                        <Dialog.Title className="text-lg font-semibold text-gray-900">
+                <Dialog.Panel className="mx-auto w-[95vw] sm:w-[85vw] md:w-[70vw] lg:w-[60vw] xl:max-w-4xl max-h-[90vh] bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden">
+                    {/* Header: Sticky */}
+                    <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white z-10 flex-shrink-0">
+                        <Dialog.Title className="text-xl font-semibold text-gray-800">
                             Shopping Cart & Orders
                         </Dialog.Title>
                         <button
+                            type="button"
                             onClick={onClose}
-                            className="text-gray-400 hover:text-gray-500"
+                            className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                            aria-label="Close cart modal"
                         >
                             <XMarkIcon className="h-6 w-6" />
                         </button>
                     </div>
 
-                    {/* Shopping Cart Section */}
-                    <div className="p-4 border-b">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center"><Icon name="shoppingBag" className="w-5 h-5 mr-2 text-blue-500" /> Your Cart</h2>
-                        {items && items.length > 0 ? (
-                            <ul className="divide-y divide-gray-200">
-                                {items.map((item, index) => (
-                                    <li key={`${item.productId}-${index}`} className="py-4 flex">
-                                        <img
-                                            src={item.imageUrl || 'https://placehold.co/80x80/gray/ffffff?text=No+Image'}
-                                            alt={item.name}
-                                            className="h-20 w-20 rounded-lg object-cover"
-                                        />
-                                        <div className="ml-4 flex-1">
-                                            <h3 className="text-sm font-medium text-gray-900">
-                                                {item.name || 'Unnamed Item'}
-                                            </h3>
-                                            <p className="mt-1 text-sm text-gray-500">
-                                                ${(item.price || 0).toFixed(2)}
-                                            </p>
-                                            <div className="mt-2 flex items-center">
-                                                <button
-                                                    onClick={() => onRemoveItem(item.productId)}
-                                                    className="ml-0 text-red-400 hover:text-red-500"
-                                                    title="Remove item"
-                                                >
-                                                    <Icon name="trash" className="h-4 w-4" />
-                                                </button>
+                    {/* Scrollable Content Area */}
+                    <div className="overflow-y-auto flex-grow">
+                        {/* Shopping Cart Section */}
+                        <div className="p-4 md:p-6 border-b">
+                            <h2 className="text-lg font-medium text-gray-700 mb-4 flex items-center">
+                                <Icon name="shoppingBag" className="w-5 h-5 mr-2 text-blue-600" /> Your Cart
+                            </h2>
+                            {displayItems && displayItems.length > 0 ? (
+                                <ul className="divide-y divide-gray-200">
+                                    {displayItems.map((item, index) => (
+                                        <li key={`${item.productId || 'item'}-${index}`} className="py-4 flex">
+                                            <img
+                                                src={item.imageUrl || `https://placehold.co/80x80/EAEAEA/999999?text=${item.name ? item.name.charAt(0) : 'N'}`}
+                                                alt={item.name || 'Product Image'}
+                                                className="h-20 w-20 rounded-lg object-cover flex-shrink-0 border border-gray-200"
+                                                onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/80x80/F0F0F0/AAAAAA?text=Error'; }}
+                                            />
+                                            <div className="ml-4 flex-1">
+                                                <h3 className="text-base font-medium text-gray-800">
+                                                    {item.name || 'Unnamed Item'}
+                                                </h3>
+                                                <p className="mt-1 text-sm text-gray-600">
+                                                    ${(item.price || 0).toFixed(2)}
+                                                </p>
+                                                {onRemoveItem && (
+                                                    <div className="mt-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => onRemoveItem(item.productId)}
+                                                            className="text-red-500 hover:text-red-700 p-1 rounded-md text-sm font-medium hover:bg-red-50 transition-colors flex items-center"
+                                                            title="Remove item"
+                                                            aria-label={`Remove ${item.name || 'item'}`}
+                                                        >
+                                                            <Icon name="trash" className="h-4 w-4 mr-1" /> Remove
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <div className="text-center py-8">
-                                <Icon name="shoppingBag" className="mx-auto h-12 w-12 text-gray-400" />
-                                <h3 className="mt-2 text-sm font-medium text-gray-900">Your cart is empty</h3>
-                                <p className="mt-1 text-sm text-gray-500">Start adding some items to your cart.</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {items && items.length > 0 && (
-                        <div className="border-t border-gray-200 p-4">
-                            <div className="flex justify-between text-sm text-gray-600 mb-2">
-                                <span>Subtotal</span>
-                                <span>${subtotal.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between text-sm text-gray-600 mb-4">
-                                <span>Shipping</span>
-                                <span>${shippingCost.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between text-base font-medium text-gray-900">
-                                <span>Total</span>
-                                <span>${total.toFixed(2)}</span>
-                            </div>
-                            <Button
-                                onClick={handleCheckout}
-                                className="w-full mt-4"
-                            >
-                                Proceed to Checkout
-                            </Button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <div className="text-center py-10">
+                                    <Icon name="shoppingBag" className="mx-auto h-16 w-16 text-gray-300" />
+                                    <h3 className="mt-3 text-md font-medium text-gray-800">Your cart is empty</h3>
+                                    <p className="mt-1 text-sm text-gray-500">Looks like you haven't added anything yet.</p>
+                                </div>
+                            )}
                         </div>
-                    )}
 
-                    {/* Orders Section */}
-                    <div className="p-4">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center"><Icon name="package" className="w-5 h-5 mr-2 text-green-500" /> Your Orders</h2>
-                        {isLoadingOrders ? (
-                            <div className="flex justify-center items-center h-24">
-                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-                            </div>
-                        ) : ordersError ? (
-                             <div className="text-center text-red-600">
-                                 <p>{ordersError}</p>
-                             </div>
-                        ) : orders && orders.length > 0 ? (
-                            <ul className="divide-y divide-gray-200">
-                                {orders.map(order => (
-                                    <li key={order._id} className="py-3 flex items-center justify-between cursor-pointer hover:bg-gray-50" onClick={() => handleViewOrder(order._id)}>
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-900">{order.items?.[0]?.name || `Order #${order._id?.slice(-6).toUpperCase() || 'N/A'}`}</p>
-                                            <p className="text-xs text-gray-500">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>
-                                        </div>
-                                        <div className="flex items-center">
-                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full mr-2
-                                                 ${order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                                   order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                   order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                                   order.status === 'returned' ? 'bg-purple-100 text-purple-800' :
-                                                   'bg-gray-100 text-gray-800'}`}>
-                                                 {order.status || 'N/A'}
-                                             </span>
-                                             <span className="text-sm font-semibold text-gray-900">${order.totals?.total?.toFixed(2) || '0.00'}</span>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <div className="text-center text-gray-500">
-                                <p>No past orders found.</p>
+                        {/* Cart Summary & Checkout Button (Only if cart has items) */}
+                        {displayItems && displayItems.length > 0 && (
+                            <div className="border-t border-gray-200 p-4 md:p-6 bg-gray-50">
+                                <div className="space-y-2 text-sm mb-4">
+                                    <div className="flex justify-between text-gray-700">
+                                        <span>Subtotal</span>
+                                        <span className="font-medium">${subtotal.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-gray-700">
+                                        <span>Shipping</span>
+                                        <span className="font-medium">${shippingCost.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between text-lg font-semibold text-gray-900 mb-5">
+                                    <span>Total</span>
+                                    <span>${total.toFixed(2)}</span>
+                                </div>
+                                <Button
+                                    onClick={handleCheckout}
+                                    className="w-full py-3 text-base"
+                                    disabled={isLoadingOrders || isOverallLoading}
+                                >
+                                    {currentUser ? 'Proceed to Checkout' : 'Login to Checkout'}
+                                </Button>
                             </div>
                         )}
-                    </div>
 
+                        {/* Orders Section (Only if user is logged in) */}
+                        {currentUser && (
+                            <div className="p-4 md:p-6 border-t">
+                                <h2 className="text-lg font-medium text-gray-700 mb-4 flex items-center">
+                                    <Icon name="package" className="w-5 h-5 mr-2 text-green-600" /> Your Past Orders
+                                </h2>
+                                {isLoadingOrders ? (
+                                    <div className="flex justify-center items-center h-24">
+                                        <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600"></div>
+                                        <p className="ml-3 text-gray-600">Loading your orders...</p>
+                                    </div>
+                                ) : ordersError ? (
+                                    <div className="text-center text-red-700 bg-red-50 p-4 rounded-lg">
+                                        <p className="font-medium">Oops! Something went wrong.</p>
+                                        <p className="text-sm">{ordersError}</p>
+                                    </div>
+                                ) : orders && orders.length > 0 ? (
+                                    <ul className="divide-y divide-gray-200 pr-1">
+                                        {orders.map(order => (
+                                            <li key={order._id} className="py-3 px-1 flex items-center justify-between cursor-pointer hover:bg-gray-50 rounded-md transition-colors group" onClick={() => handleViewOrder(order._id)}>
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-800 group-hover:text-blue-600">{order.items?.[0]?.name || `Order #${order._id?.slice(-6).toUpperCase() || 'N/A'}`}</p>
+                                                    <p className="text-xs text-gray-500">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>
+                                                </div>
+                                                <div className="flex items-center space-x-3">
+                                                    <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                        ${order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                        order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                                        order.status === 'returned' ? 'bg-purple-100 text-purple-800' :
+                                                        'bg-gray-100 text-gray-800'}`}>
+                                                        {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'N/A'}
+                                                    </span>
+                                                    <span className="text-sm font-medium text-gray-700">${order.totals?.total?.toFixed(2) || '0.00'}</span>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <div className="text-center text-gray-500 py-8">
+                                        <Icon name="package" className="mx-auto h-12 w-12 text-gray-400 mb-2" />
+                                        <p className="text-md">No past orders found.</p>
+                                        <p className="text-xs mt-1">Any orders you place will appear here.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {/* Prompt to login if cart has items but user not logged in, and orders section isn't shown */}
+                        {!currentUser && displayItems && displayItems.length > 0 && (
+                             <div className="p-4 md:p-6 border-t text-center text-sm text-gray-600 bg-gray-50">
+                                Please <button type="button" onClick={handleCheckout} className="text-blue-600 hover:underline font-semibold">login</button> to see your past orders or to complete your purchase.
+                            </div>
+                        )}
+                    </div> {/* End Scrollable Content Area */}
                 </Dialog.Panel>
             </div>
         </Dialog>
     );
-} 
+}
+
+// Example of how you might use CartModal in a parent component (for testing):
+// function App() {
+//   const [isCartOpen, setIsCartOpen] = useState(false);
+//   const [cartItems, setCartItems] = useState([
+//     { productId: '1', name: 'Cool T-Shirt', price: 25.99, imageUrl: 'https://placehold.co/80x80/7B68EE/FFFFFF?text=Shirt' },
+//     { productId: '2', name: 'Awesome Mug', price: 12.50, imageUrl: 'https://placehold.co/80x80/6495ED/FFFFFF?text=Mug' },
+//     { productId: '3', name: 'Fancy Hat', price: 35.00, imageUrl: 'https://placehold.co/80x80/4682B4/FFFFFF?text=Hat' },
+//   ]);
+//   const [isLoadingCart, setIsLoadingCart] = useState(false);
+
+//   const handleRemoveItem = (productId) => {
+//     setCartItems(prevItems => prevItems.filter(item => item.productId !== productId));
+//     toast.success('Item removed from cart!');
+//   };
+  
+//   // Mock toast container for standalone example
+//   useEffect(() => {
+//     let container = document.getElementById('toast-container-main');
+//     if (!container) {
+//         container = document.createElement('div');
+//         container.id = 'toast-container-main';
+//         container.className = 'fixed top-5 right-5 z-[100]'; // High z-index for toasts
+//         document.body.appendChild(container);
+//     }
+//     // This is a very basic way to ensure react-hot-toast has a place to render.
+//     // In a real app, you'd have <Toaster /> component from react-hot-toast.
+//   }, []);
+
+
+//   return (
+//     <div className="p-6 font-sans bg-gray-100 min-h-screen">
+//       <div className="flex space-x-3 mb-6">
+//         <Button onClick={() => { setIsLoadingCart(false); setIsCartOpen(true); }} className="bg-green-500 hover:bg-green-600">Open Cart</Button>
+//         <Button onClick={() => { setIsLoadingCart(true); setIsCartOpen(true); setTimeout(() => setIsLoadingCart(false), 2000);}} className="bg-orange-500 hover:bg-orange-600">
+//           Open Cart (Simulate Loading)
+//         </Button>
+//       </div>
+//       <p className="text-sm text-gray-600">Click "Open Cart". Try logging in/out (mocked via useAuth hook in CartModal.js) to see different states.</p>
+      
+//       <CartModal
+//         isOpen={isCartOpen}
+//         onClose={() => setIsCartOpen(false)}
+//         items={cartItems}
+//         onRemoveItem={handleRemoveItem}
+//         isLoading={isLoadingCart}
+//       />
+//       {/* For react-hot-toast notifications to appear */}
+//       {/* <Toaster position="top-right" />  // Ideal way if you have Toaster component */}
+//       <script src="https://cdn.tailwindcss.com"></script> {/* For Tailwind CSS */}
+//     </div>
+//   );
+// }
+
+// export default App; // If running as a standalone app for testing. 
