@@ -30,7 +30,8 @@ const OrderDetailPage = () => {
                 setIsLoading(true);
                 setError(null);
                 try {
-                    const res = await fetch(`/api/orders?id=${orderId}`, {
+                    // Call the correct API endpoint for fetching a single order by ID
+                    const res = await fetch(`/api/orders/${orderId}`, {
                          headers: { // Send user ID for authorization check on the backend
                             'user-id': currentUser.id
                          }
@@ -49,6 +50,7 @@ const OrderDetailPage = () => {
                         throw new Error(errorMessage);
                     }
 
+                    // Set the order data
                     setOrder(resultData);
 
                 } catch (err) {
@@ -117,16 +119,16 @@ const OrderDetailPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center"><Icon name="user" className="w-5 h-5 mr-2 text-gray-500" /> Contact Information</h2>
-                            <p className="text-gray-700"><span className="font-medium">Name:</span> {order.contactInfo?.fullName}</p>
-                            <p className="text-gray-700"><span className="font-medium">Email:</span> {order.contactInfo?.email}</p>
-                            <p className="text-gray-700"><span className="font-medium">Phone:</span> {order.contactInfo?.phone}</p>
+                            <p className="text-gray-700"><span className="font-medium">Name:</span> {order.contactInfo?.fullName || 'N/A'}</p>
+                            <p className="text-gray-700"><span className="font-medium">Email:</span> {order.contactInfo?.email || 'N/A'}</p>
+                            <p className="text-gray-700"><span className="font-medium">Phone:</span> {order.contactInfo?.phone || 'N/A'}</p>
                         </div>
                         <div>
                             <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center"><Icon name="mapPin" className="w-5 h-5 mr-2 text-gray-500" /> Delivery Address</h2>
-                            <p className="text-gray-700">{order.deliveryAddress?.address}</p>
+                            <p className="text-gray-700">{order.deliveryAddress?.address || 'N/A'}</p>
                             {order.deliveryAddress?.aptSuite && <p className="text-gray-700">Apt/Suite: {order.deliveryAddress.aptSuite}</p>}
-                            <p className="text-gray-700">{order.deliveryAddress?.city}, {order.deliveryAddress?.wilaya}</p>
-                            <p className="text-gray-700">Payment Method: Cash on Delivery</p>
+                            <p className="text-gray-700">{order.deliveryAddress?.city || 'N/A'}, {order.deliveryAddress?.wilaya || 'N/A'}</p>
+                            <p className="text-gray-700">Payment Method: {order.paymentMethod || 'N/A'}</p>
                         </div>
                     </div>
                     
@@ -144,40 +146,40 @@ const OrderDetailPage = () => {
                                  <li key={index} className="flex py-4">
                                      <img src={item.imageUrl || '/placeholder.png'} alt={item.name} className="h-20 w-20 object-cover rounded-lg mr-4" />
                                      <div className="flex-1 flex flex-col justify-center">
-                                         <p className="text-sm font-medium text-gray-900">{item.name}</p>
+                                         <p className="text-sm font-medium text-gray-900">{item.name || 'Unnamed Item'}</p>
                                          {item.attributes && <p className="text-xs text-gray-500">{item.attributes}</p>}
-                                         <p className="text-xs text-gray-500 mt-0.5">Qty: {item.quantity}</p>
+                                         <p className="text-xs text-gray-500 mt-0.5">Qty: {item.quantity || 0}</p>
                                      </div>
-                                     <p className="text-sm font-semibold text-gray-900 ml-4">${(item.price * item.quantity).toFixed(2)}</p>
+                                     <p className="text-sm font-semibold text-gray-900 ml-4">${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</p>
                                  </li>
-                             ))}
+                             )) || <p className="text-gray-500 py-4">No items found</p>}
                          </ul>
                     </div>
 
                      <div className="space-y-1.5 text-sm text-gray-700 pt-4 border-t border-gray-200">
                          <div className="flex justify-between items-center">
                              <span>Subtotal</span>
-                             <span className="font-medium">${order.totals?.subtotal.toFixed(2) || '0.00'}</span>
+                             <span className="font-medium">${order.totals?.subtotal?.toFixed(2) || '0.00'}</span>
                          </div>
                          {order.totals?.discount > 0 && (
                              <div className="flex justify-between text-green-600">
                                  <span>Discount</span>
-                                 <span>-${order.totals?.discount.toFixed(2)}</span>
+                                 <span>-${order.totals?.discount?.toFixed(2) || '0.00'}</span>
                              </div>
                          )}
                          <div className="flex justify-between">
                              <span>Shipping</span>
-                             <span className="font-medium">${order.totals?.shippingCost.toFixed(2) || '0.00'}</span>
+                             <span className="font-medium">${order.totals?.shippingCost?.toFixed(2) || '0.00'}</span>
                          </div>
                           {order.totals?.taxes > 0 && (
                              <div className="flex justify-between">
                                  <span>Taxes</span>
-                                 <span>${order.totals?.taxes.toFixed(2)}</span>
+                                 <span>${order.totals?.taxes?.toFixed(2) || '0.00'}</span>
                              </div>
                           )}
                          <div className="flex justify-between text-base font-bold text-gray-900 pt-3 mt-3 border-t-2 border-gray-300">
                              <span>Total</span>
-                             <span>${order.totals?.total.toFixed(2) || '0.00'}</span>
+                             <span className="font-medium">${order.totals?.total?.toFixed(2) || '0.00'}</span>
                          </div>
                      </div>
 

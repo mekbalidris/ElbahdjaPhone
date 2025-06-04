@@ -1,71 +1,86 @@
 import clientPromise from '../../lib/mongodb';
-// import bcrypt from 'bcryptjs';
+import { ObjectId } from 'mongodb';
+import bcrypt from 'bcryptjs';
+
+// --- IMPORTANT: Define your designated seller email(s) here ---
+const SELLER_EMAILS = ['seller@gmail.com', 'admin@gmail.com']; // Add more if needed
 
 export default async function handler(req, res) {
-  try {
     const client = await clientPromise;
     const db = client.db();
-    const collection = db.collection('users');
+    const usersCollection = db.collection('users');
 
-    if (req.method === 'GET') {
-      const { email, password } = req.query;
-      console.log('Login attempt for email:', email);
-      if (email && password) {
-        // Find user by email and password (plain text, for testing only)
-        const user = await collection.findOne({ email, password });
-        console.log('Login result:', user ? 'User found' : 'User not found');
-        if (!user) {
-          return res.status(401).json({ error: 'Invalid credentials' });
+    if (req.method === 'POST') { // User Registration
+        try {
+            const { name, email, password } = req.body;
+
+            if (!name || !email || !password) {
+                return res.status(400).json({ error: 'Name, email, and password are required' });
+            }
+            if (password.length < 6) {
+                return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+            }
+
+            const existingUser = await usersCollection.findOne({ email });
+            if (existingUser) {
+                return res.status(409).json({ error: 'User with this email already exists' });
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // --- Assign role based on email ---
+            const role = SELLER_EMAILS.includes(email.toLowerCase()) ? 'seller' : 'user';
+
+            const newUser = {
+                _id: new ObjectId(),
+                name,
+                email: email.toLowerCase(),
+                password: hashedPassword,
+                role,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
+
+            const result = await usersCollection.insertOne(newUser);
+            
+            // Return the new user object (without password)
+            const insertedUser = await usersCollection.findOne({ _id: result.insertedId }, { projection: { password: 0 } });
+            res.status(201).json(insertedUser);
+
+        } catch (error) {
+            console.error('Registration API Error:', error);
+            res.status(500).json({ error: 'Failed to create user' });
         }
-        // Don't send password back to client
-        const { password: _, ...userWithoutPassword } = user;
-        // Ensure we're sending the _id as id
-        const userWithId = {
-          ...userWithoutPassword,
-          id: user._id.toString()
-        };
-        return res.status(200).json(userWithId);
-      }
-      // If no email/password provided, return all users (without passwords)
-      const users = await collection.find({}, { projection: { password: 0 } }).toArray();
-      res.status(200).json(users);
-    } else if (req.method === 'POST') {
-      const { email, password, ...otherData } = req.body;
-      console.log('Registration attempt for email:', email);
-      
-      // Check if user already exists
-      const existingUser = await collection.findOne({ email });
-      if (existingUser) {
-        console.log('Registration failed: Email already registered');
-        return res.status(400).json({ error: 'Email already registered' });
-      }
+    } else if (req.method === 'GET') { // User Login
+        try {
+            const { email, password } = req.query;
 
-      // Store password in plain text (for testing only)
-      const user = {
-        email,
-        password,
-        ...otherData,
-        createdAt: new Date().toISOString()
-      };
+            if (!email || !password) {
+                return res.status(400).json({ error: 'Email and password are required' });
+            }
 
-      const result = await collection.insertOne(user);
-      // Fetch the inserted user by _id
-      const insertedUser = await collection.findOne({ _id: result.insertedId });
-      // Don't send password back to client
-      const { password: _, ...userWithoutPassword } = insertedUser;
-      // Ensure we're sending the _id as id
-      const userWithId = {
-        ...userWithoutPassword,
-        id: insertedUser._id.toString()
-      };
-      console.log('User registered successfully:', userWithId);
-      res.status(201).json(userWithId);
+            const user = await usersCollection.findOne({ email: email.toLowerCase() });
+
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+            if (!isPasswordMatch) {
+                return res.status(401).json({ error: 'Invalid credentials' });
+            }
+
+            // Return user data (excluding password)
+            const { password: _, ...userWithoutPassword } = user;
+            res.status(200).json(userWithoutPassword);
+
+        } catch (error) {
+            console.error('Login API Error:', error);
+            res.status(500).json({ error: 'Failed to login' });
+        }
     } else {
-      res.setHeader('Allow', ['GET', 'POST']);
-      res.status(405).end(`Method ${req.method} Not Allowed`);
+        res.setHeader('Allow', ['POST', 'GET']);
+        res.status(405).end(`Method ${req.method} Not Allowed`);
     }
-  } catch (error) {
-    console.error('API Error in /api/users:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
 } 

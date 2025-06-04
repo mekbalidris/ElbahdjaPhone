@@ -35,22 +35,13 @@ const AuthPage = () => {
         }
         setLoading(true);
         if (isLogin) {
-            // Login: check user in DB
             try {
-                const res = await fetch(`/api/users?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
-                
-                if (res.ok) {
-                    const data = await res.json();
-                    login(data);
-                    toast.success("Logged in successfully!");
-                    router.push('/'); // Redirect to home page
-                } else {
-                    const data = await res.json();
-                    toast.error(data.error || "Invalid email or password.");
-                }
+                await login({ email, password });
+                toast.success("Logged in successfully!");
+                router.push('/'); // Redirect to home page
             } catch (err) {
                 console.error('Login Error:', err);
-                toast.error("Server error during login.");
+                toast.error(err.message || "Invalid email or password.");
             }
         } else {
             // Register: create user in DB

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { toast } from 'react-hot-toast';
 
 const AuthContext = createContext(null);
 
@@ -9,40 +10,35 @@ export function AuthProvider({ children }) {
     const router = useRouter();
 
     useEffect(() => {
-        // Check for user data in localStorage
-        const userData = localStorage.getItem('user');
-        if (userData) {
+        // Check for user data in localStorage on initial load
+        const storedUser = localStorage.getItem('currentUser');
+        if (storedUser) {
             try {
-                const parsedUser = JSON.parse(userData);
+                const parsedUser = JSON.parse(storedUser);
                 setCurrentUser(parsedUser);
-            } catch (error) {
-                console.error('Error parsing user data:', error);
-                localStorage.removeItem('user');
+            } catch (e) {
+                console.error("Error parsing stored user:", e);
+                localStorage.removeItem('currentUser');
             }
         }
         setIsLoading(false);
     }, []);
 
-    const login = async (email, password) => {
+    const login = async (credentials) => {
         try {
-            const res = await fetch('/api/users', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
+            const res = await fetch(`/api/users?email=${encodeURIComponent(credentials.email)}&password=${encodeURIComponent(credentials.password)}`);
+            
+            const responseData = await res.json();
 
             if (!res.ok) {
-                throw new Error('Login failed');
+                throw new Error(responseData.error || 'Login failed. Please check your credentials.');
             }
-
-            const userData = await res.json();
-            setCurrentUser(userData);
-            localStorage.setItem('user', JSON.stringify(userData));
-            return userData;
+            
+            setCurrentUser(responseData);
+            localStorage.setItem('currentUser', JSON.stringify(responseData));
+            return responseData;
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('Login error in AuthContext:', error);
             throw error;
         }
     };
@@ -51,29 +47,26 @@ export function AuthProvider({ children }) {
         try {
             const res = await fetch('/api/users', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData),
             });
+            const responseData = await res.json();
 
             if (!res.ok) {
-                throw new Error('Registration failed');
+                throw new Error(responseData.error || 'Registration failed. Please try again.');
             }
-
-            const newUser = await res.json();
-            setCurrentUser(newUser);
-            localStorage.setItem('user', JSON.stringify(newUser));
-            return newUser;
+            
+            return responseData;
         } catch (error) {
-            console.error('Registration error:', error);
+            console.error('Registration error in AuthContext:', error);
             throw error;
         }
     };
 
     const logout = () => {
         setCurrentUser(null);
-        localStorage.removeItem('user');
+        localStorage.removeItem('currentUser');
+        toast.success("Logged out successfully.");
         router.push('/');
     };
 
@@ -87,7 +80,7 @@ export function AuthProvider({ children }) {
 
     return (
         <AuthContext.Provider value={value}>
-            {!isLoading && children}
+            {children}
         </AuthContext.Provider>
     );
 }

@@ -163,7 +163,6 @@ export default function CheckoutPage() {
 
         try {
             const orderData = {
-                userId: currentUser.id,
                 items: cartItems.map(item => ({
                     productId: item.productId,
                     name: item.name,
@@ -176,10 +175,7 @@ export default function CheckoutPage() {
                 deliveryAddress,
                 orderNotes,
                 paymentMethod: 'cash_on_delivery',
-                totals: { subtotal, shippingCost, taxes, discount, total },
-                status: 'pending',
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
+                totals: { subtotal, shippingCost, taxes, discount, total }
             };
 
             const res = await fetch('/api/orders', {
@@ -191,19 +187,14 @@ export default function CheckoutPage() {
                 body: JSON.stringify(orderData)
             });
 
-            const contentType = res.headers.get('content-type');
-            let resultData = null;
-            if (contentType && contentType.includes('application/json')) {
-                resultData = await res.json();
-            }
-
             if (!res.ok) {
-                const errorMessage = resultData?.error || 'Failed to place order';
-                throw new Error(errorMessage);
+                const errorData = await res.json();
+                throw new Error(errorData.error || 'Failed to place order');
             }
 
+            const resultData = await res.json();
             toast.dismiss(loadingToast);
-            toast.success(`Order placed successfully! Payment on delivery.`);
+            toast.success('Order placed successfully! Payment on delivery.');
             
             if (resultData && resultData._id) {
                 router.push(`/orders/${resultData._id}`);

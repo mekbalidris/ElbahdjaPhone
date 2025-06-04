@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   } else if (req.method === 'POST') {
     try {
       const {
-        cartItems,
+        items,
         contactInfo,
         deliveryAddress,
         orderNotes,
@@ -33,20 +33,30 @@ export default async function handler(req, res) {
         totals
       } = req.body;
 
+      // Validate required fields
+      if (!items || !Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ error: 'Order must contain at least one item' });
+      }
+
+      if (!contactInfo || !deliveryAddress) {
+        return res.status(400).json({ error: 'Contact info and delivery address are required' });
+      }
+
       // Create the order document
       const order = {
         userId,
-        items: cartItems.map(item => ({
+        items: items.map(item => ({
           productId: new ObjectId(item.productId),
           name: item.name,
           price: item.price,
           quantity: item.quantity,
-          imageUrl: item.imageUrl
+          imageUrl: item.imageUrl,
+          attributes: item.attributes || null
         })),
         contactInfo,
         deliveryAddress,
-        orderNotes,
-        paymentMethod,
+        orderNotes: orderNotes || '',
+        paymentMethod: paymentMethod || 'cash_on_delivery',
         totals,
         status: 'pending',
         createdAt: new Date().toISOString(),

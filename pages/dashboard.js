@@ -3,68 +3,104 @@ import { toast } from 'react-hot-toast';
 import Button from '../components/ui/Button';
 import Icon from '../components/ui/Icon';
 import ProductFormModal from '../components/products/ProductFormModal';
+import OrderDetailsModal from '../components/orders/OrderDetailsModal';
 import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'next/router';
 
 const SellerDashboardPage = () => {
     const [products, setProducts] = useState([]);
     const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
-    const [isLoadingProducts, setIsLoadingProducts] = useState(true); // Separate loading state for products
-    const { currentUser, loading: authLoading } = useAuth(); // Get user and auth loading state
+    const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+    const [statistics, setStatistics] = useState(null);
+    const [isLoadingStats, setIsLoadingStats] = useState(true);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const { currentUser, isLoading: authLoading } = useAuth();
+    const router = useRouter();
 
-    const fetchProducts = async () => {
-        setIsLoadingProducts(true); // Set product loading true
+    // Check for seller role and redirect if not authorized
+    useEffect(() => {
+        if (!authLoading) {
+            if (!currentUser) {
+                toast.error('Please log in to access the dashboard');
+                router.replace('/auth');
+            } else if (currentUser.role !== 'seller') {
+                toast.error('Access denied. Only sellers can access the dashboard');
+                router.replace('/');
+            }
+        }
+    }, [currentUser, authLoading, router]);
+
+    const fetchStatistics = async () => {
         try {
-            console.log('Fetching products...');
-            const res = await fetch('/api/products');
+            const res = await fetch('/api/statistics');
+            if (!res.ok) throw new Error('Failed to fetch statistics');
             const data = await res.json();
-            console.log('Fetched products:', data);
-            setProducts(data);
+            setStatistics(data);
         } catch (err) {
-            toast.error('Failed to fetch products');
+            console.error('Error fetching statistics:', err);
+            toast.error('Failed to load statistics');
         } finally {
-            setIsLoadingProducts(false); // Set product loading false
+            setIsLoadingStats(false);
         }
     };
 
-    useEffect(() => {
-        // Fetch products only after auth loading is complete and user is determined
-        if (!authLoading && currentUser) {
-             console.log('Current User ID for filtering:', currentUser.id);
-             fetchProducts();
-        } else if (!authLoading && !currentUser) {
-            // If auth loaded but no user, set products to empty and stop loading
-            console.log('No user logged in, not fetching products for dashboard.');
-            setProducts([]);
+    const fetchProducts = async () => {
+        setIsLoadingProducts(true);
+        try {
+            const res = await fetch('/api/products');
+            if (!res.ok) throw new Error('Failed to fetch products');
+            const data = await res.json();
+            setProducts(data);
+        } catch (err) {
+            console.error('Error fetching products:', err);
+            toast.error('Failed to fetch products');
+        } finally {
             setIsLoadingProducts(false);
         }
-    }, [currentUser, authLoading]); // Fetch products when user or auth loading state changes
+    };
 
-    // Filter products owned by the current user - this will now only run after fetchProducts is called
-    // and will use the potentially empty products array or the fetched one.
+    // Fetch data when user is confirmed as seller
+    useEffect(() => {
+        if (!authLoading && currentUser?.role === 'seller') {
+            Promise.all([fetchStatistics(), fetchProducts()])
+                .catch(err => {
+                    console.error('Error fetching dashboard data:', err);
+                });
+        }
+    }, [currentUser, authLoading]);
+
+    // Filter products owned by the current user
     const userProducts = products.filter(p => p.sellerId === currentUser?.id);
 
     const handleAddProduct = async (productData) => {
-        setIsLoadingProducts(true); // Set product loading true
+        setIsLoadingProducts(true);
         try {
             const res = await fetch('/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...productData, sellerId: currentUser?.id, ratings: 0, reviews: 0, createdAt: new Date().toISOString() })
+                body: JSON.stringify({ 
+                    ...productData, 
+                    sellerId: currentUser?.id, 
+                    ratings: 0, 
+                    reviews: 0, 
+                    createdAt: new Date().toISOString() 
+                })
             });
             if (!res.ok) throw new Error('Failed to add product');
             toast.success('Product added successfully!');
             setIsAddProductModalOpen(false);
-            fetchProducts(); // Refresh list
+            fetchProducts();
         } catch (err) {
+            console.error('Error adding product:', err);
             toast.error('Failed to add product');
         } finally {
-            setIsLoadingProducts(false); // Set product loading false
+            setIsLoadingProducts(false);
         }
     };
 
     const handleEditProduct = async (productData) => {
-        setIsLoadingProducts(true); // Set product loading true
+        setIsLoadingProducts(true);
         try {
             const res = await fetch('/api/products', {
                 method: 'PATCH',
@@ -74,11 +110,12 @@ const SellerDashboardPage = () => {
             if (!res.ok) throw new Error('Failed to update product');
             toast.success('Product updated successfully!');
             setEditingProduct(null);
-            fetchProducts(); // Refresh list
+            fetchProducts();
         } catch (err) {
+            console.error('Error updating product:', err);
             toast.error('Failed to update product');
         } finally {
-            setIsLoadingProducts(false); // Set product loading false
+            setIsLoadingProducts(false);
         }
     };
 
@@ -90,20 +127,13 @@ const SellerDashboardPage = () => {
                 method: 'DELETE'
             });
             
-            // Check if there's content to parse
-            const contentType = res.headers.get('content-type');
-            let data;
-            if (contentType && contentType.includes('application/json')) {
-                data = await res.json();
-            }
-            
             if (!res.ok) {
+                const data = await res.json();
                 throw new Error(data?.error || 'Failed to delete product');
             }
             
-            // If we get here, the deletion was successful
             toast.success('Product deleted successfully!');
-            await fetchProducts(); // Wait for the products to refresh
+            await fetchProducts();
         } catch (err) {
             console.error('Error deleting product:', err);
             toast.error(err.message || 'Failed to delete product');
@@ -112,28 +142,170 @@ const SellerDashboardPage = () => {
         }
     };
 
-    // If auth is still loading, show loading state
-    if (authLoading) {
-        return <div className="flex justify-center items-center h-64"><span>Loading user data...</span></div>;
-    }
+    const handleOrderStatusUpdate = (newStatus) => {
+        setStatistics(prev => ({
+            ...prev,
+            recentOrders: prev.recentOrders.map(order => 
+                order._id === selectedOrder._id 
+                    ? { ...order, status: newStatus }
+                    : order
+            )
+        }));
+        setSelectedOrder(prev => ({ ...prev, status: newStatus }));
+        toast.success(`Order status updated to ${newStatus}`);
+    };
 
-    // If auth is loaded but no user is logged in, show access denied message
-    if (!currentUser) {
+    const handleOrderDelete = (orderId) => {
+        setStatistics(prev => ({
+            ...prev,
+            recentOrders: prev.recentOrders.filter(order => order._id !== orderId)
+        }));
+        toast.success('Order deleted successfully');
+    };
+
+    // Show loading state while checking auth
+    if (authLoading) {
         return (
-             <div className="text-center py-16">
-                <Icon name="lock" className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
-                <h1 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h1>
-                <p className="text-gray-600 mb-6">Please log in to view the seller dashboard.</p>
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
             </div>
         );
     }
 
-    // Render dashboard content only if user is logged in and products have been loaded
+    // Show error state if not authorized
+    if (!currentUser || currentUser.role !== 'seller') {
+        return null; // The useEffect will handle the redirect
+    }
+
     return (
         <div className="py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Statistics Section */}
+                <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Dashboard Overview</h2>
+                    {isLoadingStats ? (
+                        <div className="flex justify-center items-center h-32">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                        </div>
+                    ) : statistics && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {/* Total Orders */}
+                            <div className="bg-white rounded-lg shadow p-6">
+                                <div className="flex items-center">
+                                    <div className="p-3 rounded-full bg-blue-100 text-blue-600">
+                                        <Icon name="package" className="w-6 h-6" />
+                                    </div>
+                                    <div className="ml-4">
+                                        <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                                        <p className="text-2xl font-semibold text-gray-900">{statistics.totalOrders}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Total Revenue */}
+                            <div className="bg-white rounded-lg shadow p-6">
+                                <div className="flex items-center">
+                                    <div className="p-3 rounded-full bg-green-100 text-green-600">
+                                        <Icon name="dollar" className="w-6 h-6" />
+                                    </div>
+                                    <div className="ml-4">
+                                        <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                                        <p className="text-2xl font-semibold text-gray-900">${statistics.totalRevenue.toFixed(2)}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Orders by Status */}
+                            <div className="bg-white rounded-lg shadow p-6">
+                                <div className="flex items-center">
+                                    <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                                        <Icon name="list" className="w-6 h-6" />
+                                    </div>
+                                    <div className="ml-4">
+                                        <p className="text-sm font-medium text-gray-600">Orders by Status</p>
+                                        <div className="mt-2">
+                                            {statistics.ordersByStatus.map(status => (
+                                                <div key={status._id} className="flex justify-between text-sm">
+                                                    <span className="text-gray-600">{status._id || 'Pending'}</span>
+                                                    <span className="font-medium">{status.count}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Top Products */}
+                            <div className="bg-white rounded-lg shadow p-6">
+                                <div className="flex items-center">
+                                    <div className="p-3 rounded-full bg-purple-100 text-purple-600">
+                                        <Icon name="star" className="w-6 h-6" />
+                                    </div>
+                                    <div className="ml-4">
+                                        <p className="text-sm font-medium text-gray-600">Top Products</p>
+                                        <div className="mt-2">
+                                            {statistics.topProducts.map(product => (
+                                                <div key={product._id} className="flex justify-between text-sm">
+                                                    <span className="text-gray-600 truncate max-w-[150px]">{product.productName}</span>
+                                                    <span className="font-medium">{product.totalSold} sold</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Recent Orders */}
+                {statistics?.recentOrders && statistics.recentOrders.length > 0 && (
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-6">Recent Orders</h2>
+                        <div className="bg-white shadow overflow-hidden sm:rounded-md">
+                            <ul className="divide-y divide-gray-200">
+                                {statistics.recentOrders.map(order => (
+                                    <li 
+                                        key={order._id} 
+                                        className="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer transition-colors"
+                                        onClick={() => setSelectedOrder(order)}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center">
+                                                <div className="ml-3">
+                                                    <p className="text-sm font-medium text-gray-900">Order #{order._id.slice(-6)}</p>
+                                                    <p className="text-sm text-gray-500">
+                                                        {new Date(order.createdAt).toLocaleDateString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center">
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                    ${order.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                                                      order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                                      order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                                      order.status === 'returned' ? 'bg-purple-100 text-purple-800' :
+                                                      'bg-gray-100 text-gray-800'}`}>
+                                                    {order.status}
+                                                </span>
+                                                <span className="ml-4 text-sm font-medium text-gray-900">
+                                                    ${order.totals?.total?.toFixed(2) || '0.00'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                )}
+
+                {/* Products Section */}
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Seller Dashboard</h1>
+                    <h2 className="text-2xl font-bold text-gray-900">Your Products</h2>
                     <Button
                         onClick={() => setIsAddProductModalOpen(true)}
                         variant="primary"
@@ -151,7 +323,7 @@ const SellerDashboardPage = () => {
                     <div className="bg-white shadow overflow-hidden sm:rounded-md">
                         <ul className="divide-y divide-gray-200">
                             {userProducts.map(product => (
-                                <li key={product._id}> {/* Use product._id as key */}
+                                <li key={product._id}>
                                     <div className="px-4 py-4 sm:px-6">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
@@ -166,7 +338,9 @@ const SellerDashboardPage = () => {
                                                 </div>
                                             </div>
                                             <div className="flex items-center space-x-4">
-                                                <p className="text-lg font-semibold text-blue-600">{typeof product.price === 'number' ? `$${product.price.toFixed(2)}` : 'N/A'}</p>
+                                                <p className="text-lg font-semibold text-blue-600">
+                                                    ${typeof product.price === 'number' ? product.price.toFixed(2) : 'N/A'}
+                                                </p>
                                                 <div className="flex items-center space-x-2">
                                                     <Button
                                                         variant="ghost"
@@ -179,7 +353,7 @@ const SellerDashboardPage = () => {
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        onClick={() => handleDeleteProduct(product._id)} // Use product._id for deletion
+                                                        onClick={() => handleDeleteProduct(product._id)}
                                                         className="text-red-600 hover:text-red-700"
                                                         iconLeft="trash"
                                                     >
@@ -205,7 +379,7 @@ const SellerDashboardPage = () => {
                             ))}
                         </ul>
                     </div>
-                ) : ( !isLoadingProducts && (
+                ) : (
                     <div className="text-center py-12 bg-white rounded-lg shadow">
                         <Icon name="package" className="mx-auto h-12 w-12 text-gray-400" />
                         <h3 className="mt-2 text-sm font-medium text-gray-900">No products</h3>
@@ -220,10 +394,10 @@ const SellerDashboardPage = () => {
                             </Button>
                         </div>
                     </div>
-                ))}
+                )}
             </div>
 
-            {/* Modals should only render if user is logged in */}
+            {/* Modals */}
             {currentUser && (
                 <>
                     <ProductFormModal
@@ -237,6 +411,14 @@ const SellerDashboardPage = () => {
                         onClose={() => setEditingProduct(null)}
                         onSubmit={handleEditProduct}
                         product={editingProduct}
+                    />
+
+                    <OrderDetailsModal
+                        isOpen={!!selectedOrder}
+                        onClose={() => setSelectedOrder(null)}
+                        order={selectedOrder}
+                        onStatusUpdate={handleOrderStatusUpdate}
+                        onDelete={handleOrderDelete}
                     />
                 </>
             )}
