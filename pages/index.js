@@ -137,7 +137,7 @@ const HomePage = ({ handleAddToCart }) => {
                             }} 
                             variant="outlinePurple" 
                             size="xl" 
-                            className={`!${brandPurple.text} !${brandPurple.border} hover:!${brandPurple.bg} hover:!text-white`}
+                            className={`bg-white text-black hover:bg-gray-300`}
                         >
                             Special Offers
                         </Button>

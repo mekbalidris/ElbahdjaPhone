@@ -16,11 +16,15 @@ const Button = ({ children, onClick, variant = 'primary', size = 'md', className
         outline: "bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-50 focus:ring-blue-500",
         ghost: "bg-transparent hover:bg-gray-100 text-blue-600 focus:ring-blue-500",
     };
+    
+    // Define brandPurple here or import if needed
+    const brandPurpleText = 'text-purple-600'; // Assuming this is the desired purple color class
+
     return (
         <button type={type} onClick={onClick} className={`${baseStyle} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`} disabled={disabled}>
-            {iconLeft && <Icon name={iconLeft} className={`mr-2 ${size === 'sm' ? 'w-3 h-3' : size === 'xl' ? 'w-6 h-6' : 'w-4 h-4'}`} />}
+            {iconLeft && <Icon name={iconLeft} className={`mr-2 ${brandPurpleText} ${size === 'sm' ? 'w-4 h-4' : size === 'xl' ? 'w-6 h-6' : 'w-5 h-5'}`} />}
             {children}
-            {iconRight && <Icon name={iconRight} className={`ml-2 ${size === 'sm' ? 'w-3 h-3' : size === 'xl' ? 'w-6 h-6' : 'w-4 h-4'}`} />}
+            {iconRight && <Icon name={iconRight} className={`ml-2 ${brandPurpleText} ${size === 'sm' ? 'w-4 h-4' : size === 'xl' ? 'w-6 h-6' : 'w-5 h-5'}`} />}
         </button>
     );
 };
