@@ -27,7 +27,9 @@ export default async function handler(req, res) {
         res.setHeader('Content-Length', videoBuffer.length);
         // Cache control can be important for videos
         // Cache for a shorter period if videos change often, or use ETag for validation
-        res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // Prevent caching
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
         // res.setHeader('Accept-Ranges', 'bytes'); // Optional: if you want to support range requests for seeking
 
         // Send the video data buffer

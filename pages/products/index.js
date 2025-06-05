@@ -229,7 +229,7 @@ const ProductsPage = ({ handleAddToCart }) => {
                                 <h3 className="text-lg font-semibold mb-4">Price Range</h3>
                                 <div className="flex flex-col space-y-4">
                                     <div>
-                                        <label className="block text-sm text-slate-700 font-medium mb-1">Min Price ($)</label>
+                                        <label className="block text-sm text-slate-700 font-medium mb-1">Min Price (DA)</label>
                                         <Input
                                             type="number"
                                             placeholder={overallMinPrice.toFixed(2)}
@@ -241,7 +241,7 @@ const ProductsPage = ({ handleAddToCart }) => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm text-slate-700 font-medium mb-1">Max Price ($)</label>
+                                        <label className="block text-sm text-slate-700 font-medium mb-1">Max Price (DA)</label>
                                         <Input
                                             type="number"
                                             placeholder={overallMaxPrice.toFixed(2)}

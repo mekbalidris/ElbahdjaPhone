@@ -72,7 +72,7 @@ const ProductCard = ({ product, onAddToCart, onBuyNow }) => {
                     className={`w-full h-full object-cover transition-transform duration-500 ease-in-out ${isHovered ? 'scale-105' : 'scale-100'}`}
                     onError={(e) => e.target.src = 'https://placehold.co/600x400/fecaca/f87171?text=Error'}
                 />
-                {product.offer && (<span className={`absolute top-3 left-3 ${brandOrange.bg} text-white text-[0.65rem] font-bold px-2.5 py-1 rounded-full shadow-md tracking-wider`}>DEAL</span>)}
+                {product.offer && (<span className={`absolute top-3 left-3 ${brandOrange.bg} text-white text-[0.65rem] font-bold px-2.5 py-1 rounded-full shadow-md tracking-wider animate-pulse`}>DEAL</span>)}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                     <Button

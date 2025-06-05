@@ -9,12 +9,52 @@ import Icon from '../ui/Icon';
 
 const CATEGORIES = [
     { value: 'phones', label: 'Phones' },
+    { value: 'laptops', label: 'Laptops' },
     { value: 'accessories', label: 'Accessories' },
 ];
+
+const BRANDS = {
+    phones: [
+        { value: '', label: 'Choose a brand', disabled: true },
+        { value: 'apple', label: 'Apple' },
+        { value: 'samsung', label: 'Samsung' },
+        { value: 'xiaomi', label: 'Xiaomi' },
+        { value: 'huawei', label: 'Huawei' },
+        { value: 'oppo', label: 'Oppo' },
+        { value: 'vivo', label: 'Vivo' },
+        { value: 'oneplus', label: 'OnePlus' },
+        { value: 'google', label: 'Google' },
+        { value: 'other', label: 'Other' },
+    ],
+    laptops: [
+        { value: '', label: 'Choose a brand', disabled: true },
+        { value: 'apple', label: 'Apple' },
+        { value: 'dell', label: 'Dell' },
+        { value: 'hp', label: 'HP' },
+        { value: 'lenovo', label: 'Lenovo' },
+        { value: 'asus', label: 'ASUS' },
+        { value: 'acer', label: 'Acer' },
+        { value: 'msi', label: 'MSI' },
+        { value: 'razer', label: 'Razer' },
+        { value: 'other', label: 'Other' },
+    ],
+    accessories: [
+        { value: '', label: 'Choose a brand', disabled: true },
+        { value: 'apple', label: 'Apple' },
+        { value: 'samsung', label: 'Samsung' },
+        { value: 'sony', label: 'Sony' },
+        { value: 'jbl', label: 'JBL' },
+        { value: 'logitech', label: 'Logitech' },
+        { value: 'anker', label: 'Anker' },
+        { value: 'belkin', label: 'Belkin' },
+        { value: 'other', label: 'Other' },
+    ],
+};
 
 const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
     const [name, setName] = useState('');
     const [category, setCategory] = useState('phones');
+    const [brand, setBrand] = useState('');
     const [price, setPrice] = useState('');
     const [description, setDescription] = useState('');
     const [stock, setStock] = useState('');
@@ -26,13 +66,19 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
         if (product) {
             setName(product.name);
             setCategory(product.category);
+            setBrand(product.brand || '');
             setPrice(String(product.price));
             setDescription(product.description);
             setStock(String(product.stock));
             setImages(product.images || [null, null, null, null]);
             setImagePreviews(product.images || [null, null, null, null]);
         } else {
-            setName(''); setCategory('phones'); setPrice(''); setDescription(''); setStock('');
+            setName('');
+            setCategory('phones');
+            setBrand('');
+            setPrice('');
+            setDescription('');
+            setStock('');
             setImages([null, null, null, null]);
             setImagePreviews([null, null, null, null]);
         }
@@ -43,6 +89,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
         const newErrors = {};
         if (!name.trim()) newErrors.name = "Product name is required.";
         if (!category) newErrors.category = "Category is required.";
+        if (!brand) newErrors.brand = "Brand is required.";
         if (!price || isNaN(parseFloat(price)) || parseFloat(price) <= 0) newErrors.price = "Valid price is required.";
         if (!description.trim()) newErrors.description = "Description is required.";
         if (stock === '' || isNaN(parseInt(stock)) || parseInt(stock) < 0 || !Number.isInteger(parseFloat(stock))) newErrors.stock = "Valid stock quantity (whole number, 0 or more) is required.";
@@ -110,7 +157,15 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
             return;
         }
         const filteredImages = images.filter(img => !!img);
-        const payload = { name, category, price: parseFloat(price), description, stock: parseInt(stock), images: filteredImages };
+        const payload = { 
+            name, 
+            category, 
+            brand,
+            price: parseFloat(price), 
+            description, 
+            stock: parseInt(stock), 
+            images: filteredImages 
+        };
         if (product && product.id) payload.id = product.id;
         onSubmit(payload);
     };
@@ -126,6 +181,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Input label="Product Name" name="name" value={name} onChange={e => setName(e.target.value)} placeholder="e.g., Galaxy Nova X" required error={errors.name} />
                             <Select label="Category" name="category" options={CATEGORIES} value={category} onChange={e => setCategory(e.target.value)} required error={errors.category} />
+                            <Select label="Brand" name="brand" options={BRANDS[category] || []} value={brand} onChange={e => setBrand(e.target.value)} required error={errors.brand} />
                             <Input label="Price ($)" name="price" type="number" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g., 799.99" required error={errors.price} />
                             <Input label="Stock (0 for Out of Stock)" name="stock" type="number" value={stock} onChange={e => setStock(e.target.value)} placeholder="e.g., 50" required error={errors.stock} />
                         </div>

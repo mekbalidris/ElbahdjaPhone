@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
 import Button from '../components/ui/Button';
 import Icon from '../components/ui/Icon';
@@ -7,6 +7,7 @@ import OrderDetailsModal from '../components/orders/OrderDetailsModal';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
 import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
 
 const SellerDashboardPage = () => {
     const [products, setProducts] = useState([]);
@@ -19,6 +20,7 @@ const SellerDashboardPage = () => {
     const { currentUser, isLoading: authLoading } = useAuth();
     const router = useRouter();
     const [productSearchTerm, setProductSearchTerm] = useState('');
+    const [selectedBrand, setSelectedBrand] = useState('');
 
     // Check for seller role and redirect if not authorized
     useEffect(() => {
@@ -77,8 +79,18 @@ const SellerDashboardPage = () => {
         p.sellerId === currentUser?.id &&
         (p.name?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
          p.description?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-         p.category?.toLowerCase().includes(productSearchTerm.toLowerCase()))
+         p.category?.toLowerCase().includes(productSearchTerm.toLowerCase())) &&
+        (!selectedBrand || p.brand === selectedBrand)
     );
+
+    // Get unique brands from products
+    const availableBrands = useMemo(() => {
+        const brands = new Set(products
+            .filter(p => p.sellerId === currentUser?.id)
+            .map(p => p.brand)
+            .filter(Boolean));
+        return Array.from(brands).map(brand => ({ value: brand, label: brand.charAt(0).toUpperCase() + brand.slice(1) }));
+    }, [products, currentUser?.id]);
 
     const handleAddProduct = async (productData) => {
         setIsLoadingProducts(true);
@@ -220,7 +232,7 @@ const SellerDashboardPage = () => {
                                     </div>
                                     <div className="ml-4">
                                         <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                                        <p className="text-2xl font-semibold text-gray-900">${statistics.totalRevenue.toFixed(2)}</p>
+                                        <p className="text-2xl font-semibold text-gray-900">{statistics.totalRevenue.toFixed(2)} DA</p>
                                     </div>
                                 </div>
                             </div>
@@ -299,7 +311,7 @@ const SellerDashboardPage = () => {
                                                     {order.status || 'N/A'}
                                                 </span>
                                                 <span className="ml-4 text-sm font-medium text-gray-900">
-                                                    ${order.totals?.total?.toFixed(2) || '0.00'}
+                                                    {order.totals?.total?.toFixed(2) || '0.00'} DA
                                                 </span>
                                             </div>
                                         </div>
@@ -322,13 +334,21 @@ const SellerDashboardPage = () => {
                                 onChange={(e) => setProductSearchTerm(e.target.value)}
                                 className="w-full sm:w-64 !h-[42px]"
                             />
+                            <Select
+                                options={[
+                                    { value: '', label: 'All Brands' },
+                                    ...availableBrands
+                                ]}
+                                value={selectedBrand}
+                                onChange={(e) => setSelectedBrand(e.target.value)}
+                                className="w-full sm:w-48 !h-[42px]"
+                            />
                             <Button
                                 onClick={() => setIsAddProductModalOpen(true)}
                                 variant="primary"
                                 iconLeft="plus"
                                 className="whitespace-nowrap min-w-[160px] !h-[42px]"
                             >
-                                <Icon name="plus" className="w-5 h-5 mr-2" />
                                 Add New Product
                             </Button>
                         </div>
@@ -409,8 +429,8 @@ const SellerDashboardPage = () => {
                                 onClick={() => setIsAddProductModalOpen(true)}
                                 variant="primary"
                                 iconLeft="plus"
+                                iconSize="w-7 h-7"
                             >
-                                <Icon name="plus" className="w-5 h-5 mr-2" />
                                 Add New Product
                             </Button>
                         </div>

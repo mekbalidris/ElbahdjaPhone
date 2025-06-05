@@ -150,7 +150,7 @@ const OrderDetailPage = () => {
                                          {item.attributes && <p className="text-xs text-gray-500">{item.attributes}</p>}
                                          <p className="text-xs text-gray-500 mt-0.5">Qty: {item.quantity || 0}</p>
                                      </div>
-                                     <p className="text-sm font-semibold text-gray-900 ml-4">${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</p>
+                                     <p className="text-sm font-semibold text-gray-900 ml-4">DA{((item.price || 0) * (item.quantity || 0)).toFixed(2)}</p>
                                  </li>
                              )) || <p className="text-gray-500 py-4">No items found</p>}
                          </ul>
@@ -159,27 +159,27 @@ const OrderDetailPage = () => {
                      <div className="space-y-1.5 text-sm text-gray-700 pt-4 border-t border-gray-200">
                          <div className="flex justify-between items-center">
                              <span>Subtotal</span>
-                             <span className="font-medium">${order.totals?.subtotal?.toFixed(2) || '0.00'}</span>
+                             <span className="font-medium">DA{order.totals?.subtotal?.toFixed(2) || '0.00'}</span>
                          </div>
                          {order.totals?.discount > 0 && (
                              <div className="flex justify-between text-green-600">
                                  <span>Discount</span>
-                                 <span>-${order.totals?.discount?.toFixed(2) || '0.00'}</span>
+                                 <span>-DA{order.totals?.discount?.toFixed(2) || '0.00'}</span>
                              </div>
                          )}
                          <div className="flex justify-between">
                              <span>Shipping</span>
-                             <span className="font-medium">${order.totals?.shippingCost?.toFixed(2) || '0.00'}</span>
+                             <span className="font-medium">DA{order.totals?.shippingCost?.toFixed(2) || '0.00'}</span>
                          </div>
                           {order.totals?.taxes > 0 && (
                              <div className="flex justify-between">
                                  <span>Taxes</span>
-                                 <span>${order.totals?.taxes?.toFixed(2) || '0.00'}</span>
+                                 <span>DA{order.totals?.taxes?.toFixed(2) || '0.00'}</span>
                              </div>
                           )}
                          <div className="flex justify-between text-base font-bold text-gray-900 pt-3 mt-3 border-t-2 border-gray-300">
                              <span>Total</span>
-                             <span className="font-medium">${order.totals?.total?.toFixed(2) || '0.00'}</span>
+                             <span className="font-medium">DA{order.totals?.total?.toFixed(2) || '0.00'}</span>
                          </div>
                      </div>
 

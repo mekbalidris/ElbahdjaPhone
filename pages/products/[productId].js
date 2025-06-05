@@ -9,6 +9,8 @@ const ProductDetailPage = ({ handleAddToCart }) => {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const { productId } = router.query; // Get productId from router query
+    const [isHovering, setIsHovering] = useState(false);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
         if (!productId) return; // Don't fetch if productId is not available yet
@@ -71,25 +73,41 @@ const ProductDetailPage = ({ handleAddToCart }) => {
     const mainImageUrl = product.images?.[0] || product.imageUrl;
     const hasGalleryImages = product.images && product.images.filter(img => !!img).length > 1; // Check for valid images
 
+    const handleMouseMove = (e) => {
+        const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+        const x = ((e.pageX - left) / width) * 100;
+        const y = ((e.pageY - top) / height) * 100;
+        setMousePosition({ x, y });
+    };
+
+    const handleMouseEnter = () => setIsHovering(true);
+    const handleMouseLeave = () => setIsHovering(false);
+
     return (
         <div className="bg-white py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start">
                     {/* Product Image */}
-                    <div className="lg:max-w-lg lg:self-end">
-                        <div className="aspect-w-1 aspect-h-1 rounded-lg overflow-hidden">
+                    <div className="lg:max-w-sm lg:self-start lg:sticky lg:top-20 ml-[5rem]">
+                        <div className="aspect-w-1 aspect-h-1 rounded-lg overflow-hidden shadow-lg relative">
                             {mainImageUrl ? (
                                 <img
                                     src={mainImageUrl}
                                     alt={product.name}
-                                    className="w-full h-full object-center object-cover"
+                                    className={`w-full h-full object-contain transition-transform duration-200 ease-out ${isHovering ? 'scale-[2.5]' : 'scale-100'}`}
+                                    style={{
+                                        transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
+                                    }}
                                     onError={(e) => e.target.src = 'https://placehold.co/600x400/gray/ffffff?text=Image+Error'}
+                                    onMouseMove={handleMouseMove}
+                                    onMouseEnter={handleMouseEnter}
+                                    onMouseLeave={handleMouseLeave}
                                 />
                             ) : (
                                 <img
                                     src='https://placehold.co/600x400/gray/ffffff?text=No+Image'
                                     alt="No Image Available"
-                                    className="w-full h-full object-center object-cover"
+                                    className="w-full h-full object-contain"
                                 />
                             )}
                         </div>
@@ -101,7 +119,7 @@ const ProductDetailPage = ({ handleAddToCart }) => {
                                         <img
                                             src={image}
                                             alt={`${product.name} - Image ${index + 1}`}
-                                            className="w-full h-full object-center object-cover cursor-pointer hover:opacity-75"
+                                            className="w-full h-full object-cover cursor-pointer hover:opacity-75"
                                             onClick={() => {
                                                 const currentImages = product.images.filter(img => !!img);
                                                 const clickedImage = currentImages[index];

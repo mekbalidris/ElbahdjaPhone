@@ -26,7 +26,7 @@ export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, i
         return items.reduce((sum, item) => sum + (item.price || 0), 0);
     }, [items]);
 
-    const shippingCost = 10.00;
+    const shippingCost = 500.00;
     const total = subtotal + shippingCost;
 
     // Fetch user's orders when the modal opens and the user is logged in
@@ -154,7 +154,7 @@ export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, i
                                                     {item.name || 'Unnamed Item'}
                                                 </h3>
                                                 <p className="mt-1 text-sm text-gray-600">
-                                                    ${(item.price || 0).toFixed(2)}
+                                                    {(item.price || 0).toFixed(2)} DA
                                                 </p>
                                                 {onRemoveItem && (
                                                     <div className="mt-2">
@@ -188,16 +188,16 @@ export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, i
                                 <div className="space-y-2 text-sm mb-4">
                                     <div className="flex justify-between text-gray-700">
                                         <span>Subtotal</span>
-                                        <span className="font-medium">${subtotal.toFixed(2)}</span>
+                                        <span className="font-medium">{subtotal.toFixed(2)} DA</span>
                                     </div>
                                     <div className="flex justify-between text-gray-700">
                                         <span>Shipping</span>
-                                        <span className="font-medium">${shippingCost.toFixed(2)}</span>
+                                        <span className="font-medium">{shippingCost.toFixed(2)} DA</span>
                                     </div>
                                 </div>
                                 <div className="flex justify-between text-lg font-semibold text-gray-900 mb-5">
                                     <span>Total</span>
-                                    <span>${total.toFixed(2)}</span>
+                                    <span>{total.toFixed(2)} DA</span>
                                 </div>
                                 <Button
                                     onClick={handleCheckout}
@@ -242,7 +242,9 @@ export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, i
                                                         'bg-gray-100 text-gray-800'}`}>
                                                         {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'N/A'}
                                                     </span>
-                                                    <span className="text-sm font-medium text-gray-700">${order.totals?.total?.toFixed(2) || '0.00'}</span>
+                                                    <span className="text-sm font-medium text-gray-700">
+                                                        {order.totals?.total?.toFixed(2) || '0.00'} DA
+                                                    </span>
                                                 </div>
                                             </li>
                                         ))}

@@ -82,7 +82,7 @@ const algerianWilayas = [
     // Add all 58 Wilayas here for a complete list
 ];
 
-const FIXED_SHIPPING_COST = 10.00; // Using $ as per your previous request
+const FIXED_SHIPPING_COST = 500.00; // Set shipping cost to 500 DA
 
 const CheckoutSection = ({ title, icon, children }) => ( // Removed onEdit, editStep, currentStep for simplicity in this version
     <div className="bg-white p-6 rounded-xl shadow-lg mb-6">

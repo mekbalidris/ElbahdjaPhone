@@ -45,8 +45,8 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate, onDelete })
 
     // Helper function to safely format currency
     const formatCurrency = (amount) => {
-        if (typeof amount !== 'number') return '$0.00';
-        return `$${amount.toFixed(2)}`;
+        if (typeof amount !== 'number') return '0.00 DA';
+        return `${amount.toFixed(2)} DA`;
     };
 
     return (
@@ -100,17 +100,17 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate, onDelete })
                     <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                         <div className="flex items-center">
                             <Icon name="user" className="w-5 h-5 text-gray-400 mr-2" />
-                            <span className="text-gray-700">{order.contactInfo?.name || 'N/A'}</span>
+                            <span className="text-gray-700">{order.contactInfo?.fullName || 'N/A'}</span>
                         </div>
                         <div className="flex items-center">
                             <Icon name="mail" className="w-5 h-5 text-gray-400 mr-2" />
-                            <a href={`mailto:${order.contactInfo?.email}`} className="text-blue-600 hover:text-blue-700">
+                            <a href={`mailto:${order.contactInfo?.email || ''}`} className="text-blue-600 hover:text-blue-700">
                                 {order.contactInfo?.email || 'N/A'}
                             </a>
                         </div>
                         <div className="flex items-center">
                             <Icon name="phone" className="w-5 h-5 text-gray-400 mr-2" />
-                            <a href={`tel:${order.contactInfo?.phone}`} className="text-blue-600 hover:text-blue-700">
+                            <a href={`tel:${order.contactInfo?.phone || ''}`} className="text-blue-600 hover:text-blue-700">
                                 {order.contactInfo?.phone || 'N/A'}
                             </a>
                         </div>
@@ -121,11 +121,11 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate, onDelete })
                 <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Delivery Address</h3>
                     <div className="bg-gray-50 rounded-lg p-4">
-                        <p className="text-gray-700">{order.deliveryAddress?.street || 'N/A'}</p>
+                        <p className="text-gray-700">{order.deliveryAddress?.address || 'N/A'}</p>
+                        {order.deliveryAddress?.aptSuite && <p className="text-gray-700">Apt/Suite: {order.deliveryAddress.aptSuite}</p>}
                         <p className="text-gray-700">
-                            {order.deliveryAddress?.city || 'N/A'}, {order.deliveryAddress?.state || 'N/A'} {order.deliveryAddress?.zipCode || 'N/A'}
+                            {order.deliveryAddress?.city || 'N/A'}, {order.deliveryAddress?.wilaya || 'N/A'}
                         </p>
-                        <p className="text-gray-700">{order.deliveryAddress?.country || 'N/A'}</p>
                     </div>
                 </div>
 
@@ -137,7 +137,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate, onDelete })
                             <div key={index} className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
                                 <div className="flex items-center">
                                     <img
-                                        src={item.image || 'https://placehold.co/80x80/gray/ffffff?text=N/A'}
+                                        src={item.imageUrl || '/placeholder.png'}
                                         alt={item.name}
                                         className="w-12 h-12 rounded-md object-cover"
                                     />
@@ -164,11 +164,11 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate, onDelete })
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-600">Shipping</span>
-                            <span className="text-gray-900">{formatCurrency(order.totals?.shipping)}</span>
+                            <span className="text-gray-900">{formatCurrency(order.totals?.shippingCost)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-600">Tax</span>
-                            <span className="text-gray-900">{formatCurrency(order.totals?.tax)}</span>
+                            <span className="text-gray-900">{formatCurrency(order.totals?.taxes)}</span>
                         </div>
                         <div className="border-t border-gray-200 pt-2 mt-2">
                             <div className="flex justify-between font-medium">
