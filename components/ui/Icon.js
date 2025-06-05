@@ -39,7 +39,8 @@ import {
     ChevronLeft,
     ChevronRight,
     PlayCircle,
-    ArrowRight
+    ArrowRight,
+    MessageSquare
 } from 'lucide-react';
 
 const Icon = ({ name, className, ...props }) => {
@@ -89,7 +90,8 @@ const Icon = ({ name, className, ...props }) => {
         chevronLeft: ChevronLeft,
         chevronRight: ChevronRight,
         playCircle: PlayCircle,
-        arrowRight: ArrowRight
+        arrowRight: ArrowRight,
+        messageSquare: MessageSquare
     };
 
     const SelectedIcon = icons[name];
@@ -99,8 +101,17 @@ const Icon = ({ name, className, ...props }) => {
         return null;
     }
 
+    // Attempt to extract text color class for direct application
+    const textColorClass = className ? className.split(' ').find(cls => cls.startsWith('text-')) : null;
+    let style = {};
+
+    if (textColorClass === 'text-black') {
+        style.stroke = 'black';
+        style.color = 'black'; // Some icons might use fill
+    }
+
     // Render the imported Lucide-react component
-    return <SelectedIcon className={className || "w-5 h-5"} {...props} />;
+    return <SelectedIcon className={className || "w-5 h-5"} style={style} {...props} />;
 };
 
 export default Icon; 

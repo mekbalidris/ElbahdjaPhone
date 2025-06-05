@@ -154,11 +154,11 @@ const ProductsPage = ({ handleAddToCart }) => {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Hero Section */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 py-16 px-4 sm:px-6 lg:px-8">
+            <div className={`bg-gradient-to-r ${brandOrange.gradientFrom} ${brandPurple.gradientTo} py-16 px-4 sm:px-6 lg:px-8`}>
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center">
                         <h1 className="text-4xl font-bold text-white mb-4">Discover Our Products</h1>
-                        <p className="text-xl text-blue-100 mb-8">Find exactly what you&apos;re looking for</p>
+                        <p className="text-xl text-amber-100 mb-8">Find exactly what you&apos;re looking for</p>
                         <div className="max-w-2xl mx-auto">
                             <div className="relative">
                                 <Input
@@ -186,8 +186,8 @@ const ProductsPage = ({ handleAddToCart }) => {
                                 onClick={() => setSelectedCategory(cat.value)}
                                 className={`flex items-center px-6 py-3 rounded-full transition-all duration-200 ${
                                     selectedCategory === cat.value
-                                        ? 'bg-blue-600 text-white shadow-lg scale-105'
-                                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                                        ? `${brandOrange.bg} text-white shadow-lg scale-105`
+                                        : `bg-white text-slate-700 hover:${brandOrange.text} hover:bg-amber-500/10`
                                 }`}
                             >
                                 <Icon name={cat.icon} className="w-5 h-5 mr-2" />
@@ -202,13 +202,13 @@ const ProductsPage = ({ handleAddToCart }) => {
                     <div className="flex items-center space-x-4">
                         <Button
                             onClick={() => setIsFilterOpen(!isFilterOpen)}
-                            variant="secondary"
+                            variant="outlinePurple"
                             className="flex items-center"
                         >
                             <Icon name="filter" className="w-5 h-5 mr-2" />
                             Filters
                         </Button>
-                        <span className="text-gray-600">
+                        <span className="text-slate-600">
                             {products.length} {products.length === 1 ? 'product' : 'products'} found
                         </span>
                     </div>
@@ -222,14 +222,14 @@ const ProductsPage = ({ handleAddToCart }) => {
 
                 {/* Filter Panel */}
                 {isFilterOpen && (
-                    <div className="bg-white rounded-xl shadow-lg p-6 mb-8 animate-fadeIn">
+                    <div className="bg-white rounded-xl shadow-lg p-6 mb-8 animate-fadeIn border border-gray-200">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Price Range Filter */}
                             <div>
                                 <h3 className="text-lg font-semibold mb-4">Price Range</h3>
-                                <div className="flex items-center space-x-4">
-                                    <div className="flex-1">
-                                        <label className="block text-sm text-gray-600 mb-1">Min Price ($)</label>
+                                <div className="flex flex-col space-y-4">
+                                    <div>
+                                        <label className="block text-sm text-slate-700 font-medium mb-1">Min Price ($)</label>
                                         <Input
                                             type="number"
                                             placeholder={overallMinPrice.toFixed(2)}
@@ -240,8 +240,8 @@ const ProductsPage = ({ handleAddToCart }) => {
                                             className="!py-2.5"
                                         />
                                     </div>
-                                    <div className="flex-1">
-                                        <label className="block text-sm text-gray-600 mb-1">Max Price ($)</label>
+                                    <div>
+                                        <label className="block text-sm text-slate-700 font-medium mb-1">Max Price ($)</label>
                                         <Input
                                             type="number"
                                             placeholder={overallMaxPrice.toFixed(2)}
@@ -258,29 +258,14 @@ const ProductsPage = ({ handleAddToCart }) => {
                             {/* Availability Filter */}
                             <div>
                                 <h3 className="text-lg font-semibold mb-4">Availability</h3>
-                                <div className="space-y-2">
-                                    <label className="flex items-center space-x-2">
-                                        <input
-                                            type="checkbox"
-                                            id="availability-filter"
-                                            checked={showOnlyAvailable}
-                                            onChange={(e) => setShowOnlyAvailable(e.target.checked)}
-                                            className={`h-4 w-4 rounded border-slate-300 ${brandOrange.text} focus:${brandOrange.ring} focus:ring-offset-0 transition duration-150 ease-in-out`}
-                                        />
-                                        <span>Only show available products</span>
-                                    </label>
-                                </div>
+                                <label className="inline-flex items-center">
+                                    <input type="checkbox" className={`form-checkbox h-5 w-5 ${brandOrange.text} rounded focus:ring-0`} checked={showOnlyAvailable} onChange={(e) => setShowOnlyAvailable(e.target.checked)} />
+                                    <span className="ml-2 text-slate-700">Only show available products</span>
+                                </label>
                             </div>
                         </div>
-
-                        {/* Reset Filters Button */}
                         <div className="mt-6 flex justify-end">
-                            <Button
-                                onClick={handleResetFilters}
-                                variant="secondary"
-                                className="flex items-center"
-                            >
-                                <Icon name="refresh" className="w-5 h-5 mr-2" />
+                            <Button variant="outlineOrange" onClick={handleResetFilters}>
                                 Reset Filters
                             </Button>
                         </div>
