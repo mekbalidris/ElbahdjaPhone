@@ -177,7 +177,7 @@ export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, i
                                 <div className="text-center py-10">
                                     <Icon name="shoppingBag" className="mx-auto h-16 w-16 text-gray-300" />
                                     <h3 className="mt-3 text-md font-medium text-gray-800">Your cart is empty</h3>
-                                    <p className="mt-1 text-sm text-gray-500">Looks like you haven't added anything yet.</p>
+                                    <p className="mt-1 text-sm text-gray-500">Looks like you haven&apos;t added anything yet.</p>
                                 </div>
                             )}
                         </div>
@@ -256,70 +256,15 @@ export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, i
                                 )}
                             </div>
                         )}
-                        {/* Prompt to login if cart has items but user not logged in, and orders section isn't shown */}
+
                         {!currentUser && displayItems && displayItems.length > 0 && (
-                             <div className="p-4 md:p-6 border-t text-center text-sm text-gray-600 bg-gray-50">
+                            <div className="p-4 md:p-6 border-t text-center text-sm text-gray-600 bg-gray-50">
                                 Please <button type="button" onClick={handleCheckout} className="text-blue-600 hover:underline font-semibold">login</button> to see your past orders or to complete your purchase.
                             </div>
                         )}
-                    </div> {/* End Scrollable Content Area */}
+                    </div>
                 </Dialog.Panel>
             </div>
         </Dialog>
     );
 }
-
-// Example of how you might use CartModal in a parent component (for testing):
-// function App() {
-//   const [isCartOpen, setIsCartOpen] = useState(false);
-//   const [cartItems, setCartItems] = useState([
-//     { productId: '1', name: 'Cool T-Shirt', price: 25.99, imageUrl: 'https://placehold.co/80x80/7B68EE/FFFFFF?text=Shirt' },
-//     { productId: '2', name: 'Awesome Mug', price: 12.50, imageUrl: 'https://placehold.co/80x80/6495ED/FFFFFF?text=Mug' },
-//     { productId: '3', name: 'Fancy Hat', price: 35.00, imageUrl: 'https://placehold.co/80x80/4682B4/FFFFFF?text=Hat' },
-//   ]);
-//   const [isLoadingCart, setIsLoadingCart] = useState(false);
-
-//   const handleRemoveItem = (productId) => {
-//     setCartItems(prevItems => prevItems.filter(item => item.productId !== productId));
-//     toast.success('Item removed from cart!');
-//   };
-  
-//   // Mock toast container for standalone example
-//   useEffect(() => {
-//     let container = document.getElementById('toast-container-main');
-//     if (!container) {
-//         container = document.createElement('div');
-//         container.id = 'toast-container-main';
-//         container.className = 'fixed top-5 right-5 z-[100]'; // High z-index for toasts
-//         document.body.appendChild(container);
-//     }
-//     // This is a very basic way to ensure react-hot-toast has a place to render.
-//     // In a real app, you'd have <Toaster /> component from react-hot-toast.
-//   }, []);
-
-
-//   return (
-//     <div className="p-6 font-sans bg-gray-100 min-h-screen">
-//       <div className="flex space-x-3 mb-6">
-//         <Button onClick={() => { setIsLoadingCart(false); setIsCartOpen(true); }} className="bg-green-500 hover:bg-green-600">Open Cart</Button>
-//         <Button onClick={() => { setIsLoadingCart(true); setIsCartOpen(true); setTimeout(() => setIsLoadingCart(false), 2000);}} className="bg-orange-500 hover:bg-orange-600">
-//           Open Cart (Simulate Loading)
-//         </Button>
-//       </div>
-//       <p className="text-sm text-gray-600">Click "Open Cart". Try logging in/out (mocked via useAuth hook in CartModal.js) to see different states.</p>
-      
-//       <CartModal
-//         isOpen={isCartOpen}
-//         onClose={() => setIsCartOpen(false)}
-//         items={cartItems}
-//         onRemoveItem={handleRemoveItem}
-//         isLoading={isLoadingCart}
-//       />
-//       {/* For react-hot-toast notifications to appear */}
-//       {/* <Toaster position="top-right" />  // Ideal way if you have Toaster component */}
-//       <script src="https://cdn.tailwindcss.com"></script> {/* For Tailwind CSS */}
-//     </div>
-//   );
-// }
-
-// export default App; // If running as a standalone app for testing. 

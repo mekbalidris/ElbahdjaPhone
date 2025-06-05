@@ -109,6 +109,21 @@ const OrderSummaryItem = ({ item }) => (
 );
 OrderSummaryItem.displayName = 'OrderSummaryItem';
 
+const CheckoutForm = React.forwardRef((props, ref) => {
+    // ... existing code ...
+});
+CheckoutForm.displayName = 'CheckoutForm';
+
+const PaymentForm = React.forwardRef((props, ref) => {
+    // ... existing code ...
+});
+PaymentForm.displayName = 'PaymentForm';
+
+const OrderSummary = React.forwardRef((props, ref) => {
+    // ... existing code ...
+});
+OrderSummary.displayName = 'OrderSummary';
+
 export default function CheckoutPage() {
     const router = useRouter();
     const { currentUser, isLoading: authLoading } = useAuth(); // Get auth loading state
