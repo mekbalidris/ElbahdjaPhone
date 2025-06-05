@@ -33,10 +33,22 @@ import {
     Instagram,
     Linkedin,
     Youtube,
-    ShoppingCart
+    ShoppingCart,
+    LayoutGrid,
+    Laptop,
+    ChevronLeft,
+    ChevronRight,
+    PlayCircle,
+    ArrowRight
 } from 'lucide-react';
 
 const Icon = ({ name, className, ...props }) => {
+    console.log('Icon component received name prop:', name, typeof name);
+    if (typeof name !== 'string') {
+        console.warn('Icon component received a non-string name prop:', name);
+        return null;
+    }
+
     const icons = {
         smartphone: Smartphone,
         headphones: Headphones,
@@ -72,6 +84,12 @@ const Icon = ({ name, className, ...props }) => {
         linkedin: Linkedin,
         youtube: Youtube,
         cart: ShoppingCart,
+        grid: LayoutGrid,
+        laptop: Laptop,
+        chevronLeft: ChevronLeft,
+        chevronRight: ChevronRight,
+        playCircle: PlayCircle,
+        arrowRight: ArrowRight
     };
 
     const SelectedIcon = icons[name];

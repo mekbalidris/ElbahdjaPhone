@@ -1,59 +1,88 @@
-import React, { useState, useEffect, useRef } from 'react';
-
-// --- Project Imports ---
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/router';
-import Button from '../components/ui/Button'; // Assuming this path is correct
-import Icon from '../components/ui/Icon';     // Assuming this path is correct
-import ProductCard from '../components/products/ProductCard'; // Assuming this path is correct
-// import { useAuth } from '../../context/AuthContext'; // Not used in this component, but kept in mind
-import { toast } from 'react-hot-toast'; // Assuming react-hot-toast is used in the project
+import Button from '../components/ui/Button';
+import Icon from '../components/ui/Icon';
+import ProductCard from '../components/products/ProductCard';
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-hot-toast';
+
+// --- Color Palette (Client Inspired - Tailwind classes) ---
+const brandOrange = {
+    bg: 'bg-amber-500',
+    text: 'text-amber-500',
+    border: 'border-amber-500',
+    hoverBg: 'hover:bg-amber-600',
+    gradientFrom: 'from-amber-500',
+    gradientTo: 'to-orange-600',
+};
+
+const brandPurple = {
+    bg: 'bg-purple-600',
+    text: 'text-purple-600',
+    border: 'border-purple-600',
+    hoverBg: 'hover:bg-purple-700',
+    gradientFrom: 'from-purple-600',
+    gradientTo: 'to-indigo-700',
+};
 
 // --- Main HomePage Component ---
 const HomePage = ({ handleAddToCart }) => {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const router = useRouter(); // Using the real router
+    const [showcaseVideoVisible, setShowcaseVideoVisible] = useState(true);
+    const router = useRouter();
+    const { currentUser } = useAuth();
+    const isAdmin = currentUser?.role === 'seller';
 
-    // Categories for the slider - using icon names compatible with your Icon component
+    const [heroVideoKey, setHeroVideoKey] = useState(Date.now());
+    const [showcaseVideoKey, setShowcaseVideoKey] = useState(Date.now() + 1);
+
     const categories = [
-        { name: 'All Products', brand: null, category: null, icon: 'grid' }, // Assuming 'grid' icon exists
-        { name: 'Smartphones', category: 'smartphones', brand: null, icon: 'smartphone' }, // Assuming 'smartphone' icon exists
-        { name: 'Laptops', category: 'laptops', brand: null, icon: 'laptop' }, // Assuming 'laptop' icon exists
-        { name: 'Accessories', category: 'accessories', brand: null, icon: 'headphones' }, // Assuming 'headphones' icon exists
-        // Add more categories/brands as needed, using icon names compatible with your Icon component
+        { name: 'All Phones', query: { category: 'smartphones' }, icon: 'smartphone' },
+        { name: 'Laptops', query: { category: 'laptops' }, icon: 'laptop' },
+        { name: 'Headphones', query: { category: 'accessories', subCategory: 'headphones' }, icon: 'headphones' },
+        { name: 'Gadgets', query: { category: 'accessories' }, icon: 'grid' },
     ];
 
     useEffect(() => {
-        setIsLoading(true);
-        const fetchProducts = async () => {
+        const fetchData = async () => {
+            setIsLoading(true);
             try {
-                const res = await fetch('/api/products');
-                if (!res.ok) {
-                    // Check if the response body can be parsed as JSON for a specific error message
-                    const errorData = await res.json().catch(() => ({ error: 'Failed to fetch products' }));
-                    throw new Error(errorData.error || 'Failed to fetch products');
+                // Fetch products
+                const productsRes = await fetch('/api/products');
+                if (!productsRes.ok) {
+                    throw new Error('Failed to fetch products');
                 }
-                const data = await res.json();
-                setProducts(data);
+                const productsData = await productsRes.json();
+                setProducts(productsData);
+
+                // Fetch showcase visibility
+                const showcaseRes = await fetch('/api/showcase');
+                if (!showcaseRes.ok) {
+                    throw new Error('Failed to fetch showcase visibility');
+                }
+                const showcaseData = await showcaseRes.json();
+                setShowcaseVideoVisible(showcaseData.visible);
+                setHeroVideoKey(Date.now());
+                setShowcaseVideoKey(Date.now() + 1);
             } catch (error) {
-                console.error('Error fetching products:', error);
-                // Show a toast error using react-hot-toast
-                toast.error(error.message || 'Failed to load products');
+                console.error('Error fetching data:', error);
+                toast.error(error.message || 'Failed to load data');
             } finally {
                 setIsLoading(false);
             }
         };
-        fetchProducts();
+
+        fetchData();
     }, []);
 
-    const featuredProducts = products.filter(p => p.featured).slice(0, 4);
-    const offerProducts = products.filter(p => p.offer).slice(0, 3);
+    const featuredProducts = useMemo(() => products.filter(p => p.featured).slice(0, 4), [products]);
+    const offerProducts = useMemo(() => products.filter(p => p.offer).slice(0, 4), [products]);
 
     const categorySliderRef = useRef(null);
-
     const scrollCategory = (direction) => {
         if (categorySliderRef.current) {
-            const scrollAmount = categorySliderRef.current.offsetWidth * 0.8; // Scroll by 80% of visible width
+            const scrollAmount = categorySliderRef.current.offsetWidth * 0.75;
             categorySliderRef.current.scrollBy({
                 left: direction === 'left' ? -scrollAmount : scrollAmount,
                 behavior: 'smooth'
@@ -61,201 +90,201 @@ const HomePage = ({ handleAddToCart }) => {
         }
     };
 
+    useEffect(() => {
+        const sections = document.querySelectorAll('.section-animate');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fadeInUp');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        sections.forEach(section => observer.observe(section));
+        return () => sections.forEach(section => observer.unobserve(section));
+    }, [isLoading]);
+
+    if (isLoading && products.length === 0) {
+        return (
+            <div className="fixed inset-0 bg-gray-50 flex flex-col items-center justify-center z-[100]">
+                <div className={`${brandOrange.text} text-4xl font-bold mb-4`}>EL Bahdja Phone</div>
+                <div className={`w-16 h-16 border-4 ${brandOrange.border} border-t-transparent rounded-full animate-spin`}></div>
+                <p className="text-slate-700 mt-4 text-lg">Loading brilliance...</p>
+            </div>
+        );
+    }
+
     return (
-        <div className="bg-gray-50 min-h-screen font-sans text-gray-800">
+        <div className="bg-gray-50 min-h-screen font-sans text-slate-800 selection:bg-amber-500 selection:text-white overflow-x-hidden">
             {/* Screen 1: Hero Section */}
-            <section className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white p-6 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-30">
-                    {/* Placeholder for a large, high-quality iPhone image or abstract tech background */}
-                    {/* Replace with a real image relevant to your site if possible */}
-                    <img
-                        src="https://placehold.co/1920x1080/000000/111111?text=Your+Awesome+Tech+Image"
-                        alt="Featured Tech Background"
-                        className="w-full h-full object-cover"
-                    />
-                </div>
-                <div className="relative z-10 text-center space-y-8 max-w-3xl">
-                    <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight">
-                        Welcome to <span className="text-blue-400">Your Store Name</span> {/* Replace with your store name */}
+            <section className="min-h-screen flex flex-col items-center justify-center p-6 relative text-center bg-gradient-to-br from-slate-900 via-slate-800 to-black">
+                <div className="relative z-10 space-y-8 max-w-4xl animate-fadeInUp" style={{animationDelay: '0.3s'}}>
+                    <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-tight text-white">
+                        Welcome to <span className={`bg-clip-text text-transparent bg-gradient-to-r ${brandOrange.gradientFrom} ${brandPurple.gradientTo}`}>EL Bahdja Phone</span>
                     </h1>
-                    <p className="text-xl md:text-2xl text-gray-300 max-w-xl mx-auto">
-                        Experience the future of technology. Discover cutting-edge products and premium accessories. {/* Replace with your slogan */}
+                    <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto font-light leading-relaxed">
+                        Your destination for cutting-edge mobile technology and premium accessories. Discover innovation.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                        <Button
-                            onClick={() => router.push('/products')}
-                            variant="primary"
-                            size="xl"
-                            className="w-full sm:w-auto shadow-lg hover:shadow-xl transform hover:scale-105"
-                            iconRight={<Icon name="arrowRight" className="w-6 h-6"/>}
-                        >
-                            Explore Products
+                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center pt-8">
+                        <Button onClick={() => router.push('/products')} variant="primary" size="xl" className={`!${brandOrange.bg} ${brandOrange.hoverBg} !text-white`}>
+                            Explore Devices
                         </Button>
-                        <Button
-                            onClick={() => router.push('/products?filter=offers')}
-                            variant="outline"
-                            size="xl"
-                            className="w-full sm:w-auto border-2 border-white text-white hover:bg-white hover:text-gray-900 shadow-lg hover:shadow-xl transform hover:scale-105"
-                            iconRight={<Icon name="chevronRight" className="w-6 h-6"/>}
+                        <Button 
+                            onClick={() => {
+                                const offersSection = document.getElementById('offers-section');
+                                offersSection?.scrollIntoView({ behavior: 'smooth' });
+                            }} 
+                            variant="outlinePurple" 
+                            size="xl" 
+                            className={`!${brandPurple.text} !${brandPurple.border} hover:!${brandPurple.bg} hover:!text-white`}
                         >
-                            View Offers
+                            Special Offers
                         </Button>
                     </div>
                 </div>
-                <div className="absolute bottom-10 text-gray-400 animate-bounce">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                    </svg>
+                <div className="absolute bottom-10 text-gray-400 animate-bounce-slow z-10">
+                    <Icon name="chevronDown" className="w-10 h-10" path="m19.5 8.25-7.5 7.5-7.5-7.5"/>
                 </div>
             </section>
 
-            {/* Screen 2: Category/Brand Slider */}
-            <section className="py-16 md:py-24 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Screen 2: Category Slider */}
+            <section className="py-16 md:py-24 bg-white section-animate">
+                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12 md:mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">Shop by Category</h2>
-                        <p className="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">Find exactly what you&apos;re looking for, from top brands to essential accessories.</p>
+                        <h2 className={`text-3xl md:text-4xl font-bold ${brandPurple.text} tracking-tight`}>Shop By Category</h2>
+                        <p className="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">Find exactly what you&apos;re looking for with ease.</p>
                     </div>
-
-                    <div className="relative">
-                        <div ref={categorySliderRef} className="flex space-x-4 md:space-x-6 overflow-x-auto pb-4 scrollbar-hide">
+                    <div className="flex justify-center items-center">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto">
                             {categories.map((category, index) => (
                                 <div
                                     key={index}
-                                    onClick={() => router.push(category.brand ? `/products?brand=${category.brand}` : (category.category ? `/products?category=${category.category}`: '/products'))}
-                                    className="flex-shrink-0 w-40 h-40 md:w-48 md:h-48 bg-gray-100 rounded-xl flex flex-col items-center justify-center text-center p-4 cursor-pointer group hover:bg-blue-500 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
+                                    onClick={() => router.push({ pathname: '/products', query: category.query })}
+                                    className="w-full h-52 md:h-60 bg-gray-50 rounded-2xl flex flex-col items-center justify-center text-center p-5 cursor-pointer group hover:bg-gradient-to-br hover:from-amber-500 hover:to-orange-600 hover:shadow-xl hover:shadow-amber-500/30 transition-all duration-300 transform hover:-translate-y-2 border border-gray-200 hover:border-transparent"
+                                    style={{animationDelay: `${index * 100}ms`}}
                                 >
-                                    <Icon name={category.icon} className="w-12 h-12 mb-2 text-gray-700 group-hover:text-white transition-colors" />
-                                    <p className="text-sm md:text-base font-semibold text-gray-700 group-hover:text-white transition-colors">{category.name}</p>
+                                    <Icon name={category.icon} className={`w-12 h-12 md:w-14 md:h-14 mb-4 ${brandOrange.text} group-hover:text-white transition-colors duration-300 transform group-hover:scale-110`} />
+                                    <p className="text-md md:text-lg font-semibold text-slate-700 group-hover:text-white transition-colors duration-300">{category.name}</p>
                                 </div>
                             ))}
                         </div>
-                         {/* Scroll Buttons for Slider - visible on larger screens */}
-                        <button
-                            onClick={() => scrollCategory('left')}
-                            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 p-2 bg-white/80 hover:bg-white rounded-full shadow-md hidden md:block transition-opacity hover:opacity-100 opacity-70"
-                            aria-label="Scroll left"
-                        >
-                            <Icon name="chevronLeft" className="w-6 h-6 text-gray-700"/> {/* Assuming 'chevronLeft' icon exists */}
-                        </button>
-                        <button
-                            onClick={() => scrollCategory('right')}
-                            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 p-2 bg-white/80 hover:bg-white rounded-full shadow-md hidden md:block transition-opacity hover:opacity-100 opacity-70"
-                            aria-label="Scroll right"
-                        >
-                            <Icon name="chevronRight" className="w-6 h-6 text-gray-700"/> {/* Assuming 'chevronRight' icon exists */}
-                        </button>
                     </div>
                 </div>
             </section>
 
-            {/* Screen 3: Offers & Showcase */}
-            <section className="py-16 md:py-24 bg-gray-100">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Screen 3: Offers & Showcase Video */}
+            <section id="offers-section" className="py-16 md:py-24 bg-gray-50 section-animate">
+                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12 md:mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">Hot Deals & New Arrivals</h2>
-                        <p className="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">Don&apos;t miss out on our latest promotions and newest tech.</p>
+                        <h2 className={`text-3xl md:text-4xl font-bold ${brandOrange.text} tracking-tight`}>Hot Deals & Showcase</h2>
+                        <p className="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">Grab limited-time offers and see our products in action.</p>
                     </div>
-
-                    {/* Video Showcase Placeholder - Replace with real video embed if needed */}
-                    <div className="mb-16 md:mb-20">
-                        <div className="aspect-video bg-gray-800 rounded-xl shadow-2xl flex items-center justify-center text-white relative overflow-hidden group">
-                             {/* Placeholder for a video thumbnail */}
-                            <img
-                                src="https://placehold.co/1280x720/1F2937/4B5563?text=Product+Showcase+Video"
-                                alt="Video placeholder"
-                                className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-opacity"
-                            />
-                            <div className="relative z-10 text-center">
-                                <Icon name="playCircle" className="w-20 h-20 md:w-28 md:h-28 text-white/80 group-hover:text-white group-hover:scale-110 transition-all duration-300 cursor-pointer"/> {/* Assuming 'playCircle' icon exists */}
-                                <p className="mt-2 text-lg font-medium">Watch Our Latest Review</p>
+                    
+                    {showcaseVideoVisible && (
+                        <div className="mb-16 md:mb-20 relative animate-fade-in">
+                            <div className="aspect-video bg-black rounded-2xl shadow-2xl overflow-hidden max-w-4xl mx-auto">
+                                <video
+                                    className="w-full h-full object-cover"
+                                    muted
+                                    loop
+                                    playsInline
+                                    controls
+                                    controlsList="nodownload"
+                                    style={{ borderRadius: '1rem' }}
+                                >
+                                    <source src="/api/showcase/video" type="video/mp4" />
+                                    Your browser does not support the video tag.
+                                </video>
                             </div>
+                            {isAdmin && (
+                                <div className="absolute -top-16 right-0 z-10">
+                                    <Button onClick={() => router.push('/admin/homepage-management')} variant="secondary" size="sm" className="shadow-md">
+                                        Manage Homepage
+                                    </Button>
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    )}
 
-                    {isLoading ? (
-                        <div className="flex justify-center items-center h-64">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                            <p className="ml-3 text-gray-600">Loading Offers...</p>
-                        </div>
+                    {isLoading && !offerProducts.length ? (
+                        <div className="flex justify-center items-center h-64"><div className={`w-12 h-12 border-4 ${brandOrange.border} border-t-transparent rounded-full animate-spin`}></div></div>
                     ) : offerProducts.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-                            {offerProducts.map(product => (
-                                <ProductCard
-                                    key={product._id}
-                                    product={product}
-                                    onAddToCart={handleAddToCart}
-                                />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                            {offerProducts.map((product, index) => (
+                                <div key={product._id} className="animate-fadeInUp" style={{animationDelay: `${0.3 + index * 0.1}s`}}>
+                                    <ProductCard product={product} onAddToCart={handleAddToCart} />
+                                </div>
                             ))}
                         </div>
                     ) : (
-                        <p className="text-center text-gray-600 text-lg">No special offers available at the moment. Check back soon!</p>
+                        <p className="text-center text-slate-500 text-lg py-8">No special offers available right now. Check back soon!</p>
                     )}
                     <div className="text-center mt-12 md:mt-16">
-                        <Button
-                            onClick={() => router.push('/products?filter=offers')} // Link to products page filtered by offers
-                            variant="outline"
+                        <Button 
+                            onClick={() => router.push('/products?filter=offers')} 
+                            variant="primary" 
                             size="lg"
-                            className="border-blue-600 text-blue-600 hover:bg-blue-50"
-                            iconRight={<Icon name="chevronRight" className="w-5 h-5"/>} // Assuming 'chevronRight' icon exists
+                            className={`${brandOrange.bg} ${brandOrange.hoverBg} !text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300`}
                         >
-                            View All Offers
+                            View All Deals
                         </Button>
                     </div>
                 </div>
             </section>
 
-            {/* Featured Products Section */}
-            <section className="py-16 md:py-24 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Screen 4: Featured Products */}
+            <section className="py-16 md:py-24 bg-white section-animate">
+                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12 md:mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 sm:text-4xl">
-                            Featured Products
-                        </h2>
-                        <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-500 sm:mt-4">
-                            Handpicked for you. Our most popular and top-rated items.
-                        </p>
+                        <h2 className={`text-3xl md:text-4xl font-bold ${brandPurple.text} tracking-tight`}>Featured Selections</h2>
+                        <p className="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">Our top picks, curated just for you.</p>
                     </div>
-                    {isLoading ? (
-                        <div className="flex justify-center items-center h-64">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                            <p className="ml-3 text-gray-600">Loading Products...</p>
-                        </div>
+                    {isLoading && !featuredProducts.length ? (
+                        <div className="flex justify-center items-center h-64"><div className={`w-12 h-12 border-4 ${brandPurple.border} border-t-transparent rounded-full animate-spin`}></div></div>
                     ) : featuredProducts.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
-                            {featuredProducts.map(product => (
-                                <ProductCard
-                                    key={product._id}
-                                    product={product}
-                                    onAddToCart={handleAddToCart}
-                                />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                            {featuredProducts.map((product, index) => (
+                                <div key={product._id} className="animate-fadeInUp" style={{animationDelay: `${0.2 + index * 0.15}s`}}>
+                                    <ProductCard product={product} onAddToCart={handleAddToCart} />
+                                </div>
                             ))}
                         </div>
                     ) : (
-                         <p className="text-center text-gray-600 text-lg">No featured products to display currently.</p>
+                        <p className="text-center text-slate-500 text-lg py-8">Curating our featured products... Please check back soon!</p>
                     )}
                 </div>
             </section>
 
-            {/* Footer (Simple Placeholder) */}
-            <footer className="py-12 bg-gray-800 text-gray-300 text-center">
-                <p>&copy; {new Date().getFullYear()} Your Store Name. All rights reserved.</p> {/* Replace with your store name */}
-                <p className="text-sm mt-1">Discover the Best in Technology.</p> {/* Replace with your slogan */}
-            </footer>
             <style jsx global>{`
-                html {
-                    scroll-behavior: smooth;
+                html { scroll-behavior: smooth; }
+                body { 
+                    background-color: #f8fafc;
+                    color: #1e293b;
                 }
-                .font-sans { // Ensure Inter or a similar clean font is prioritized if used
-                    // font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+                .font-sans {
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
                 }
-                .scrollbar-hide::-webkit-scrollbar {
-                    display: none;
+                .scrollbar-hide::-webkit-scrollbar { display: none; }
+                .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+                @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(25px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
-                .scrollbar-hide {
-                    -ms-overflow-style: none;  /* IE and Edge */
-                    scrollbar-width: none;  /* Firefox */
+                .animate-fadeInUp { animation: fadeInUp 0.7s ease-out forwards; opacity:0; }
+                
+                @keyframes videoFadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 0.3; }
                 }
+                .animate-video-fade-in { animation: videoFadeIn 1.5s 0.2s ease-out forwards; }
+
+                @keyframes bounceSlow {
+                    0%, 100% { transform: translateY(-10%); animation-timing-function: cubic-bezier(0.8,0,1,1); }
+                    50% { transform: translateY(0); animation-timing-function: cubic-bezier(0,0,0.2,1); }
+                }
+                .animate-bounce-slow { animation: bounceSlow 2.5s infinite; }
             `}</style>
         </div>
     );
