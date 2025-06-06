@@ -3,9 +3,11 @@ import { toast } from 'react-hot-toast';
 import Button from '../../components/ui/Button';
 import Icon from '../../components/ui/Icon';
 import { useRouter } from 'next/router';
+import ProductCard from '../../components/products/ProductCard';
 
 const ProductDetailPage = ({ handleAddToCart }) => {
     const [product, setProduct] = useState(null);
+    const [relatedProducts, setRelatedProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const { productId } = router.query; // Get productId from router query
@@ -13,7 +15,8 @@ const ProductDetailPage = ({ handleAddToCart }) => {
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
-        if (!productId) return; // Don't fetch if productId is not available yet
+        console.log('useEffect running for productId:', productId);
+        if (!productId) return;
 
         setIsLoading(true);
         // Fetch product by _id
@@ -32,7 +35,30 @@ const ProductDetailPage = ({ handleAddToCart }) => {
                 return res.json();
             })
             .then(data => {
-                setProduct(data); // API should return a single product object
+                console.log('Fetched main product data:', data);
+                setProduct(data);
+                // After getting the product, fetch related products
+                if (data && data.category) {
+                    console.log('Fetching related products for category:', data.category);
+                    fetch(`/api/products?category=${data.category}`)
+                        .then(res => res.json())
+                        .then(products => {
+                             console.log('Fetched related products (raw):', products);
+                            // Filter out the current product and limit to 4 related products
+                            const related = products
+                                .filter(p => p._id !== productId)
+                                .slice(0, 4);
+                            console.log('Fetched related products (filtered):', related);
+                            setRelatedProducts(related);
+                        })
+                        .catch(err => {
+                            console.error('Error fetching related products:', err);
+                        });
+                } else if (!data) {
+                    console.log('No main product data fetched.');
+                } else if (!data.category) {
+                     console.log('Main product data fetched, but no category available.', data);
+                }
                 setIsLoading(false);
             })
             .catch((err) => {
@@ -82,6 +108,8 @@ const ProductDetailPage = ({ handleAddToCart }) => {
 
     const handleMouseEnter = () => setIsHovering(true);
     const handleMouseLeave = () => setIsHovering(false);
+
+    console.log('Rendering ProductDetailPage. relatedProducts:', relatedProducts);
 
     return (
         <div className="bg-white py-8">
@@ -173,6 +201,23 @@ const ProductDetailPage = ({ handleAddToCart }) => {
                         </div>
                     </div>
                 </div>
+
+                {/* Related Products Section */}
+                {relatedProducts.length > 0 && (
+                    <div className="mt-16 border-t border-gray-200 pt-16">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-8">You May Also Like</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {relatedProducts.map(relatedProduct => (
+                                <div key={relatedProduct._id} className="animate-fadeIn">
+                                    <ProductCard 
+                                        product={relatedProduct} 
+                                        onAddToCart={handleAddToCart}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
