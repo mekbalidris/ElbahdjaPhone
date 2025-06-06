@@ -31,7 +31,8 @@ const brandPurple = {
 
 const CATEGORIES = [
     { value: 'all', label: 'All Categories', icon: 'grid' },
-    { value: 'phones', label: 'Phones', icon: 'smartphone' },
+    { value: 'smartphones', label: 'Phones', icon: 'smartphone' },
+    { value: 'laptops', label: 'Laptops', icon: 'laptop' },
     { value: 'accessories', label: 'Accessories', icon: 'headphones' },
 ];
 
@@ -44,6 +45,7 @@ const ProductsPage = ({ handleAddToCart }) => {
     const [allProducts, setAllProducts] = useState([]); // Store all products for filtering
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
+    const [selectedBrand, setSelectedBrand] = useState(''); // Add brand filter state
     const [sortBy, setSortBy] = useState('createdAt_desc');
     const [isLoading, setIsLoading] = useState(true);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -52,82 +54,147 @@ const ProductsPage = ({ handleAddToCart }) => {
     const [overallMaxPrice, setOverallMaxPrice] = useState(2000);
     const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
     const router = useRouter();
-    const { category } = router.query;
 
-    // Determine actual max price from fetched products
-    useEffect(() => {
-        if (allProducts.length > 0) {
-            const prices = allProducts.map(p => p.price).filter(p => typeof p === 'number');
-            setOverallMinPrice(prices.length ? Math.min(...prices) : 0);
-            setOverallMaxPrice(prices.length ? Math.max(...prices) : 2000);
-            setPriceRange({min: '', max: ''}); // Reset price range when new products are loaded
-        }
-    }, [allProducts]);
+    // Get available brands based on selected category
+    const availableBrands = useMemo(() => {
+        if (!allProducts.length) return [];
+        const brands = new Set(
+            allProducts
+                .filter(p => selectedCategory === 'all' || p.category === selectedCategory)
+                .map(p => p.brand)
+                .filter(Boolean)
+        );
+        return [
+            { value: '', label: 'All Brands' },
+            ...Array.from(brands).map(brand => ({
+                value: brand,
+                label: brand.charAt(0).toUpperCase() + brand.slice(1)
+            }))
+        ];
+    }, [allProducts, selectedCategory]);
 
+    // 1. Fetch products once on component mount
     useEffect(() => {
         setIsLoading(true);
-        let url = '/api/products';
-        fetch(url)
+        fetch('/api/products')
             .then(res => res.json())
             .then(data => {
-                setAllProducts(data); // Store all products
-                applyFilters(data); // Apply initial filters
+                setAllProducts(data);
                 setIsLoading(false);
             })
             .catch(() => {
                 setIsLoading(false);
                 toast.error('Failed to fetch products');
             });
-    }, []);
+    }, []); // Empty dependency array means this runs once on mount
 
-    // Apply all filters whenever any filter changes
+    // 2. Update selectedCategory when URL category changes, after router is ready
     useEffect(() => {
-        applyFilters(allProducts);
-    }, [searchTerm, selectedCategory, sortBy, priceRange, showOnlyAvailable, allProducts]);
+        if (router.isReady) {
+            const categoryFromUrl = router.query.category;
+            // Check if the category from URL is one of the valid categories
+            if (categoryFromUrl && CATEGORIES.some(cat => cat.value === categoryFromUrl)) {
+                setSelectedCategory(categoryFromUrl);
+            } else {
+                setSelectedCategory('all'); // Default to 'all' if no category in URL or invalid
+            }
+        }
+    }, [router.isReady, router.query.category]); // Depend on router.isReady and the category query parameter
 
-    const applyFilters = (data) => {
+    // 3. Apply filters whenever allProducts or any filter state changes
+    useEffect(() => {
+        // Only apply filters if allProducts data is loaded
+        if (allProducts.length > 0) {
+             applyFilters(allProducts, selectedCategory, searchTerm, priceRange, showOnlyAvailable, sortBy);
+        } else if (!isLoading) {
+             // If no products loaded and not loading, apply filters to show no results
+             // This handles the case where filtering happens before data is fetched
+             applyFilters([], selectedCategory, searchTerm, priceRange, showOnlyAvailable, sortBy);
+        }
+    }, [allProducts, selectedCategory, selectedBrand, searchTerm, priceRange, showOnlyAvailable, sortBy, isLoading]); // Depend on all relevant filter states and allProducts/isLoading
+
+    // Update overall min/max price range based on fetched products
+    useEffect(() => {
+        if (allProducts.length > 0) {
+            const prices = allProducts.map(p => p.price).filter(p => typeof p === 'number');
+            setOverallMinPrice(prices.length ? Math.min(...prices) : 0);
+            setOverallMaxPrice(prices.length ? Math.max(...prices) : 2000);
+            setPriceRange(prev => ({ 
+                min: prev.min || (prices.length ? Math.min(...prices) : ''), 
+                max: prev.max || (prices.length ? Math.max(...prices) : '') 
+            }));
+        } else {
+             // Reset overall price range if no products
+            setOverallMinPrice(0);
+            setOverallMaxPrice(2000);
+            setPriceRange({ min: '', max: '' });
+        }
+    }, [allProducts]);
+
+    const applyFilters = (data, currentCategory, currentSearchTerm, currentPriceRange, currentShowOnlyAvailable, currentSortBy) => {
         let filtered = [...data];
 
         // Apply search filter
-        if (searchTerm) {
+        if (currentSearchTerm) {
             filtered = filtered.filter(p => 
-                p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                p.description.toLowerCase().includes(searchTerm.toLowerCase())
+                p.name.toLowerCase().includes(currentSearchTerm.toLowerCase()) || 
+                p.description.toLowerCase().includes(currentSearchTerm.toLowerCase())
             );
         }
 
         // Apply category filter
-        if (selectedCategory !== 'all') {
-            filtered = filtered.filter(p => p.category === selectedCategory);
+        if (currentCategory && currentCategory !== 'all') {
+            filtered = filtered.filter(p => {
+                if (currentCategory === 'smartphones') {
+                    return p.category === 'smartphones' || p.category === 'phones';
+                }
+                return p.category === currentCategory;
+            });
+        }
+
+        // Apply brand filter
+        if (selectedBrand) {
+            filtered = filtered.filter(p => p.brand === selectedBrand);
         }
 
         // Apply price range filter
-        if (priceRange.min && priceRange.max) {
-            filtered = filtered.filter(p => p.price >= priceRange.min && p.price <= priceRange.max);
+        if (currentPriceRange.min && currentPriceRange.max) {
+            filtered = filtered.filter(p => {
+                 const price = parseFloat(p.price);
+                 const min = parseFloat(currentPriceRange.min);
+                 const max = parseFloat(currentPriceRange.max);
+                 return !isNaN(price) && price >= min && price <= max;
+            });
         }
 
         // Apply availability filter
-        if (showOnlyAvailable) {
+        if (currentShowOnlyAvailable) {
             filtered = filtered.filter(p => p.stock > 0);
         }
 
         // Apply sorting
         filtered.sort((a, b) => {
-            const [field, order] = sortBy.split('_');
+            const [field, order] = currentSortBy.split('_'); // Use currentSortBy parameter
             let comparison = 0;
-            if (a[field] < b[field]) comparison = -1;
-            if (a[field] > b[field]) comparison = 1;
+            // Handle potential null/undefined values and different types
+            const aValue = a[field];
+            const bValue = b[field];
+
+            if (typeof aValue === 'string' && typeof bValue === 'string') {
+                 comparison = aValue.localeCompare(bValue);
+            } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+                 comparison = aValue - bValue;
+            } else if (aValue === undefined || aValue === null) {
+                 comparison = 1; // Null/undefined comes after
+            } else if (bValue === undefined || bValue === null) {
+                 comparison = -1; // Null/undefined comes after
+            }
+
             return order === 'desc' ? comparison * -1 : comparison;
         });
 
         setProducts(filtered);
     };
-
-    useEffect(() => {
-        if (category && category !== selectedCategory) {
-            setSelectedCategory(category);
-        }
-    }, [category]);
 
     const sortOptions = [
         { value: 'createdAt_desc', label: 'Newest First' },
@@ -145,6 +212,7 @@ const ProductsPage = ({ handleAddToCart }) => {
     const handleResetFilters = () => {
         setSearchTerm('');
         setSelectedCategory('all');
+        setSelectedBrand('');
         setSortBy('createdAt_desc');
         setPriceRange({ min: '', max: '' });
         setShowOnlyAvailable(false);
@@ -203,7 +271,7 @@ const ProductsPage = ({ handleAddToCart }) => {
                         <Button
                             onClick={() => setIsFilterOpen(!isFilterOpen)}
                             variant="outlinePurple"
-                            className="flex items-center"
+                            className={`flex items-center border-2 ${isFilterOpen ? 'border-purple-600 bg-purple-50' : 'border-purple-200 hover:border-purple-400'} transition-all duration-200`}
                         >
                             <Icon name="filter" className="w-5 h-5 mr-2" />
                             Filters
@@ -212,12 +280,20 @@ const ProductsPage = ({ handleAddToCart }) => {
                             {products.length} {products.length === 1 ? 'product' : 'products'} found
                         </span>
                     </div>
-                    <Select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                        options={sortOptions}
-                        className="w-full sm:w-48"
-                    />
+                    <div className="flex items-center space-x-4">
+                        <Select
+                            value={selectedBrand}
+                            onChange={(e) => setSelectedBrand(e.target.value)}
+                            options={availableBrands}
+                            className="w-48"
+                        />
+                        <Select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            options={sortOptions}
+                            className="w-48"
+                        />
+                    </div>
                 </div>
 
                 {/* Filter Panel */}
@@ -259,7 +335,12 @@ const ProductsPage = ({ handleAddToCart }) => {
                             <div>
                                 <h3 className="text-lg font-semibold mb-4">Availability</h3>
                                 <label className="inline-flex items-center">
-                                    <input type="checkbox" className={`form-checkbox h-5 w-5 ${brandOrange.text} rounded focus:ring-0`} checked={showOnlyAvailable} onChange={(e) => setShowOnlyAvailable(e.target.checked)} />
+                                    <input 
+                                        type="checkbox" 
+                                        className={`form-checkbox h-5 w-5 ${brandOrange.text} rounded focus:ring-0`} 
+                                        checked={showOnlyAvailable} 
+                                        onChange={(e) => setShowOnlyAvailable(e.target.checked)} 
+                                    />
                                     <span className="ml-2 text-slate-700">Only show available products</span>
                                 </label>
                             </div>

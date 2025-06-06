@@ -114,8 +114,8 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => { // Default cartItemCoun
 
     return (
         <>
-            <nav className="bg-white shadow-sm sticky top-0 z-50 font-sans">
-                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8"> {/* Content constrained */}
+            <nav className={`bg-white shadow-sm z-50 font-sans ${router.pathname === '/' ? 'fixed top-0 left-0 right-0' : 'sticky top-0'}`}>
+                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         {/* Logo */}
                         <div className="flex-shrink-0">
@@ -141,7 +141,21 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => { // Default cartItemCoun
                         </div>
 
                         {/* Right side icons - Desktop */}
-                        <div className="hidden md:flex items-center space-x-3">
+                        <div className="hidden md:flex items-center space-x-6">
+                            {/* Delivery Info */}
+                            <div className="flex items-center space-x-2 text-slate-700 hover:text-amber-500 transition-colors cursor-pointer">
+                                <Icon name="mapPin" className="w-5 h-5" />
+                                <span className="text-sm font-medium">Delivery to 58 Wilayas</span>
+                                <span className="ml-1 text-lg">🇩🇿</span>
+                            </div>
+
+                            {/* Contact Info */}
+                            <div className="flex items-center space-x-2 text-slate-700 hover:text-amber-500 transition-colors">
+                                <Icon name="phone" className="w-5 h-5" />
+                                <a href="tel:0552408449" className="text-sm font-medium">0552408449</a>
+                            </div>
+
+                            {/* Cart Button */}
                             <button 
                                 onClick={onCartClick}
                                 className={`relative p-2 rounded-full text-black hover:text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-1 transition-colors`}
@@ -231,6 +245,19 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => { // Default cartItemCoun
                                         {item.label}
                                     </MobileNavLink>
                                 ))}
+                                
+                                {/* Mobile Delivery Info */}
+                                <div className="flex items-center px-3 py-3 text-slate-700">
+                                    <Icon name="mapPin" className="w-5 h-5 mr-2" />
+                                    <span className="text-base font-medium">Delivery to 58 Wilayas</span>
+                                    <span className="ml-2 text-lg">🇩🇿</span>
+                                </div>
+
+                                {/* Mobile Contact Info */}
+                                <div className="flex items-center px-3 py-3 text-slate-700">
+                                    <Icon name="phone" className="w-5 h-5 mr-2" />
+                                    <a href="tel:0552408449" className="text-base font-medium">0552408449</a>
+                                </div>
                             </div>
                             <div className="pt-4 pb-3 border-t border-gray-200">
                                 {authLoading ? (

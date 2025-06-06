@@ -11,7 +11,7 @@ export default async function handler(req, res) {
         const showcaseCollection = db.collection('showcase');
 
         // Fetch the specific showcase video document
-        const showcase = await showcaseCollection.findOne({ _id: 'mainShowcaseVideo' });
+        const showcase = await showcaseCollection.findOne({ _id: 'video' });
 
         if (!showcase || !showcase.videoData || !showcase.videoType) {
             // If you want to serve a default/placeholder video, you could do it here

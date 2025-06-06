@@ -118,7 +118,7 @@ const HomePage = ({ handleAddToCart }) => {
     return (
         <div className="bg-gray-50 min-h-screen font-sans text-slate-800 selection:bg-amber-500 selection:text-white overflow-x-hidden">
             {/* Screen 1: Hero Section */}
-            <section className="min-h-screen flex flex-col items-center justify-center p-6 relative text-center bg-gradient-to-br from-slate-900 via-slate-800 to-black">
+            <section className="min-h-screen flex flex-col items-center justify-center p-6 relative text-center bg-gradient-to-br from-slate-900 via-slate-800 to-black pt-16">
                 <div className="relative z-10 space-y-8 max-w-4xl animate-fadeInUp" style={{animationDelay: '0.3s'}}>
                     <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-tight text-white">
                         Welcome to <span className={`bg-clip-text text-transparent bg-gradient-to-r ${brandOrange.gradientFrom} ${brandPurple.gradientTo}`}>EL Bahdja Phone</span>
@@ -160,7 +160,7 @@ const HomePage = ({ handleAddToCart }) => {
                             {categories.map((category, index) => (
                                 <div
                                     key={index}
-                                    onClick={() => router.push({ pathname: '/products', query: category.query })}
+                                    onClick={() => router.push({ pathname: '/products', query: { category: category.query.category } })}
                                     className="w-full h-52 md:h-60 bg-gray-50 rounded-2xl flex flex-col items-center justify-center text-center p-5 cursor-pointer group hover:bg-gradient-to-br hover:from-amber-500 hover:to-orange-600 hover:shadow-xl hover:shadow-amber-500/30 transition-all duration-300 transform hover:-translate-y-2 border border-gray-200 hover:border-transparent"
                                     style={{animationDelay: `${index * 100}ms`}}
                                 >
@@ -182,11 +182,10 @@ const HomePage = ({ handleAddToCart }) => {
                     </div>
                     
                     {showcaseVideoVisible && (
-                        <div className="mb-16 md:mb-20 relative animate-fade-in">
-                            <div className="aspect-video bg-black rounded-2xl shadow-2xl overflow-hidden max-w-4xl mx-auto">
+                        <div className="mb-16 md:mb-20 relative animate-fade-in flex justify-center">
+                            <div className="bg-black rounded-2xl shadow-2xl overflow-hidden max-h-[60vh] max-w-full">
                                 <video
-                                    className="w-full h-full object-cover"
-                                    muted
+                                    className="w-full h-full object-contain"
                                     loop
                                     playsInline
                                     controls

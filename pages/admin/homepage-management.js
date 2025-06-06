@@ -261,13 +261,13 @@ const HomepageManagement = () => {
                         <div className="border-t pt-6">
                             <h3 className="text-xl font-semibold text-gray-700 mb-3">Current Hero Video</h3>
                             <div className="bg-gray-200 rounded-lg overflow-hidden aspect-video max-w-2xl mx-auto">
-                                <video
-                                    key={currentVideoKey} // Force re-render on new video upload
-                                    src="/api/showcase/video" // Endpoint to serve the video
-                                    controls
+                                <video 
+                                    key={currentVideoKey} // This key forces re-mount on change
+                                    src={`/api/showcase/video?v=${currentVideoKey}`} // Cache-busting query param
+                                    controls 
                                     className="w-full h-full object-contain"
-                                    onError={(e) => {
-                                        console.error("Video load error:", e);
+                                    onError={(e) => { 
+                                        console.error("Video load error:", e); 
                                         toast.error("Could not load current video. It might be missing or corrupted.");
                                     }}
                                 >
