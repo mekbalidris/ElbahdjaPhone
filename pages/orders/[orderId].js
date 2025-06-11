@@ -102,7 +102,7 @@ const OrderDetailPage = () => {
      }
 
     return (
-        <div className="bg-gray-100 min-h-screen py-8 sm:py-12">
+        <div className="bg-gray-100 min-h-screen py-8 sm:py-12 mt-[1.5rem]">
             <div className="container mx-auto px-4 max-w-3xl">
                 <div className="bg-white rounded-xl shadow-xl p-6 sm:p-8">
                     <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between border-b pb-6 mb-6">

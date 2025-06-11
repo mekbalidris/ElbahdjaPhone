@@ -6,92 +6,72 @@ import Icon from '../ui/Icon';
 import { useRouter } from 'next/router';
 import { toast } from 'react-hot-toast'; // For notifications
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
+//import { useLanguage } from '../../context/LanguageContext';
+import { X, Plus, Minus, Trash2 } from 'lucide-react';
 
-export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, isLoading: initialLoading }) {
-    const router = useRouter(); // Now uses the mock useRouter defined above
+export default function CartModal({ isOpen, onClose, isLoading: initialLoading }) {
+    const router = useRouter();
     const { currentUser } = useAuth();
+    const { cartItems, updateQuantity, removeFromCart } = useCart();
+    //const { t } = useLanguage();
 
-    const [orders, setOrders] = useState([]);
-    const [isLoadingOrders, setIsLoadingOrders] = useState(false);
-    const [ordersError, setOrdersError] = useState(null);
-    
     const [isOverallLoading, setIsOverallLoading] = useState(initialLoading);
     useEffect(() => {
         setIsOverallLoading(initialLoading);
     }, [initialLoading]);
 
-
     const subtotal = useMemo(() => {
-        if (!items || !Array.isArray(items)) return 0;
-        return items.reduce((sum, item) => sum + (item.price || 0), 0);
-    }, [items]);
+        if (!cartItems || !Array.isArray(cartItems)) return 0;
+        return cartItems.reduce((sum, item) => {
+            const quantity = item.quantity || 1;
+            return sum + ((item.price || 0) * quantity);
+        }, 0);
+    }, [cartItems]);
 
     const shippingCost = 500.00;
     const total = subtotal + shippingCost;
 
-    // Fetch user's orders when the modal opens and the user is logged in
-    useEffect(() => {
-        if (isOpen && currentUser) {
-            const fetchOrders = async () => {
-                setIsLoadingOrders(true);
-                setOrdersError(null);
-                try {
-                    const res = await fetch('/api/orders', {
-                        headers: {
-                            'user-id': currentUser.id
-                        }
-                    });
-                    if (!res.ok) {
-                      // Handle empty orders specifically if API returns 404 or empty array
-                      if(res.status === 404 || (res.headers.get('content-type')?.includes('application/json') && !(await res.clone().json()).length)){
-                          setOrders([]);
-                      } else {
-                        throw new Error('Failed to fetch orders');
-                      }
-                    } else {
-                       const data = await res.json();
-                       setOrders(data);
-                    }
-                } catch (err) {
-                    console.error('Error fetching orders:', err);
-                    setOrdersError('Failed to load orders.');
-                    toast.error('Failed to load orders.');
-                } finally {
-                    setIsLoadingOrders(false);
-                }
-            };
-            fetchOrders();
-        } else if (!isOpen) {
-            setOrders([]);
-            setOrdersError(null);
-        }
-    }, [isOpen, currentUser]);
-
     const handleCheckout = () => {
         if (!currentUser) {
             toast.error('Please login to proceed to checkout');
-            router.push('/auth'); // Uses mock router
+            router.push('/auth');
             onClose();
             return;
         }
         onClose();
-        router.push('/checkout'); // Uses mock router
+        router.push('/checkout');
     };
 
-    const handleViewOrder = (orderId) => {
-        onClose(); 
-        router.push(`/orders/${orderId}`); // Uses mock router
-    };
-    
     // Simulate items for testing if not provided by props.
     // Keep this empty by default, or add items if you want them to appear when `items` prop is not passed or empty.
-    const displayItems = items && items.length > 0 ? items : [
+    const displayItems = cartItems && cartItems.length > 0 ? cartItems : [
         // Example:
         // { productId: 'sample001', name: 'Sample Item A (Cart)', price: 19.99, imageUrl: 'https://placehold.co/80x80/7B68EE/FFFFFF?text=Shirt' },
         // { productId: 'sample002', name: 'Awesome Mug', price: 12.50, imageUrl: 'https://placehold.co/80x80/6495ED/FFFFFF?text=Mug' },
         // { productId: 'sample003', name: 'Fancy Hat', price: 35.00, imageUrl: 'https://placehold.co/80x80/4682B4/FFFFFF?text=Hat' },
     ];
 
+    const handleQuantityChange = async (productId, currentQuantity, change) => {
+        const newQuantity = currentQuantity + change;
+        if (newQuantity > 0) {
+            try {
+                await updateQuantity(productId, newQuantity);
+            } catch (error) {
+                console.error('Error updating quantity:', error);
+                toast.error('Failed to update quantity');
+            }
+        }
+    };
+
+    const handleRemoveItem = async (productId) => {
+        try {
+            await removeFromCart(productId);
+        } catch (error) {
+            console.error('Error removing item:', error);
+            toast.error('Failed to remove item');
+        }
+    };
 
     if (isOverallLoading) {
         return (
@@ -110,7 +90,12 @@ export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, i
     }
 
     return (
-        <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+        <Dialog
+            open={isOpen}
+            onClose={onClose}
+            className="relative z-50"
+            data-cart-modal
+        >
             {/* Overlay */}
             <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
             
@@ -120,15 +105,15 @@ export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, i
                     {/* Header: Sticky */}
                     <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white z-10 flex-shrink-0">
                         <Dialog.Title className="text-xl font-semibold text-gray-800">
-                            Shopping Cart & Orders
+                            Cart
                         </Dialog.Title>
                         <button
                             type="button"
                             onClick={onClose}
                             className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
-                            aria-label="Close cart modal"
+                            aria-label="close"
                         >
-                            <XMarkIcon className="h-6 w-6" />
+                            <X className="h-6 w-6" />
                         </button>
                     </div>
 
@@ -137,47 +122,57 @@ export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, i
                         {/* Shopping Cart Section */}
                         <div className="p-4 md:p-6 border-b">
                             <h2 className="text-lg font-medium text-gray-700 mb-4 flex items-center">
-                                <Icon name="shoppingBag" className="w-5 h-5 mr-2 text-blue-600" /> Your Cart
+                                <Icon name="shoppingBag" className="w-5 h-5 mr-2 text-blue-600" /> Shopping Cart
                             </h2>
                             {displayItems && displayItems.length > 0 ? (
-                                <ul className="divide-y divide-gray-200">
-                                    {displayItems.map((item, index) => (
-                                        <li key={`${item.productId || 'item'}-${index}`} className="py-4 flex">
-                                            <img
-                                                src={item.imageUrl || `https://placehold.co/80x80/EAEAEA/999999?text=${item.name ? item.name.charAt(0) : 'N'}`}
-                                                alt={item.name || 'Product Image'}
-                                                className="h-20 w-20 rounded-lg object-cover flex-shrink-0 border border-gray-200"
-                                                onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/80x80/F0F0F0/AAAAAA?text=Error'; }}
-                                            />
-                                            <div className="ml-4 flex-1">
-                                                <h3 className="text-base font-medium text-gray-800">
-                                                    {item.name || 'Unnamed Item'}
-                                                </h3>
-                                                <p className="mt-1 text-sm text-gray-600">
-                                                    {(item.price || 0).toFixed(2)} DA
-                                                </p>
-                                                {onRemoveItem && (
-                                                    <div className="mt-2">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => onRemoveItem(item.productId)}
-                                                            className="text-red-500 hover:text-red-700 p-1 rounded-md text-sm font-medium hover:bg-red-50 transition-colors flex items-center"
-                                                            title="Remove item"
-                                                            aria-label={`Remove ${item.name || 'item'}`}
-                                                        >
-                                                            <Icon name="trash" className="h-4 w-4 mr-1" /> Remove
-                                                        </button>
-                                                    </div>
-                                                )}
+                                <div className="mt-4 space-y-4">
+                                    {displayItems.map((item) => (
+                                        <div key={`${item.productId}-${item._id}`} className="flex items-center space-x-4 py-4 border-b border-gray-200">
+                                            <div className="flex-shrink-0 w-20 h-20">
+                                                <img
+                                                    src={item.images?.[0] || item.imageUrl || 'https://placehold.co/200x200'}
+                                                    alt={item.name}
+                                                    className="w-full h-full object-cover rounded-lg"
+                                                />
                                             </div>
-                                        </li>
+                                            <div className="flex-grow">
+                                                <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
+                                                <p className="text-sm text-gray-500">{item.price.toFixed(2)} DA</p>
+                                                <div className="flex items-center space-x-2 mt-2">
+                                                    <button
+                                                        onClick={() => handleQuantityChange(item.productId, item.quantity || 1, -1)}
+                                                        className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
+                                                    >
+                                                        <Minus className="h-4 w-4 text-gray-500" />
+                                                    </button>
+                                                    <span className="text-sm font-medium w-8 text-center">{item.quantity || 1}</span>
+                                                    <button
+                                                        onClick={() => handleQuantityChange(item.productId, item.quantity || 1, 1)}
+                                                        className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
+                                                    >
+                                                        <Plus className="h-4 w-4 text-gray-500" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col items-end space-y-2">
+                                                <p className="text-sm font-medium text-gray-900">
+                                                    {((item.price * (item.quantity || 1)).toFixed(2))} DA
+                                                </p>
+                                                <button
+                                                    onClick={() => handleRemoveItem(item.productId)}
+                                                    className="text-red-500 hover:text-red-600"
+                                                >
+                                                    <Trash2 className="h-5 w-5" />
+                                                </button>
+                                            </div>
+                                        </div>
                                     ))}
-                                </ul>
+                                </div>
                             ) : (
                                 <div className="text-center py-10">
                                     <Icon name="shoppingBag" className="mx-auto h-16 w-16 text-gray-300" />
                                     <h3 className="mt-3 text-md font-medium text-gray-800">Your cart is empty</h3>
-                                    <p className="mt-1 text-sm text-gray-500">Looks like you haven&apos;t added anything yet.</p>
+                                    <p className="mt-1 text-sm text-gray-500">Add some items to your cart to get started</p>
                                 </div>
                             )}
                         </div>
@@ -202,66 +197,10 @@ export default function CartModal({ isOpen, onClose, items = [], onRemoveItem, i
                                 <Button
                                     onClick={handleCheckout}
                                     className="w-full py-3 text-base"
-                                    disabled={isLoadingOrders || isOverallLoading}
+                                    disabled={isOverallLoading}
                                 >
-                                    {currentUser ? 'Proceed to Checkout' : 'Login to Checkout'}
+                                    Proceed to Checkout
                                 </Button>
-                            </div>
-                        )}
-
-                        {/* Orders Section (Only if user is logged in) */}
-                        {currentUser && (
-                            <div className="p-4 md:p-6 border-t">
-                                <h2 className="text-lg font-medium text-gray-700 mb-4 flex items-center">
-                                    <Icon name="package" className="w-5 h-5 mr-2 text-green-600" /> Your Past Orders
-                                </h2>
-                                {isLoadingOrders ? (
-                                    <div className="flex justify-center items-center h-24">
-                                        <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600"></div>
-                                        <p className="ml-3 text-gray-600">Loading your orders...</p>
-                                    </div>
-                                ) : ordersError ? (
-                                    <div className="text-center text-red-700 bg-red-50 p-4 rounded-lg">
-                                        <p className="font-medium">Oops! Something went wrong.</p>
-                                        <p className="text-sm">{ordersError}</p>
-                                    </div>
-                                ) : orders && orders.length > 0 ? (
-                                    <ul className="divide-y divide-gray-200 pr-1">
-                                        {orders.map(order => (
-                                            <li key={order._id} className="py-3 px-1 flex items-center justify-between cursor-pointer hover:bg-gray-50 rounded-md transition-colors group" onClick={() => handleViewOrder(order._id)}>
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-800 group-hover:text-blue-600">{order.items?.[0]?.name || `Order #${order._id?.slice(-6).toUpperCase() || 'N/A'}`}</p>
-                                                    <p className="text-xs text-gray-500">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</p>
-                                                </div>
-                                                <div className="flex items-center space-x-3">
-                                                    <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full
-                                                        ${order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                        order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                                        order.status === 'returned' ? 'bg-purple-100 text-purple-800' :
-                                                        'bg-gray-100 text-gray-800'}`}>
-                                                        {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'N/A'}
-                                                    </span>
-                                                    <span className="text-sm font-medium text-gray-700">
-                                                        {order.totals?.total?.toFixed(2) || '0.00'} DA
-                                                    </span>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <div className="text-center text-gray-500 py-8">
-                                        <Icon name="package" className="mx-auto h-12 w-12 text-gray-400 mb-2" />
-                                        <p className="text-md">No past orders found.</p>
-                                        <p className="text-xs mt-1">Any orders you place will appear here.</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {!currentUser && displayItems && displayItems.length > 0 && (
-                            <div className="p-4 md:p-6 border-t text-center text-sm text-gray-600 bg-gray-50">
-                                Please <button type="button" onClick={handleCheckout} className="text-blue-600 hover:underline font-semibold">login</button> to see your past orders or to complete your purchase.
                             </div>
                         )}
                     </div>

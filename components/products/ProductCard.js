@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
-import Button from '../ui/Button';
-import Icon from '../ui/Icon';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
+import Icon from '../ui/Icon';
+import Button from '../ui/Button';
 
 // --- Color Palette (Client Inspired - Tailwind classes) ---
 const brandOrange = {
@@ -25,79 +28,137 @@ const brandPurple = {
     gradientTo: 'to-indigo-700',
 };
 
-const ProductCard = ({ product, onAddToCart, onBuyNow }) => {
+const ProductCard = ({ product }) => {
     const router = useRouter();
-    const [isHovered, setIsHovered] = useState(false);
+    const { addToCart } = useCart();
+    const { currentUser } = useAuth();
+    const [isImageHovered, setIsImageHovered] = useState(false);
+    const [isImageLoaded, setIsImageLoaded] = useState(false);
 
     if (!product) return null;
 
     const isAvailable = product.stock > 0;
 
-    const handleImageClick = () => {
+    const handleViewDetails = (e) => {
+        // Prevent navigation if clicking on buttons other than view details
+        if (e.target.closest('button') && !e.target.closest('button').textContent.includes('View Details')) return;
         router.push(`/products/${product._id}`);
     };
 
-    const handleBuyNowClick = async () => {
-        if (isAvailable) {
-            // Use onBuyNow if provided, otherwise fallback to onAddToCart
-            if (onBuyNow) {
-                await onBuyNow(product);
-            } else if (onAddToCart) {
-                await onAddToCart(product);
-            }
-            // Redirect to checkout after adding to cart
+    const handleBuyNowClick = async (e) => {
+        e.stopPropagation(); // Prevent card click
+        if (!isAvailable) return;
+        
+        try {
+            await addToCart({ ...product, quantity: 1 });
             router.push('/checkout');
+        } catch (error) {
+            console.error('Error in buy now:', error);
+            toast.error('Failed to process your request. Please try again.');
         }
     };
 
-    const handleAddToCartClick = async () => {
-        if (isAvailable && onAddToCart) {
-            await onAddToCart(product);
+    const handleAddToCartClick = async (e) => {
+        e.stopPropagation(); // Prevent card click
+        if (!isAvailable) return;
+        
+        try {
+            await addToCart({ ...product, quantity: 1 });
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            toast.error('Failed to add product to cart');
         }
     };
+
+    // Get the first image from the images array or use imageUrl as fallback
+    const imageUrl = product.images?.[0] || product.imageUrl || `https://placehold.co/600x400/e2e8f0/94a3b8?text=${encodeURIComponent(product.name || "Product")}`;
 
     return (
-        <div
-            className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-all duration-300 ease-out group relative border border-gray-200/80 hover:border-transparent hover:shadow-xl hover:shadow-purple-500/10 transform hover:-translate-y-1"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+        <div 
+            className="group relative bg-white rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl border border-gray-100 cursor-pointer"
+            onClick={handleViewDetails}
         >
-            <div
-                className="w-full h-52 sm:h-60 overflow-hidden cursor-pointer relative group"
-                onClick={handleImageClick}
+            {/* Product Image Container */}
+            <div 
+                className="relative aspect-square overflow-hidden bg-gray-100"
+                onMouseEnter={() => setIsImageHovered(true)}
+                onMouseLeave={() => setIsImageHovered(false)}
             >
-                <img
-                    src={product.images?.[0] || product.imageUrl || `https://placehold.co/600x400/e2e8f0/94a3b8?text=${encodeURIComponent(product.name || "Product")}`}
-                    alt={product.name || "Product image"}
-                    className={`w-full h-full object-cover transition-transform duration-500 ease-in-out ${isHovered ? 'scale-105' : 'scale-100'}`}
-                    onError={(e) => e.target.src = 'https://placehold.co/600x400/fecaca/f87171?text=Error'}
-                />
-                {product.offer && (<span className={`absolute top-3 left-3 ${brandOrange.bg} text-white text-[0.65rem] font-bold px-2.5 py-1 rounded-full shadow-md tracking-wider animate-pulse`}>DEAL</span>)}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                <div className="relative w-full h-full">
+                    <Image
+                        src={imageUrl}
+                        alt={product.name || "Product image"}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className={`object-cover transition-all duration-500 ${
+                            isImageHovered ? 'scale-110 blur-sm' : 'scale-100 blur-0'
+                        } ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                        onLoad={() => setIsImageLoaded(true)}
+                        onError={(e) => {
+                            e.target.src = 'https://placehold.co/600x400/fecaca/f87171?text=Error';
+                        }}
+                    />
+                </div>
+                {!isImageLoaded && (
+                    <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+                )}
+                
+                {/* Deal Tag */}
+                {product.offer && (
+                    <span className="absolute top-3 left-3 bg-amber-500 text-white text-[0.65rem] font-bold px-2.5 py-1 rounded-full shadow-md tracking-wider animate-pulse">
+                        DEAL
+                    </span>
+                )}
+                
+                {/* View Details Button */}
+                <div className={`cursor-pointer absolute inset-0 flex items-center justify-center transition-all duration-300 ${
+                    isImageHovered ? 'opacity-100' : 'opacity-0'
+                }`}>
                     <Button
-                        variant="primary"
-                        size="sm"
-                        className="w-full bg-black hover:bg-gray-100 hover:text-black"
                         onClick={(e) => {
                             e.stopPropagation();
-                            handleImageClick();
+                            handleViewDetails(e);
                         }}
+                        variant="primary"
+                        size="sm"
+                        className="bg-black backdrop-blur-sm hover:bg-white hover:text-amber-500 transform hover:scale-105 transition-all duration-300"
                     >
                         View Details
                     </Button>
                 </div>
             </div>
-            <div className="p-4 flex flex-col flex-grow">
-                <h3 className={`text-md font-semibold text-slate-800 mb-1 truncate transition-colors duration-300 group-hover:${brandPurple.text}`} title={product.name}>{product.name || "Unnamed Product"}</h3>
-                <p className="text-xs text-slate-500 uppercase mb-2 tracking-wider">{product.category}</p>
-                <div className='flex flex-row justify-between items-center mb-3 mt-auto pt-2'>
-                    <p className={`text-xl font-bold ${brandPurple.text}`}>{typeof product.price === 'number' ? `$${product.price.toFixed(2)}` : 'N/A'}</p>
-                    <span className={`px-2.5 py-0.5 rounded-full text-[0.7rem] font-medium ${isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{isAvailable ? 'In Stock' : 'Out of Stock'}</span>
+
+            {/* Product Info */}
+            <div className="p-4">
+                <h3 className="text-base font-semibold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 mb-2">{product.name}</h3>
+                <div className="flex items-center justify-between mb-4">
+                    <p className="text-amber-500 font-bold text-xl">{product.price?.toLocaleString()} DA</p>
+                    {isAvailable ? (
+                        <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded-full">In Stock</span>
+                    ) : (
+                        <span className="text-sm text-red-600 bg-red-50 px-2 py-1 rounded-full">Out of Stock</span>
+                    )}
                 </div>
-                <div className="space-y-2 pt-3 border-t border-gray-100">
-                    <Button onClick={handleBuyNowClick} variant="primary" size="sm" className={`w-full !py-2 ${brandOrange.bg} hover:${brandOrange.hoverBg}`} disabled={!isAvailable}>Buy Now</Button>
-                    <Button onClick={handleAddToCartClick} variant="outline" size="sm" className={`w-full !py-2 !border-purple-500 !text-purple-600 hover:!bg-purple-500 hover:!text-white group`} iconLeft="cart" disabled={!isAvailable}>{isAvailable ? 'Add to Cart' : 'Out of Stock'}</Button>
+                <div className="space-y-2">
+                    <Button 
+                        onClick={handleBuyNowClick} 
+                        variant="primary" 
+                        size="sm" 
+                        className="w-full bg-amber-500 hover:bg-amber-600 transition-colors" 
+                        disabled={!isAvailable}
+                    >
+                        Buy Now
+                    </Button>
+                    <Button 
+                        onClick={handleAddToCartClick} 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full border-amber-500 text-amber-500 hover:bg-green-400 hover:text-white transition-colors" 
+                        disabled={!isAvailable}
+                        iconLeft="shoppingBag"
+                    >
+                        Add to Cart
+                    </Button>
                 </div>
             </div>
         </div>

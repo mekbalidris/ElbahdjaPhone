@@ -262,7 +262,7 @@ const ProfilePage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 py-8 sm:py-12 px-4 font-sans">
+        <div className="min-h-screen bg-gray-100 py-8 sm:py-12 px-4 font-sans mt-[2.5rem]">
             <div className="max-w-3xl mx-auto space-y-10">
                 {/* Profile Information Section */}
                 {/* This section is displayed if the user is logged in based on the check above */}

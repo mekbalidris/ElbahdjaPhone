@@ -5,6 +5,7 @@ import Icon from '../components/ui/Icon';
 import ProductCard from '../components/products/ProductCard';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
+import { ChevronDown, Smartphone, Laptop, Headphones, Grid } from 'lucide-react';
 
 // --- Color Palette (Client Inspired - Tailwind classes) ---
 const brandOrange = {
@@ -14,6 +15,7 @@ const brandOrange = {
     hoverBg: 'hover:bg-amber-600',
     gradientFrom: 'from-amber-500',
     gradientTo: 'to-orange-600',
+    ring: 'focus:ring-amber-500'
 };
 
 const brandPurple = {
@@ -23,6 +25,7 @@ const brandPurple = {
     hoverBg: 'hover:bg-purple-700',
     gradientFrom: 'from-purple-600',
     gradientTo: 'to-indigo-700',
+    ring: 'focus:ring-purple-600'
 };
 
 // --- Main HomePage Component ---
@@ -37,12 +40,32 @@ const HomePage = ({ handleAddToCart }) => {
     const [heroVideoKey, setHeroVideoKey] = useState(Date.now());
     const [showcaseVideoKey, setShowcaseVideoKey] = useState(Date.now() + 1);
 
-    const categories = [
-        { name: 'All Phones', query: { category: 'smartphones' }, icon: 'smartphone' },
-        { name: 'Laptops', query: { category: 'laptops' }, icon: 'laptop' },
-        { name: 'Headphones', query: { category: 'accessories', subCategory: 'headphones' }, icon: 'headphones' },
-        { name: 'Gadgets', query: { category: 'accessories' }, icon: 'grid' },
-    ];
+    const categories = useMemo(() => [
+        { 
+            name: 'All Phones', 
+            query: { category: 'phones' }, 
+            image: '/images/categories/phones.jpg',
+            description: 'Latest smartphones from top brands'
+        },
+        { 
+            name: 'Laptops', 
+            query: { category: 'laptops' }, 
+            image: '/images/categories/laptops.jpg',
+            description: 'Powerful laptops for work and gaming'
+        },
+        { 
+            name: 'Headphones', 
+            query: { category: 'accessories', subCategory: 'headphones' }, 
+            image: '/images/categories/headphones.jpg',
+            description: 'Premium audio accessories'
+        },
+        { 
+            name: 'Gadgets', 
+            query: { category: 'accessories' }, 
+            image: '/images/categories/gadgets.jpg',
+            description: 'Smart gadgets and accessories'
+        },
+    ], []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -110,7 +133,7 @@ const HomePage = ({ handleAddToCart }) => {
             <div className="fixed inset-0 bg-gray-50 flex flex-col items-center justify-center z-[100]">
                 <div className={`${brandOrange.text} text-4xl font-bold mb-4`}>EL Bahdja Phone</div>
                 <div className={`w-16 h-16 border-4 ${brandOrange.border} border-t-transparent rounded-full animate-spin`}></div>
-                <p className="text-slate-700 mt-4 text-lg">Loading brilliance...</p>
+                <p className="text-slate-700 mt-4 text-lg">Loading...</p>
             </div>
         );
     }
@@ -119,12 +142,14 @@ const HomePage = ({ handleAddToCart }) => {
         <div className="bg-gray-50 min-h-screen font-sans text-slate-800 selection:bg-amber-500 selection:text-white overflow-x-hidden">
             {/* Screen 1: Hero Section */}
             <section className="min-h-screen flex flex-col items-center justify-center p-6 relative text-center bg-gradient-to-br from-slate-900 via-slate-800 to-black pt-16">
-                <div className="relative z-10 space-y-8 max-w-4xl animate-fadeInUp" style={{animationDelay: '0.3s'}}>
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-black"></div>
+                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+                <div className="relative z-10 space-y-8 max-w-4xl animate-fadeInUp" style={{animationDelay: '0.2s'}}>
                     <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-tight text-white">
                         Welcome to <span className={`bg-clip-text text-transparent bg-gradient-to-r ${brandOrange.gradientFrom} ${brandPurple.gradientTo}`}>EL Bahdja Phone</span>
                     </h1>
                     <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto font-light leading-relaxed">
-                        Your destination for cutting-edge mobile technology and premium accessories. Discover innovation.
+                        Discover the latest smartphones, laptops, and accessories at unbeatable prices
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center pt-8">
                         <Button onClick={() => router.push('/products')} variant="primary" size="xl" className={`!${brandOrange.bg} ${brandOrange.hoverBg} !text-white`}>
@@ -149,23 +174,38 @@ const HomePage = ({ handleAddToCart }) => {
             </section>
 
             {/* Screen 2: Category Slider */}
-            <section className="py-16 md:py-24 bg-white section-animate">
+            <section className="py-16 md:py-24 bg-gray-50 section-animate">
                 <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12 md:mb-16">
-                        <h2 className={`text-3xl md:text-4xl font-bold ${brandPurple.text} tracking-tight`}>Shop By Category</h2>
-                        <p className="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">Find exactly what you&apos;re looking for with ease.</p>
+                        <h2 className={`text-3xl md:text-4xl font-bold ${brandPurple.text} tracking-tight`}>Shop by Category</h2>
+                        <p className="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">Browse our wide selection of products by category</p>
                     </div>
                     <div className="flex justify-center items-center">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 max-w-7xl mx-auto">
                             {categories.map((category, index) => (
                                 <div
                                     key={index}
-                                    onClick={() => router.push({ pathname: '/products', query: { category: category.query.category } })}
-                                    className="w-full h-52 md:h-60 bg-gray-50 rounded-2xl flex flex-col items-center justify-center text-center p-5 cursor-pointer group hover:bg-gradient-to-br hover:from-amber-500 hover:to-orange-600 hover:shadow-xl hover:shadow-amber-500/30 transition-all duration-300 transform hover:-translate-y-2 border border-gray-200 hover:border-transparent"
+                                    onClick={() => router.push({ 
+                                        pathname: '/products', 
+                                        query: category.query 
+                                    })}
+                                    className="group relative w-full h-64 bg-white rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
                                     style={{animationDelay: `${index * 100}ms`}}
                                 >
-                                    <Icon name={category.icon} className={`w-12 h-12 md:w-14 md:h-14 mb-4 ${brandOrange.text} group-hover:text-white transition-colors duration-300 transform group-hover:scale-110`} />
-                                    <p className="text-md md:text-lg font-semibold text-slate-700 group-hover:text-white transition-colors duration-300">{category.name}</p>
+                                    <div className="absolute inset-0">
+                                        <img 
+                                            src={category.image} 
+                                            alt={category.name}
+                                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                                    </div>
+                                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                                        <h3 className="text-xl font-bold mb-2">{category.name}</h3>
+                                        <p className="text-sm text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            {category.description}
+                                        </p>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -177,8 +217,8 @@ const HomePage = ({ handleAddToCart }) => {
             <section id="offers-section" className="py-16 md:py-24 bg-gray-50 section-animate">
                 <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12 md:mb-16">
-                        <h2 className={`text-3xl md:text-4xl font-bold ${brandOrange.text} tracking-tight`}>Hot Deals & Showcase</h2>
-                        <p className="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">Grab limited-time offers and see our products in action.</p>
+                        <h2 className={`text-3xl md:text-4xl font-bold ${brandOrange.text} tracking-tight`}>Hot Deals</h2>
+                        <p className="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">Check out our latest offers and discounts</p>
                     </div>
                     
                     {showcaseVideoVisible && (
@@ -237,7 +277,7 @@ const HomePage = ({ handleAddToCart }) => {
                 <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12 md:mb-16">
                         <h2 className={`text-3xl md:text-4xl font-bold ${brandPurple.text} tracking-tight`}>Featured Selections</h2>
-                        <p className="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">Our top picks, curated just for you.</p>
+                        <p className="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">Our handpicked selection of the best products</p>
                     </div>
                     {isLoading && !featuredProducts.length ? (
                         <div className="flex justify-center items-center h-64"><div className={`w-12 h-12 border-4 ${brandPurple.border} border-t-transparent rounded-full animate-spin`}></div></div>

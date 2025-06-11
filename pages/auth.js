@@ -34,35 +34,35 @@ const AuthPage = () => {
             return;
         }
         setLoading(true);
-        if (isLogin) {
-            try {
-                await login({ email, password });
-                toast.success("Logged in successfully!");
-                router.push('/'); // Redirect to home page
-            } catch (err) {
-                console.error('Login Error:', err);
-                toast.error(err.message || "Invalid email or password.");
-            }
-        } else {
-            // Register: create user in DB
-            try {
-                const res = await fetch('/api/users', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, name }),
-                });
-                const data = await res.json();
-                if (res.ok) {
+        try {
+            const res = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: isLogin ? 'login' : 'register',
+                    email,
+                    password,
+                    ...(isLogin ? {} : { name })
+                }),
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                if (isLogin) {
+                    await login({ email, password });
+                    toast.success("Logged in successfully!");
+                    router.push('/');
+                } else {
                     toast.success("Account created successfully! Please log in.");
                     setIsLogin(true);
                     setPassword('');
-                } else {
-                    toast.error(data.error || "Failed to create account.");
                 }
-            } catch (err) {
-                console.error('Registration Error:', err);
-                toast.error("Server error during registration.");
+            } else {
+                toast.error(data.error || (isLogin ? "Invalid email or password." : "Failed to create account."));
             }
+        } catch (err) {
+            console.error(isLogin ? 'Login Error:' : 'Registration Error:', err);
+            toast.error("Server error. Please try again.");
         }
         setLoading(false);
     };

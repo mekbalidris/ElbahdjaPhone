@@ -8,7 +8,8 @@ import Select from '../components/ui/Select'; // Adjust path as needed
 import TextArea from '../components/ui/TextArea'; // Adjust path as needed
 import Icon from '../components/ui/Icon';     // Adjust path as needed
 // Using lucide-react directly for self-contained example if Icon component is not fully defined
-import { FileText, MapPin, User, Mail, Phone, Lock, DollarSign, ShoppingBag, Edit2, ChevronLeft, CreditCard, Truck, Tag, Home as HomeIcon, Package, Star, Image as ImageIcon, Search, Filter, XCircle, ChevronDown, ChevronUp, Menu, X as XIcon, Plus, Minus, Trash } from 'lucide-react';
+import { FileText, MapPin, User, Mail, Phone, Lock, DollarSign, ShoppingBag, Edit2, ChevronLeft, CreditCard, Truck, Tag, Home as HomeIcon, Package, Star, Image as ImageIcon, Search, Filter, XCircle, ChevronDown, ChevronUp, Menu, X as XIcon, Plus, Minus, Trash, Trash2 } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 
 // --- Minimal Inlined UI Components (if not using separate files) ---
@@ -75,114 +76,156 @@ const ActualIcon = Icon || MinimalIcon;
 
 const algerianWilayas = [
     { value: '', label: 'Select Wilaya', disabled: true },
-    { value: '16', label: 'Alger (16)' }, { value: '31', label: 'Oran (31)' },
-    { value: '25', label: 'Constantine (25)' }, { value: '23', label: 'Annaba (23)' },
-    { value: '19', label: 'Sétif (19)' }, { value: '15', label: 'Tizi Ouzou (15)' },
-    { value: '09', label: 'Blida (09)' }, { value: '13', label: 'Tlemcen (13)' },
-    // Add all 58 Wilayas here for a complete list
+    { value: '16', label: '(16) Alger' },
+    { value: '31', label: '(31) Oran' },
+    { value: '19', label: '(19) Sétif' },
+    { value: '6', label: '(6) Béjaïa' },
+    { value: '17', label: '(17) Djelfa' },
+    { value: '28', label: '(28) M\'sila' },
+    { value: '5', label: '(5) Batna' },
+    { value: '7', label: '(7) Biskra' },
+    { value: '9', label: '(9) Blida' },
+    { value: '10', label: '(10) Bouira' },
+    { value: '12', label: '(12) Chlef' },
+    { value: '13', label: '(13) Constantine' },
+    { value: '14', label: '(14) El Oued' },
+    { value: '15', label: '(15) El Tarf' },
+    { value: '18', label: '(18) Jijel' },
+    { value: '20', label: '(20) Saïda' },
+    { value: '21', label: '(21) Skikda' },
+    { value: '22', label: '(22) Sidi Bel Abbès' },
+    { value: '23', label: '(23) Annaba' },
+    { value: '24', label: '(24) Guelma' },
+    { value: '25', label: '(25) Constantine' },
+    { value: '26', label: '(26) Médéa' },
+    { value: '27', label: '(27) Mostaganem' },
+    { value: '29', label: '(29) Mascara' },
+    { value: '30', label: '(30) Ouargla' },
+    { value: '32', label: '(32) El Bayadh' },
+    { value: '33', label: '(33) Illizi' },
+    { value: '34', label: '(34) Bordj Bou Arréridj' },
+    { value: '35', label: '(35) Boumerdès' },
+    { value: '36', label: '(36) El Tarf' },
+    { value: '37', label: '(37) Tindouf' },
+    { value: '38', label: '(38) Tissemsilt' },
+    { value: '39', label: '(39) El Oued' },
+    { value: '40', label: '(40) Khenchela' },
+    { value: '41', label: '(41) Souk Ahras' },
+    { value: '42', label: '(42) Tipaza' },
+    { value: '43', label: '(43) Mila' },
+    { value: '44', label: '(44) Aïn Defla' },
+    { value: '45', label: '(45) Naâma' },
+    { value: '46', label: '(46) Aïn Témouchent' },
+    { value: '47', label: '(47) Ghardaïa' },
+    { value: '48', label: '(48) Relizane' },
+    { value: '49', label: '(49) Timimoun' },
+    { value: '50', label: '(50) Bordj Badji Mokhtar' },
+    { value: '51', label: '(51) Ouled Djellal' },
+    { value: '52', label: '(52) Béni Abbès' },
+    { value: '53', label: '(53) In Salah' },
+    { value: '54', label: '(54) In Guezzam' },
+    { value: '55', label: '(55) Touggourt' },
+    { value: '56', label: '(56) Djanet' },
+    { value: '57', label: '(57) El M\'Ghair' },
+    { value: '58', label: '(58) El Meniaa' },
 ];
 
 const FIXED_SHIPPING_COST = 500.00; // Set shipping cost to 500 DA
 
-const CheckoutSection = ({ title, icon, children }) => ( // Removed onEdit, editStep, currentStep for simplicity in this version
-    <div className="bg-white p-6 rounded-xl shadow-lg mb-6">
-        <div className="flex items-center mb-4">
-            <ActualIcon name={icon} className="w-6 h-6 text-blue-600 mr-3" />
-            <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+const CheckoutSection = ({ title, iconName, children }) => {
+    return (
+        <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200/80">
+            <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                <ActualIcon name={iconName} className="w-6 h-6 text-amber-500 mr-2" />
+                {title}
+            </h2>
+            <div className="space-y-4">
+                {children}
+            </div>
         </div>
-        {children}
-    </div>
-);
+    );
+};
 
-CheckoutSection.displayName = 'CheckoutSection';
+const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove }) => {
+    const handleQuantityChange = (change) => {
+        const newQuantity = (item.quantity || 1) + change;
+        if (newQuantity >= 1) {
+            onUpdateQuantity(item.productId, newQuantity);
+        }
+    };
 
-const OrderSummaryItem = ({ item }) => (
-    <li className="flex py-4 border-b border-gray-200 last:border-b-0">
-        <img src={item.imageUrl || `https://placehold.co/80x80/e0e0e0/757575?text=${item.name.substring(0,1)}`} alt={item.name} className="h-20 w-20 rounded-lg object-cover border border-gray-200" />
-        <div className="ml-4 flex-1 flex flex-col justify-center">
-            <h3 className="text-sm font-medium text-gray-800 leading-tight">{item.name}</h3>
-            {item.attributes && <p className="text-xs text-gray-500">{item.attributes}</p>}
-            <p className="text-xs text-gray-500 mt-0.5">Qty: {item.quantity || 0}</p>
+    return (
+        <div className="flex items-center space-x-4 py-4 border-b border-gray-200">
+            <div className="flex-shrink-0 w-20 h-20">
+                <img
+                    src={item.images?.[0] || item.imageUrl || 'https://placehold.co/200x200'}
+                    alt={item.name}
+                    className="w-full h-full object-cover rounded-lg"
+                />
+            </div>
+            <div className="flex-grow">
+                <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
+                <p className="text-sm text-gray-500">{item.price.toFixed(2)} DA</p>
+                <div className="flex items-center space-x-2 mt-2">
+                    <button
+                        onClick={() => handleQuantityChange(-1)}
+                        className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
+                    >
+                        <Minus className="h-4 w-4 text-gray-500" />
+                    </button>
+                    <span className="text-sm font-medium w-8 text-center">{item.quantity || 1}</span>
+                    <button
+                        onClick={() => handleQuantityChange(1)}
+                        className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
+                    >
+                        <Plus className="h-4 w-4 text-gray-500" />
+                    </button>
+                </div>
+            </div>
+            <div className="flex flex-col items-end space-y-2">
+                <p className="text-sm font-medium text-gray-900">
+                    {((item.price * (item.quantity || 1)).toFixed(2))} DA
+                </p>
+                <button
+                    onClick={() => onRemove(item.productId)}
+                    className="text-red-500 hover:text-red-600"
+                >
+                    <Trash2 className="h-5 w-5" />
+                </button>
+            </div>
         </div>
-        <p className="text-sm font-semibold text-gray-900 ml-4 shrink-0">${(((item.price || 0) * (item.quantity || 0))).toFixed(2)}</p>
-    </li>
-);
-OrderSummaryItem.displayName = 'OrderSummaryItem';
+    );
+};
 
-const CheckoutForm = React.forwardRef((props, ref) => {
-    // ... existing code ...
-});
-CheckoutForm.displayName = 'CheckoutForm';
+const LoadingSpinner = ({ size = "md" }) => {
+    const sizeClasses = {
+        sm: "w-5 h-5",
+        md: "w-8 h-8",
+        lg: "w-12 h-12"
+    };
+    return (
+        <div className={`animate-spin rounded-full border-4 border-gray-200 border-t-amber-500 ${sizeClasses[size]}`} />
+    );
+};
 
-const PaymentForm = React.forwardRef((props, ref) => {
-    // ... existing code ...
-});
-PaymentForm.displayName = 'PaymentForm';
-
-const OrderSummary = React.forwardRef((props, ref) => {
-    // ... existing code ...
-});
-OrderSummary.displayName = 'OrderSummary';
-
-export default function CheckoutPage() {
+const CheckoutPage = () => {
     const router = useRouter();
-    const { currentUser, isLoading: authLoading } = useAuth(); // Get auth loading state
-    const [cartItems, setCartItems] = useState([]);
-    const [isLoadingCart, setIsLoadingCart] = useState(true); // Separate loading for cart
-
-    const [contactInfo, setContactInfo] = useState({ email: '', fullName: '', phone: '' });
+    const { currentUser } = useAuth();
+    const { cartItems, isLoading: isLoadingCart, updateQuantity, removeFromCart, clearCart } = useCart();
+    const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+    const [formErrors, setFormErrors] = useState({});
+    const [contactInfo, setContactInfo] = useState({
+        fullName: currentUser?.name || '',
+        email: currentUser?.email || '',
+        phone: '',
+    });
     const [deliveryAddress, setDeliveryAddress] = useState({
-        address: '', aptSuite: '', wilaya: '', city: '',
+        wilaya: '',
+        city: '',
+        address: '',
+        aptSuite: '',
     });
     const [orderNotes, setOrderNotes] = useState('');
-    
-    const [couponCode, setCouponCode] = useState('');
-    const [discount, setDiscount] = useState(0);
-    const [taxRate] = useState(0.00); // Assuming 0% tax for simplicity
-
-    const [formErrors, setFormErrors] = useState({});
-    const [isPlacingOrder, setIsPlacingOrder] = useState(false);
-
-    useEffect(() => {
-        if (authLoading) return; // Wait for auth to load
-
-        if (!currentUser) {
-            toast.error('Please log in to checkout.');
-            router.push('/auth');
-            return;
-        }
-
-        const fetchCartItems = async () => {
-            setIsLoadingCart(true);
-            try {
-                const res = await fetch('/api/cart', { headers: { 'user-id': currentUser.id } });
-                if (!res.ok) {
-                    if (res.status === 404) { // Cart might be empty
-                        setCartItems([]); 
-                        // toast('Your cart is empty. Add some items!', { icon: '🛒' });
-                        // router.push('/products'); // Optionally redirect if cart is empty
-                        return;
-                    }
-                    throw new Error('Failed to fetch cart');
-                }
-                const data = await res.json();
-                if (!data.items || data.items.length === 0) {
-                    // toast('Your cart is empty. Add some items!', { icon: '🛒' });
-                    // router.push('/products'); // Optionally redirect
-                    setCartItems([]);
-                } else {
-                    setCartItems(data.items);
-                }
-            } catch (err) {
-                console.error('Error fetching cart:', err);
-                toast.error('Failed to load cart items. Please try again.');
-                // router.push('/products'); // Redirect on critical error
-            } finally {
-                setIsLoadingCart(false);
-            }
-        };
-        fetchCartItems();
-    }, [currentUser, router, authLoading]);
 
     const handleInputChange = (setter, field) => (e) => {
         setter(prev => ({ ...prev, [field]: e.target.value }));
@@ -190,143 +233,108 @@ export default function CheckoutPage() {
             setFormErrors(prev => ({...prev, [field]: null}));
         }
     };
-    
-    const subtotal = useMemo(() => {
-        if (!Array.isArray(cartItems)) return 0;
-        return cartItems.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0);
-    }, [cartItems]);
 
-    const shippingCost = cartItems.length > 0 ? FIXED_SHIPPING_COST : 0; // No shipping cost if cart is empty
-    const taxes = useMemo(() => (subtotal - discount) * taxRate, [subtotal, discount, taxRate]);
-    const total = useMemo(() => subtotal + shippingCost + taxes - discount, [subtotal, shippingCost, taxes, discount]);
+    const subtotal = useMemo(() => cartItems.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0), [cartItems]);
+    const shippingCost = cartItems.length > 0 ? FIXED_SHIPPING_COST : 0;
+    const total = subtotal + shippingCost;
 
-    const applyCoupon = () => {
-        if (couponCode.toUpperCase() === 'SALE10') {
-            const newDiscount = subtotal * 0.10;
-            setDiscount(newDiscount);
-            toast.success(`10% discount applied! -$${newDiscount.toFixed(2)}`);
-        } else {
-            toast.error('Invalid coupon code.');
-            setDiscount(0);
-        }
-        setCouponCode('');
-    };
-    
-    const validateForm = () => { // Renamed from validateStep1
+    const validateForm = () => {
         const errors = {};
         if (!contactInfo.fullName.trim()) errors.fullName = 'Full name is required.';
         if (!contactInfo.email.trim() || !/\S+@\S+\.\S+/.test(contactInfo.email)) errors.email = 'Valid email is required.';
         if (!contactInfo.phone.trim()) errors.phone = 'Phone number is required.';
-        else if (!/^(05|06|07)\d{8}$/.test(contactInfo.phone.replace(/\s/g, ''))) errors.phone = 'Valid Algerian phone number required (e.g., 05 XX XX XX XX).';
-
-
-        if (!deliveryAddress.address.trim()) errors.address = 'Full address is required.';
+        else if (!/^(05|06|07)\d{8}$/.test(contactInfo.phone.replace(/\s/g, ''))) errors.phone = 'Valid Algerian phone number is required (10 digits).';
         if (!deliveryAddress.wilaya) errors.wilaya = 'Wilaya is required.';
         if (!deliveryAddress.city.trim()) errors.city = 'City / Commune is required.';
-
-
+        if (!deliveryAddress.address.trim()) errors.address = 'A detailed street address is required.';
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     };
 
     const handlePlaceOrder = async () => {
         if (!validateForm()) {
-            toast.error('Please complete all required fields correctly.');
+            toast.error('Please fix the errors in the form.');
             return;
         }
-        if (cartItems.length === 0) {
-            toast.error("Your cart is empty. Please add items before placing an order.");
-            return;
-        }
-        
         setIsPlacingOrder(true);
         const loadingToast = toast.loading('Placing your order...');
-
         try {
             const orderData = {
-                userId: currentUser.id, // Make sure currentUser and its id is available
                 items: cartItems.map(item => ({
-                    productId: item.productId || item._id, // Prefer productId, fallback to _id
+                    productId: item.productId,
                     name: item.name,
-                    quantity: item.quantity,
                     price: item.price,
-                    imageUrl: item.imageUrl,
+                    quantity: item.quantity || 1,
+                    imageUrl: item.images?.[0] || item.imageUrl,
                     attributes: item.attributes || null
                 })),
                 contactInfo,
                 deliveryAddress,
                 orderNotes,
-                paymentMethod: 'cash_on_delivery', // Defaulting to cash on delivery
-                totals: { subtotal, shippingCost, taxes, discount, total },
-                status: 'Pending Confirmation', // Initial status
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
+                totals: {
+                    subtotal,
+                    shippingCost,
+                    total
+                },
+                paymentMethod: 'cash_on_delivery',
+                isGuestOrder: !currentUser,
+                userId: currentUser?.id || null
             };
 
-            const res = await fetch('/api/orders', {
+            const response = await fetch('/api/orders', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'user-id': currentUser.id // Pass user-id if your API needs it for auth/association
+                    ...(currentUser && { 'user-id': currentUser.id })
                 },
                 body: JSON.stringify(orderData)
             });
-            
-            const contentType = res.headers.get('content-type');
-            let resultData = null;
-            if (contentType && contentType.includes('application/json')) {
-                resultData = await res.json();
+
+            const responseData = await response.json();
+
+            if (!response.ok) {
+                if (responseData.error.includes('Insufficient stock')) {
+                    toast.dismiss(loadingToast);
+                    toast.error(responseData.error);
+                    return;
+                }
+                if (responseData.error.includes('Product not found')) {
+                    toast.dismiss(loadingToast);
+                    toast.error(responseData.error);
+                    return;
+                }
+                throw new Error(responseData.error || 'Failed to place order');
             }
 
-            if (!res.ok) {
-                const errorMessage = resultData?.error || `Failed to place order (Status: ${res.status})`;
-                throw new Error(errorMessage);
-            }
-
-            toast.dismiss(loadingToast);
-            toast.success(resultData?.message || 'Order placed successfully! Payment on delivery.');
+            // Clear the cart after successful order placement
+            await clearCart();
             
-            if (resultData && resultData._id) {
-                router.push(`/orders/${resultData._id}`); // Navigate to order confirmation
-            } else {
-                console.warn('Order _id not returned from API, redirecting to generic confirmation.');
-                router.push('/orders/confirmation'); // Fallback confirmation
-            }
-        } catch (err) {
-            console.error('Error placing order:', err);
             toast.dismiss(loadingToast);
-            toast.error(err.message || 'Failed to place order. Please try again.\'');
+            toast.success('Order placed successfully!');
+            router.push(`/orders/${responseData._id}`);
+        } catch (error) {
+            console.error('Error placing order:', error);
+            toast.dismiss(loadingToast);
+            toast.error(error.message || 'Failed to place order. Please try again.');
         } finally {
             setIsPlacingOrder(false);
         }
     };
-    
-    if (authLoading || isLoadingCart) {
+
+    if (isLoadingCart) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-                <p className="ml-3 text-gray-600">Loading checkout...</p>
+                <LoadingSpinner size="lg" />
             </div>
         );
     }
 
-    if (!currentUser) { // Should be caught by useEffect, but as a safeguard
+    if (cartItems.length === 0 && !isLoadingCart) {
         return (
-             <div className="min-h-screen flex items-center justify-center text-center p-4">
-                <div>
-                    <ActualIcon name="lock" className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                    <p className="text-xl text-gray-700">Please log in to proceed.</p>
-                </div>
-            </div>
-        );
-    }
-    
-    if (cartItems.length === 0 && !isLoadingCart) { // Show if cart is definitively empty after loading
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center text-center p-4">
                 <ActualIcon name="shoppingBag" className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <h1 className="text-2xl font-bold text-gray-800 mb-2">Your Cart is Empty</h1>
-                <p className="text-gray-600 mb-6">Looks like you haven&apos;t added any items to your cart yet.</p>
+                <p className="text-gray-600 mb-6">Add items to your cart to proceed to checkout.</p>
                 <ActualButton onClick={() => router.push('/products')} variant="primary" size="lg">
                     Continue Shopping
                 </ActualButton>
@@ -334,124 +342,172 @@ export default function CheckoutPage() {
         );
     }
 
-
     return (
-        <div className="bg-gray-100 min-h-screen py-8 sm:py-12">
-            <div className="container mx-auto px-4 max-w-4xl">
-                <div className="mb-8 text-center">
-                    <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">Finalize Your Order</h1>
-                    <p className="text-gray-600 mt-2">Review your details and complete your purchase.</p>
-                </div>
-
-                <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-                    <div className="lg:w-[60%] w-full">
-                        <CheckoutSection 
-                            title="Contact & Delivery Information" 
-                            icon="mapPin"
-                        >
-                            <ActualInput label="Full Name" name="fullName" value={contactInfo.fullName} onChange={handleInputChange(setContactInfo, 'fullName')} error={formErrors.fullName} required iconLeft="user" />
-                            <ActualInput label="Email Address" name="email" type="email" value={contactInfo.email} onChange={handleInputChange(setContactInfo, 'email')} error={formErrors.email} required iconLeft="mail" />
-                            <ActualInput label="Phone Number (for delivery & confirmation)" name="phone" type="tel" value={contactInfo.phone} onChange={handleInputChange(setContactInfo, 'phone')} error={formErrors.phone} required iconLeft="phone" placeholder="05 XX XX XX XX" />
-                            
-                            <h3 className="text-md font-semibold text-gray-700 mt-6 mb-3">Delivery Address</h3>
-                            <ActualSelect label="Wilaya" name="wilaya" options={algerianWilayas} value={deliveryAddress.wilaya} onChange={handleInputChange(setDeliveryAddress, 'wilaya')} error={formErrors.wilaya} required />
-                            <ActualInput label="City / Commune" name="city" value={deliveryAddress.city} onChange={handleInputChange(setDeliveryAddress, 'city')} error={formErrors.city} placeholder="e.g., Alger Centre, Bab Ezzouar" required/>
-                            <ActualInput label="Full Address (Street, Building, etc.)" name="address" value={deliveryAddress.address} onChange={handleInputChange(setDeliveryAddress, 'address')} error={formErrors.address} required iconLeft="home" placeholder="e.g., 123 Rue Didouche Mourad, Immeuble A, Cité XYZ" />
-                            <ActualInput label="Apartment, Suite, Floor (Optional)" name="aptSuite" value={deliveryAddress.aptSuite} onChange={handleInputChange(setDeliveryAddress, 'aptSuite')} placeholder="e.g., Apt 5B, Etage 3" />
-                            <ActualTextArea label="Order Notes (Optional)" name="orderNotes" value={orderNotes} onChange={(e) => setOrderNotes(e.target.value)} placeholder="Any special instructions for delivery or product specifics..." />
-
-                            <div className="mt-8 p-4 bg-yellow-50 rounded-lg text-yellow-800 flex items-start">
-                                <ActualIcon name="dollarSign" className="w-6 h-6 mr-3 shrink-0 mt-1" />
-                                <div>
-                                    <p className="text-sm font-semibold">Payment on Delivery (الدفع عند الاستلام)</p>
-                                    <p className="text-xs">You will pay in cash when your order is delivered. Please have the exact amount ready.</p>
-                                </div>
-                            </div>
-
-                            <ActualButton onClick={handlePlaceOrder} size="lg" className="w-full mt-8" disabled={isPlacingOrder || cartItems.length === 0} iconLeft={isPlacingOrder ? null : "lock"}>
-                                {isPlacingOrder ? 'Processing...' : `Confirm Order`}
-                            </ActualButton>
+        <div className="bg-gray-100 min-h-screen py-8 sm:py-12 mt-[2.5rem]">
+            <div className="container mx-auto px-4 max-w-6xl">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
+                    {/* Left Column: Form */}
+                    <div className="lg:col-span-3 space-y-8">
+                        <CheckoutSection title="Contact & Delivery" iconName="mapPin">
+                            <ActualInput
+                                label="Full Name"
+                                name="fullName"
+                                value={contactInfo.fullName}
+                                onChange={handleInputChange(setContactInfo, 'fullName')}
+                                error={formErrors.fullName}
+                                required
+                                iconLeft="user"
+                                placeholder="Enter your full name"
+                            />
+                            <ActualInput
+                                label="Email Address"
+                                name="email"
+                                type="email"
+                                value={contactInfo.email}
+                                onChange={handleInputChange(setContactInfo, 'email')}
+                                error={formErrors.email}
+                                required
+                                iconLeft="mail"
+                                placeholder="Enter your email address"
+                            />
+                            <ActualInput
+                                label="Phone Number"
+                                name="phone"
+                                type="tel"
+                                value={contactInfo.phone}
+                                onChange={handleInputChange(setContactInfo, 'phone')}
+                                error={formErrors.phone}
+                                required
+                                iconLeft="phone"
+                                placeholder="Enter your phone number"
+                            />
+                            <h3 className="text-md font-semibold text-slate-700 pt-5 mt-5 border-t border-gray-200">
+                                Shipping Address
+                            </h3>
+                            <ActualSelect
+                                label="Wilaya"
+                                name="wilaya"
+                                options={algerianWilayas}
+                                value={deliveryAddress.wilaya}
+                                onChange={handleInputChange(setDeliveryAddress, 'wilaya')}
+                                error={formErrors.wilaya}
+                                required
+                            />
+                            <ActualInput
+                                label="City / Commune"
+                                name="city"
+                                value={deliveryAddress.city}
+                                onChange={handleInputChange(setDeliveryAddress, 'city')}
+                                error={formErrors.city}
+                                placeholder="Enter your city or commune"
+                                required
+                            />
+                            <ActualInput
+                                label="Street Address"
+                                name="address"
+                                value={deliveryAddress.address}
+                                onChange={handleInputChange(setDeliveryAddress, 'address')}
+                                error={formErrors.address}
+                                required
+                                iconLeft="home"
+                                placeholder="Enter your street address"
+                            />
+                            <ActualInput
+                                label="Apartment/Suite (Optional)"
+                                name="aptSuite"
+                                value={deliveryAddress.aptSuite}
+                                onChange={handleInputChange(setDeliveryAddress, 'aptSuite')}
+                                placeholder="Enter apartment or suite number"
+                            />
+                        </CheckoutSection>
+                        <CheckoutSection title="Order Notes" iconName="fileText">
+                            <ActualTextArea
+                                label="Special Instructions"
+                                name="orderNotes"
+                                value={orderNotes}
+                                onChange={(e) => setOrderNotes(e.target.value)}
+                                placeholder="Any special instructions for delivery?"
+                                rows={4}
+                            />
                         </CheckoutSection>
                     </div>
-
-                    <div className="lg:w-[40%] w-full lg:sticky lg:top-24 self-start">
-                        <div className="bg-white p-5 rounded-xl shadow-xl">
-                            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                                <ActualIcon name="fileText" className="w-6 h-6 text-blue-600 mr-2" /> Order Summary
-                            </h2>
-                            {cartItems.length > 0 ? (
-                                <ul className="max-h-72 overflow-y-auto divide-y divide-gray-200 pr-1 mb-4 custom-scrollbar">
+                    {/* Right Column: Order Summary */}
+                    <div className="lg:col-span-2">
+                        <div className="lg:sticky lg:top-24">
+                            <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200/80">
+                                <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center">
+                                    <ActualIcon name="shoppingBag" className="w-6 h-6 text-amber-500 mr-2" />
+                                    Order Summary
+                                </h2>
+                                <div className="max-h-64 overflow-y-auto divide-y divide-gray-200 pr-2 custom-scrollbar">
                                     {cartItems.map(item => (
-                                        <OrderSummaryItem key={item.productId || item._id} item={item} />
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className="text-gray-500 text-sm py-4 text-center">Your cart appears to be empty.</p>
-                            )}
-
-                            <div className="space-y-1.5 text-sm text-gray-700 pt-4 border-t border-gray-200">
-                                <div className="flex justify-between items-center">
-                                    <span>Subtotal</span>
-                                    <span className="font-medium">${subtotal.toFixed(2)}</span>
-                                </div>
-                                {/* Coupon Input and Apply Button - Corrected Alignment */}
-                                <div className="flex items-stretch mt-3 mb-2"> {/* Use items-stretch or items-end */}
-                                    <div className="flex-grow">
-                                        <ActualInput 
-                                            type="text" 
-                                            name="coupon" 
-                                            placeholder="Discount code" 
-                                            value={couponCode} 
-                                            onChange={(e) => setCouponCode(e.target.value)} 
-                                            className="!mb-0 !py-2 text-sm rounded-l-lg rounded-r-none border-gray-300 focus:border-blue-500 focus:ring-blue-500 h-full" // Added h-full
-                                            disabled={isPlacingOrder}
+                                        <OrderSummaryItem
+                                            key={`${item.productId}-${item._id}`}
+                                            item={item}
+                                            onUpdateQuantity={updateQuantity}
+                                            onRemove={removeFromCart}
                                         />
-                                    </div>
-                                    <ActualButton 
-                                        onClick={applyCoupon} 
-                                        variant="secondary" 
-                                        className="!py-2 text-sm rounded-r-lg rounded-l-none px-3 !bg-gray-200 hover:!bg-gray-300 border border-l-0 border-gray-300 h-full" // Added h-full
-                                        disabled={!couponCode.trim() || isPlacingOrder}
-                                    >
-                                        Apply
-                                    </ActualButton>
+                                    ))}
                                 </div>
-                                {discount > 0 && (
-                                    <div className="flex justify-between text-green-600">
-                                        <span>Discount</span>
-                                        <span>-${discount.toFixed(2)}</span>
-                                    </div>
-                                )}
-                                <div className="flex justify-between">
-                                    <span>Shipping</span>
-                                    <span className="font-medium">${shippingCost.toFixed(2)}</span>
-                                </div>
-                                {taxRate > 0 && (
+                                <div className="space-y-2 text-sm text-slate-700 pt-4 mt-4 border-t border-gray-200">
                                     <div className="flex justify-between">
-                                        <span>Taxes ({(taxRate * 100).toFixed(0)}%)</span>
-                                        <span>${taxes.toFixed(2)}</span>
+                                        <span>Subtotal</span>
+                                        <span className="font-medium">{subtotal.toFixed(2)} DA</span>
                                     </div>
-                                )}
-                                <div className="flex justify-between text-xl font-bold text-gray-900 pt-3 mt-3 border-t-2 border-gray-300">
-                                    <span>Total</span>
-                                    <span>${total.toFixed(2)}</span>
+                                    <div className="flex justify-between">
+                                        <span>Shipping</span>
+                                        <span className="font-medium">{shippingCost.toFixed(2)} DA</span>
+                                    </div>
                                 </div>
+                                <div className="flex justify-between text-lg font-bold text-slate-900 pt-3 mt-3 border-t-2 border-slate-300">
+                                    <span>Total</span>
+                                    <span>{total.toFixed(2)} DA</span>
+                                </div>
+                                <div className="mt-6 p-4 bg-amber-50 rounded-lg text-amber-900 flex items-center space-x-3">
+                                    <ActualIcon name="package" className="w-8 h-8 text-amber-500 shrink-0" />
+                                    <div>
+                                        <p className="font-semibold">Payment on Delivery</p>
+                                        <p className="text-xs">
+                                            Pay with cash upon delivery of your order.
+                                        </p>
+                                    </div>
+                                </div>
+                                <ActualButton
+                                    onClick={handlePlaceOrder}
+                                    size="lg"
+                                    className="w-full mt-6"
+                                    disabled={isPlacingOrder}
+                                    isLoading={isPlacingOrder}
+                                    iconLeft="lock"
+                                >
+                                    {isPlacingOrder ? 'Processing...' : `Confirm Order (${total.toFixed(2)} DA)`}
+                                </ActualButton>
+                                <p className="text-xs text-slate-500 mt-4 text-center">
+                                    By placing your order, you agree to our terms and conditions.
+                                </p>
                             </div>
                         </div>
-                        <p className="text-xs text-gray-500 mt-4 text-center">
-                            By placing your order, you agree to our terms and conditions.
-                        </p>
                     </div>
                 </div>
             </div>
             <style jsx global>{`
-                .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-                .custom-scrollbar::-webkit-scrollbar-track { background: #edf2f7; border-radius: 10px; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 5px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: #f1f5f9;
+                    border-radius: 10px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: #cbd5e1;
+                    border-radius: 10px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: #94a3b8;
+                }
             `}</style>
         </div>
     );
-}
+};
 
-CheckoutPage.displayName = 'CheckoutPage';
+export default CheckoutPage;

@@ -49,11 +49,6 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Product not found' });
       }
 
-      // Check if product is in stock (stock is managed by order completion now)
-      // if (product.stock <= 0) {
-      //      return res.status(400).json({ error: 'Product is out of stock' });
-      // }
-
       // Check if cart exists
       let cart = await collection.findOne({ userId });
       
@@ -64,8 +59,7 @@ export default async function handler(req, res) {
            price: product.price,
            imageUrl: product.images?.[0] || product.imageUrl,
            attributes: product.attributes || null, // Include attributes if they exist
-           // Quantity is implicitly 1 for each entry
-           quantity: 1, // Explicitly add quantity
+           quantity: 1, // Default quantity for new items
       };
 
       if (!cart) {
@@ -76,20 +70,24 @@ export default async function handler(req, res) {
         };
         await collection.insertOne(cart);
       } else {
-        // Add the new item to the existing cart's items array
-        cart.items.push(newItem);
+        // Check if item already exists in cart
+        const existingItemIndex = cart.items.findIndex(item => 
+          item.productId.toString() === productId
+        );
+
+        if (existingItemIndex !== -1) {
+          // Item exists, increase quantity
+          cart.items[existingItemIndex].quantity = (cart.items[existingItemIndex].quantity || 1) + 1;
+        } else {
+          // Item doesn't exist, add new item
+          cart.items.push(newItem);
+        }
 
         await collection.updateOne(
           { userId },
           { $set: { items: cart.items } }
         );
       }
-
-      // Stock decrease is now handled when the order is completed
-      // await productsCollection.updateOne(
-      //     { _id: new ObjectId(productId) },
-      //     { $inc: { stock: -1 } }
-      // );
 
       // Fetch and return the updated cart with populated product details
       const updatedCart = await collection.findOne({ userId });
@@ -124,6 +122,15 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Cart not found' });
       }
 
+      // If no productId is provided, clear the entire cart
+      if (!productId) {
+        await collection.updateOne(
+          { userId },
+          { $set: { items: [] } }
+        );
+        return res.status(200).json({ userId, items: [] });
+      }
+
       const itemIndexToRemove = cart.items.findIndex(item => 
            item.productId.toString() === productId
       );
@@ -139,12 +146,6 @@ export default async function handler(req, res) {
         { userId },
         { $set: { items: cart.items } }
       );
-
-      // Stock increase is now handled when a completed order is uncompleted or deleted
-       // await productsCollection.updateOne(
-       //    { _id: new ObjectId(productId) },
-       //    { $inc: { stock: 1 } }
-       // );
 
       // Fetch and return the updated cart with populated product details
       const updatedCart = await collection.findOne({ userId });
@@ -170,8 +171,60 @@ export default async function handler(req, res) {
       console.error('Error removing item from cart:', err);
       res.status(500).json({ error: 'Failed to remove item from cart' });
     }
+  } else if (req.method === 'PATCH') {
+    try {
+      const { productId, quantity } = req.body;
+      
+      if (!productId || typeof quantity !== 'number' || quantity < 1) {
+        return res.status(400).json({ error: 'Invalid request parameters' });
+      }
+
+      const cart = await collection.findOne({ userId });
+      if (!cart) {
+        return res.status(404).json({ error: 'Cart not found' });
+      }
+
+      const itemIndex = cart.items.findIndex(item => 
+        item.productId.toString() === productId.toString()
+      );
+
+      if (itemIndex === -1) {
+        return res.status(404).json({ error: 'Item not found in cart' });
+      }
+
+      // Update the quantity
+      cart.items[itemIndex].quantity = quantity;
+
+      await collection.updateOne(
+        { userId },
+        { $set: { items: cart.items } }
+      );
+
+      // Fetch and return the updated cart with populated product details
+      const updatedCart = await collection.findOne({ userId });
+      if (updatedCart && updatedCart.items && updatedCart.items.length > 0) {
+        const productIds = updatedCart.items.map(item => item.productId);
+        const products = await productsCollection.find({ _id: { $in: productIds } }).toArray();
+
+        updatedCart.items = updatedCart.items.map(item => {
+          const product = products.find(p => p._id.toString() === item.productId.toString());
+          if (!product) return null;
+          return {
+            ...item,
+            name: product.name,
+            price: product.price,
+            imageUrl: product.images?.[0] || product.imageUrl,
+          };
+        }).filter(item => item !== null);
+      }
+
+      res.status(200).json(updatedCart);
+    } catch (err) {
+      console.error('Error updating cart quantity:', err);
+      res.status(500).json({ error: 'Failed to update item quantity' });
+    }
   } else {
-    res.setHeader('Allow', ['GET', 'POST', 'DELETE']); // Removed PATCH
+    res.setHeader('Allow', ['GET', 'POST', 'DELETE', 'PATCH']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 } 

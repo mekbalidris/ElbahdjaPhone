@@ -4,223 +4,201 @@ import Button from '../../components/ui/Button';
 import Icon from '../../components/ui/Icon';
 import { useRouter } from 'next/router';
 import ProductCard from '../../components/products/ProductCard';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 
-const ProductDetailPage = ({ handleAddToCart }) => {
-    const [product, setProduct] = useState(null);
-    const [relatedProducts, setRelatedProducts] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+const brandOrange = { text: 'text-amber-500', ring: 'focus:ring-amber-500', border: 'border-amber-500' };
+const brandPurple = { text: 'text-purple-600' };
+
+const ProductDetailPage = () => {
     const router = useRouter();
-    const { productId } = router.query; // Get productId from router query
+    const { productId } = router.query;
+    const { addToCart } = useCart();
+    const { currentUser } = useAuth();
+
+    const [product, setProduct] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [quantity, setQuantity] = useState(1);
+    const [activeImage, setActiveImage] = useState('');
+    const [relatedProducts, setRelatedProducts] = useState([]);
+    const [fallbackProducts, setFallbackProducts] = useState([]);
     const [isHovering, setIsHovering] = useState(false);
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
 
     useEffect(() => {
-        console.log('useEffect running for productId:', productId);
-        if (!productId) return;
-
+        if (!router.isReady || !productId) return;
         setIsLoading(true);
-        // Fetch product by _id
         fetch(`/api/products?_id=${productId}`)
-            .then(res => {
-                if (!res.ok) {
-                     // Handle case where product is not found (e.g., 404)
-                    if (res.status === 404) {
-                        return null; // Indicate product not found
-                    } else if (res.status === 400) {
-                         // Handle invalid ID case
-                        return null;
-                    }
-                    throw new Error('Failed to fetch product');
-                }
-                return res.json();
-            })
+            .then(res => res.json())
             .then(data => {
-                console.log('Fetched main product data:', data);
                 setProduct(data);
-                // After getting the product, fetch related products
+                setActiveImage(data.images?.[0] || data.imageUrl);
                 if (data && data.category) {
-                    console.log('Fetching related products for category:', data.category);
-                    fetch(`/api/products?category=${data.category}`)
+                    fetch(`/api/products?category=${encodeURIComponent(data.category)}`)
                         .then(res => res.json())
                         .then(products => {
-                             console.log('Fetched related products (raw):', products);
-                            // Filter out the current product and limit to 4 related products
-                            const related = products
-                                .filter(p => p._id !== productId)
-                                .slice(0, 4);
-                            console.log('Fetched related products (filtered):', related);
-                            setRelatedProducts(related);
-                        })
-                        .catch(err => {
-                            console.error('Error fetching related products:', err);
+                            // Exclude current product
+                            const related = products.filter(p => p._id !== productId);
+                            setRelatedProducts(related.slice(0, 4));
+                            // If less than 4, fetch more products as fallback
+                            if (related.length < 4) {
+                                fetch('/api/products')
+                                    .then(res => res.json())
+                                    .then(allProducts => {
+                                        // Exclude current and already shown related
+                                        const others = allProducts.filter(p => p._id !== productId && !related.some(rp => rp._id === p._id));
+                                        setFallbackProducts(others.slice(0, 4 - related.length));
+                                    });
+                            } else {
+                                setFallbackProducts([]);
+                            }
                         });
-                } else if (!data) {
-                    console.log('No main product data fetched.');
-                } else if (!data.category) {
-                     console.log('Main product data fetched, but no category available.', data);
                 }
                 setIsLoading(false);
             })
-            .catch((err) => {
-                console.error('Product detail fetch error:', err);
+            .catch(() => {
                 setIsLoading(false);
                 toast.error('Failed to load product details.');
             });
-    }, [productId]); // Refetch when productId changes
+    }, [router.isReady, productId]);
 
-    if (isLoading || !productId) {
-        return <div className="min-h-screen flex justify-center items-center"><span>Loading...</span></div>; // Added min-h-screen
-    }
+    const isAvailable = product && product.stock > 0;
 
-     if (!product) { // Handle product not found or invalid ID cases
-         return (
-             <div className="min-h-screen flex flex-col items-center justify-center text-gray-700">
-                  <Icon name="package" className="w-16 h-16 mb-4" />
-                  <h1 className="text-2xl font-bold mb-2">Product Not Found</h1>
-                  <p className="mb-6">The product you are looking for does not exist.</p>
-                  <Button onClick={() => router.push('/products')}>Back to Products</Button>
-             </div>
-         );
-     }
+    const handleQuantityChange = (change) => {
+        setQuantity(prev => {
+            const newQuantity = prev + change;
+            if (newQuantity < 1) return 1;
+            if (product && newQuantity > product.stock) {
+                toast.error(`Only ${product.stock} items available in stock.`);
+                return product.stock;
+            }
+            return newQuantity;
+        });
+    };
 
-    // Determine availability based on stock
-    const isAvailable = product.stock > 0;
-
-    const handleAddToCartClick = () => {
-        // Assuming handleAddToCart function expects a single product object
-        if (handleAddToCart && isAvailable) {
-            handleAddToCart(product);
-            toast.success(`${product.name} added to cart!`);
-        } else if (!isAvailable) {
-            toast.error('This product is currently out of stock.');
+    const handleBuyNow = async () => {
+        if (!isAvailable || !product) return;
+        
+        try {
+            await addToCart({ ...product, quantity });
+            router.push('/checkout');
+        } catch (error) {
+            console.error('Error in buy now:', error);
+            toast.error('Failed to process your request. Please try again.');
         }
     };
 
-    const mainImageUrl = product.images?.[0] || product.imageUrl;
-    const hasGalleryImages = product.images && product.images.filter(img => !!img).length > 1; // Check for valid images
+    const handleAddToCartClick = async () => {
+        if (!isAvailable || !product) return;
+        
+        try {
+            await addToCart({ ...product, quantity });
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            toast.error('Failed to add product to cart');
+        }
+    };
 
+    // Mouse move/zoom logic for main image
     const handleMouseMove = (e) => {
         const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
         const x = ((e.pageX - left) / width) * 100;
         const y = ((e.pageY - top) / height) * 100;
         setMousePosition({ x, y });
     };
-
     const handleMouseEnter = () => setIsHovering(true);
     const handleMouseLeave = () => setIsHovering(false);
 
-    console.log('Rendering ProductDetailPage. relatedProducts:', relatedProducts);
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center"><div className={`animate-spin rounded-full h-16 w-16 border-b-2 ${brandOrange.border}`}></div></div>;
+    if (!product) return <div className="min-h-screen flex items-center justify-center"><h1 className="text-2xl text-slate-700">Product not found.</h1></div>;
 
     return (
-        <div className="bg-white py-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start">
-                    {/* Product Image */}
-                    <div className="lg:max-w-sm lg:self-start lg:sticky lg:top-20 ml-[5rem]">
-                        <div className="aspect-w-1 aspect-h-1 rounded-lg overflow-hidden shadow-lg relative">
-                            {mainImageUrl ? (
-                                <img
-                                    src={mainImageUrl}
-                                    alt={product.name}
-                                    className={`w-full h-full object-contain transition-transform duration-200 ease-out ${isHovering ? 'scale-[2.5]' : 'scale-100'}`}
-                                    style={{
-                                        transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
-                                    }}
-                                    onError={(e) => e.target.src = 'https://placehold.co/600x400/gray/ffffff?text=Image+Error'}
-                                    onMouseMove={handleMouseMove}
-                                    onMouseEnter={handleMouseEnter}
-                                    onMouseLeave={handleMouseLeave}
-                                />
-                            ) : (
-                                <img
-                                    src='https://placehold.co/600x400/gray/ffffff?text=No+Image'
-                                    alt="No Image Available"
-                                    className="w-full h-full object-contain"
-                                />
-                            )}
-                        </div>
-                        {/* Image Gallery */}
-                        {hasGalleryImages && (
-                            <div className="mt-4 grid grid-cols-4 gap-2">
-                                {product.images.filter(img => !!img).map((image, index) => (
-                                    <div key={index} className="aspect-w-1 aspect-h-1 rounded-lg overflow-hidden">
-                                        <img
-                                            src={image}
-                                            alt={`${product.name} - Image ${index + 1}`}
-                                            className="w-full h-full object-cover cursor-pointer hover:opacity-75"
-                                            onClick={() => {
-                                                const currentImages = product.images.filter(img => !!img);
-                                                const clickedImage = currentImages[index];
-                                                const remainingImages = currentImages.filter((_, i) => i !== index);
-                                                setProduct({ ...product, images: [clickedImage, ...remainingImages] });
-                                            }}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Product Info */}
-                    <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0">
-                        <div className="flex items-center justify-between">
-                            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">{product.name}</h1>
-                            <p className="text-3xl font-bold text-blue-600">{typeof product.price === 'number' ? `$${product.price.toFixed(2)}` : 'N/A'}</p>
-                        </div>
-
-                        <div className="mt-3">
-                            <h2 className="sr-only">Product information</h2>
-                            <p className="text-sm text-gray-500 uppercase">{product.category}</p>
-                        </div>
-
-                        <div className="mt-6">
-                            <h3 className="sr-only">Description</h3>
-                            <div className="text-base text-gray-700 space-y-6">
-                                <p>{product.description}</p>
-                            </div>
-                        </div>
-
-                        {/* Availability Status */}
-                        <div className="mt-6">
-                             <p className="text-sm font-medium text-gray-900">Availability:</p>
-                             <span className={`mt-1 inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium ${isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                 {isAvailable ? 'In Stock' : 'Out of Stock'}
-                             </span>
-                        </div>
-
-                        <div className="mt-10 flex sm:flex-row">
-                            <Button
-                                onClick={handleAddToCartClick}
-                                variant="primary"
-                                size="lg"
-                                className="w-full sm:w-auto"
-                                disabled={!isAvailable} // Disable if not available
-                            >
-                                {isAvailable ? 'Add to Cart' : 'Out of Stock'}
-                            </Button>
-                        </div>
-                    </div>
+        <div className="bg-white font-sans mt-[1rem]">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+                <div className="mb-6">
+                    <button onClick={() => router.back()} className={`inline-flex items-center text-sm font-medium ${brandPurple.text} hover:text-purple-700`}>
+                        <Icon name="chevronLeft" className="w-5 h-5 mr-1"/> Back to Products
+                    </button>
                 </div>
-
-                {/* Related Products Section */}
-                {relatedProducts.length > 0 && (
-                    <div className="mt-16 border-t border-gray-200 pt-16">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-8">You May Also Like</h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {relatedProducts.map(relatedProduct => (
-                                <div key={relatedProduct._id} className="animate-fadeIn">
-                                    <ProductCard 
-                                        product={relatedProduct} 
-                                        onAddToCart={handleAddToCart}
-                                    />
-                                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-10 gap-10 lg:gap-16">
+                    {/* Image Gallery - Left Side */}
+                    <div className="lg:col-span-1 order-first lg:order-first">
+                        <div className="flex lg:flex-col gap-4">
+                           {product.images?.map((img, index) => (
+                                <button key={index} onClick={() => setActiveImage(img)} className={`w-[5.5rem] aspect-square bg-gray-100 rounded-xl overflow-hidden focus:outline-none transition-all duration-200 ${activeImage === img ? `ring-2 ring-offset-2 ${brandOrange.ring}` : 'opacity-60 hover:opacity-100'}`}>
+                                    <img src={img} alt={`${product.name} thumbnail ${index + 1}`} className="w-full h-full object-cover"/>
+                                </button>
                             ))}
                         </div>
                     </div>
-                )}
+                    {/* Main Image */}
+                    <div className="lg:col-span-4 mb-8">
+                         <div className="bg-gray-100 rounded-2xl shadow-lg overflow-hidden h-[30rem] w-[30rem] sticky top-24 flex items-center justify-center">
+                            <img 
+                                src={activeImage} 
+                                alt={product.name} 
+                                className={`w-full h-full object-cover transition-transform duration-300 ${isHovering ? '' : ''}`}
+                                style={{
+                                    transform: isHovering ? 'scale(2.5)' : 'scale(1)',
+                                    transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`
+                                }}
+                                onMouseMove={handleMouseMove}
+                                onMouseEnter={handleMouseEnter}
+                                onMouseLeave={handleMouseLeave}
+                            />
+                        </div>
+                    </div>
+                    {/* Product Info */}
+                    <div className="lg:col-span-5 space-y-6">
+                        <div className="space-y-3">
+                            <p className={`font-bold ${brandOrange.text} uppercase tracking-wider text-sm`}>{product.category}</p>
+                            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">{product.name}</h1>
+                            <p className={`text-4xl font-bold ${brandPurple.text}`}>{product.price?.toLocaleString()} DA</p>
+                        </div>
+                        <div className="text-base text-slate-600 space-y-4 leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description?.replace(/\n/g, '<br />') }} />
+                        {isAvailable ? (
+                            <div className="p-3 bg-green-50 text-green-800 rounded-xl flex items-center space-x-3 text-sm">
+                                <Icon name="package" className="w-5 h-5 text-green-600" />
+                                <span className="font-semibold">In Stock & Ready to Ship</span>
+                            </div>
+                        ) : (
+                            <div className="p-3 bg-red-50 text-red-700 rounded-xl flex items-center space-x-3 text-sm">
+                                <Icon name="xCircle" className="w-5 h-5 text-red-600" />
+                                <span className="font-semibold">Out of Stock</span>
+                            </div>
+                        )}
+                        <div className="flex items-center space-x-4 pt-4 border-t border-gray-200">
+                            <p className="font-semibold text-slate-700 text-sm">Quantity:</p>
+                            <div className="flex items-center rounded-xl border border-slate-300">
+                                <button onClick={() => handleQuantityChange(-1)} className="p-3 text-slate-600 hover:text-amber-500 disabled:opacity-40" disabled={quantity <= 1}><Icon name="minus" className="w-4 h-4"/></button>
+                                <span className="px-4 font-bold text-slate-800 text-lg">{quantity}</span>
+                                <button onClick={() => handleQuantityChange(1)} className="p-3 text-slate-600 hover:text-amber-500 disabled:opacity-40" disabled={quantity >= product.stock}><Icon name="plus" className="w-4 h-4"/></button>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+                            <Button onClick={handleAddToCartClick} variant="outline" size="lg" className={`!border-purple-600 !text-purple-600 hover:!bg-purple-600 hover:!text-white`} iconLeft="shoppingBag" disabled={!isAvailable}>Add to Cart</Button>
+                            <Button onClick={handleBuyNow} variant="primary" size="lg" disabled={!isAvailable}>Buy Now</Button>
+                        </div>
+                        <div className="text-sm text-slate-600 space-y-3 pt-4 border-t border-gray-200">
+                            <div className="flex items-center"><Icon name="package" className={`w-5 h-5 mr-3 ${brandOrange.text}`}/><span>Fast Delivery to 58 Wilayas</span></div>
+                            <div className="flex items-center"><Icon name="package" className={`w-5 h-5 mr-3 text-green-600`}/><span>Official 12-Month Warranty</span></div>
+                        </div>
+                    </div>
+                </div>
+                <section className="pt-16 mt-16 border-t border-gray-200/80">
+                    <h2 className="text-2xl font-bold text-center mb-8 text-slate-800">Related Products</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {relatedProducts.map(related => (
+                            <ProductCard key={related._id} product={related} />
+                        ))}
+                        {fallbackProducts.map(related => (
+                            <ProductCard key={related._id} product={related} />
+                        ))}
+                    </div>
+                </section>
             </div>
         </div>
     );
 };
 
-export default ProductDetailPage; 
+export default ProductDetailPage;

@@ -146,16 +146,26 @@ const SellerDashboardPage = () => {
                 method: 'DELETE'
             });
             
+            const data = await res.json();
+            
             if (!res.ok) {
-                const data = await res.json();
                 throw new Error(data?.error || 'Failed to delete product');
             }
+            
+            // Add a small delay to ensure the deletion is processed
+            await new Promise(resolve => setTimeout(resolve, 500));
             
             toast.success('Product deleted successfully!');
             await fetchProducts();
         } catch (err) {
             console.error('Error deleting product:', err);
-            toast.error(err.message || 'Failed to delete product');
+            // Only show error if it's not a "not found" error after successful deletion
+            if (!err.message?.includes('not found')) {
+                toast.error(err.message || 'Failed to delete product');
+            } else {
+                toast.success('Product deleted successfully!');
+                await fetchProducts();
+            }
         } finally {
             setIsLoadingProducts(false);
         }
@@ -200,7 +210,7 @@ const SellerDashboardPage = () => {
     }
 
     return (
-        <div className="py-8">
+        <div className="py-8 mt-[2.5rem]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Statistics Section */}
                 <div className="mb-8">
@@ -232,7 +242,7 @@ const SellerDashboardPage = () => {
                                     </div>
                                     <div className="ml-4">
                                         <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                                        <p className="text-2xl font-semibold text-gray-900">{statistics.totalRevenue.toFixed(2)} DA</p>
+                                        <p className="text-2xl font-semibold text-gray-900">{statistics.totalRevenue} DA</p>
                                     </div>
                                 </div>
                             </div>
@@ -311,7 +321,7 @@ const SellerDashboardPage = () => {
                                                     {order.status || 'N/A'}
                                                 </span>
                                                 <span className="ml-4 text-sm font-medium text-gray-900">
-                                                    {order.totals?.total?.toFixed(2) || '0.00'} DA
+                                                    {order.totals?.total || '0.00'} DA
                                                 </span>
                                             </div>
                                         </div>
@@ -379,7 +389,7 @@ const SellerDashboardPage = () => {
                                             </div>
                                             <div className="flex items-center space-x-4">
                                                 <p className="text-lg font-semibold text-blue-600">
-                                                    ${typeof product.price === 'number' ? product.price.toFixed(2) : 'N/A'}
+                                                    {typeof product.price === 'number' ? product.price : 'N/A'} DA
                                                 </p>
                                                 <div className="flex items-center space-x-2">
                                                     <Button

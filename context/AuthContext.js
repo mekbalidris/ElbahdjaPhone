@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-hot-toast';
+import Cookies from 'js-cookie';
 
 const AuthContext = createContext(null);
 
@@ -10,15 +11,15 @@ export function AuthProvider({ children }) {
     const router = useRouter();
 
     useEffect(() => {
-        // Check for user data in localStorage on initial load
-        const storedUser = localStorage.getItem('currentUser');
+        // Check for user data in cookies on initial load
+        const storedUser = Cookies.get('currentUser');
         if (storedUser) {
             try {
                 const parsedUser = JSON.parse(storedUser);
                 setCurrentUser(parsedUser);
             } catch (e) {
                 console.error("Error parsing stored user:", e);
-                localStorage.removeItem('currentUser');
+                Cookies.remove('currentUser');
             }
         }
         setIsLoading(false);
@@ -26,7 +27,15 @@ export function AuthProvider({ children }) {
 
     const login = async (credentials) => {
         try {
-            const res = await fetch(`/api/users?email=${encodeURIComponent(credentials.email)}&password=${encodeURIComponent(credentials.password)}`);
+            const res = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'login',
+                    email: credentials.email,
+                    password: credentials.password
+                })
+            });
             
             const responseData = await res.json();
 
@@ -35,7 +44,8 @@ export function AuthProvider({ children }) {
             }
             
             setCurrentUser(responseData);
-            localStorage.setItem('currentUser', JSON.stringify(responseData));
+            // Store user data in cookie with 7 days expiration
+            Cookies.set('currentUser', JSON.stringify(responseData), { expires: 7 });
             return responseData;
         } catch (error) {
             console.error('Login error in AuthContext:', error);
@@ -63,11 +73,17 @@ export function AuthProvider({ children }) {
         }
     };
 
-    const logout = () => {
-        setCurrentUser(null);
-        localStorage.removeItem('currentUser');
-        toast.success("Logged out successfully.");
-        router.push('/');
+    const logout = async () => {
+        try {
+            setCurrentUser(null);
+            Cookies.remove('currentUser');
+            toast.success("Logged out successfully.");
+            router.push('/');
+            return true;
+        } catch (error) {
+            console.error('Logout error:', error);
+            throw error;
+        }
     };
 
     const value = {
@@ -85,10 +101,10 @@ export function AuthProvider({ children }) {
     );
 }
 
-export function useAuth() {
+export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
         throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;
-} 
+}; 

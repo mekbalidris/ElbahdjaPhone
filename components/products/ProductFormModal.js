@@ -11,6 +11,7 @@ const CATEGORIES = [
     { value: 'phones', label: 'Phones' },
     { value: 'laptops', label: 'Laptops' },
     { value: 'accessories', label: 'Accessories' },
+    { value: 'watch', label: 'Watches' },
 ];
 
 const BRANDS = {
@@ -47,6 +48,12 @@ const BRANDS = {
         { value: 'logitech', label: 'Logitech' },
         { value: 'anker', label: 'Anker' },
         { value: 'belkin', label: 'Belkin' },
+        { value: 'other', label: 'Other' },
+    ],
+    watch: [
+        { value: '', label: 'Choose a brand', disabled: true },
+        { value: 'apple', label: 'Apple' },
+        { value: 'samsung', label: 'Samsung' },
         { value: 'other', label: 'Other' },
     ],
 };
