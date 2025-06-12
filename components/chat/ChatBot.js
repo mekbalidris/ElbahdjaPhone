@@ -78,26 +78,31 @@ const ChatBot = () => {
         const browserLang = navigator.language.split('-')[0];
         const detectedLang = browserLang === 'fr' || browserLang === 'ar' ? browserLang : 'en';
         
-        toast.custom(
-            (t) => (
-                <div
-                    className={`${
-                        t.visible ? 'animate-enter' : 'animate-leave'
-                    } fixed bottom-5 right-16 bg-white text-gray-800 shadow-lg rounded-full pointer-events-auto flex items-center px-4 py-2`}
-                    style={{
-                        animation: 'slideIn 0.5s ease-out',
-                    }}
-                >
-                    <p className="text-sm whitespace-nowrap">
-                        {welcomeMessages[detectedLang]}
-                    </p>
-                </div>
-            ),
-            {
-                duration: 5000,
-                position: 'bottom-right',
-            }
-        );
+        // Wait for 2 seconds after component mount to show the toast
+        const timer = setTimeout(() => {
+            toast.custom(
+                (t) => (
+                    <div
+                        className={`${
+                            t.visible ? 'animate-enter' : 'animate-leave'
+                        } fixed bottom-5 right-16 bg-white text-gray-800 shadow-lg rounded-full pointer-events-auto flex items-center px-4 py-2`}
+                        style={{
+                            animation: 'slideIn 0.5s ease-out',
+                        }}
+                    >
+                        <p className="text-sm whitespace-nowrap">
+                            {welcomeMessages[detectedLang]}
+                        </p>
+                    </div>
+                ),
+                {
+                    duration: 5000,
+                    position: 'bottom-right',
+                }
+            );
+        }, 2000);
+
+        return () => clearTimeout(timer);
     }, []); // Empty dependency array means this runs once when component mounts
 
     const scrollToBottom = () => {
