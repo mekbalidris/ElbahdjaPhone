@@ -50,7 +50,9 @@ export default function CartModal({ isOpen, onClose, isLoading: initialLoading }
         const newQuantity = currentQuantity + change;
         if (newQuantity > 0) {
             try {
-                await updateQuantity(productId, newQuantity);
+                // For guest users, we need to use _id instead of productId
+                const idToUse = currentUser ? productId : productId;
+                await updateQuantity(idToUse, newQuantity);
             } catch (error) {
                 console.error('Error updating quantity:', error);
                 toast.error('Failed to update quantity');
@@ -134,14 +136,14 @@ export default function CartModal({ isOpen, onClose, isLoading: initialLoading }
                                                 <p className="text-sm text-gray-500">{item.price.toFixed(2)} DA</p>
                                                 <div className="flex items-center space-x-2 mt-2">
                                                     <button
-                                                        onClick={() => handleQuantityChange(item.productId, item.quantity || 1, -1)}
+                                                        onClick={() => handleQuantityChange(item._id || item.productId, item.quantity || 1, -1)}
                                                         className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
                                                     >
                                                         <Minus className="h-4 w-4 text-gray-500" />
                                                     </button>
                                                     <span className="text-sm font-medium w-8 text-center">{item.quantity || 1}</span>
                                                     <button
-                                                        onClick={() => handleQuantityChange(item.productId, item.quantity || 1, 1)}
+                                                        onClick={() => handleQuantityChange(item._id || item.productId, item.quantity || 1, 1)}
                                                         className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
                                                     >
                                                         <Plus className="h-4 w-4 text-gray-500" />

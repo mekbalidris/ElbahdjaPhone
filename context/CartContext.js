@@ -94,6 +94,7 @@ export function CartProvider({ children }) {
                 } else {
                     guestCart.push({
                         _id: product._id,
+                        productId: product._id,
                         name: product.name,
                         price: product.price,
                         imageUrl: product.images?.[0] || product.imageUrl,
@@ -136,6 +137,7 @@ export function CartProvider({ children }) {
             } else {
                 // Handle guest user
                 const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+                // Keep all items EXCEPT the one we want to remove
                 const updatedCart = guestCart.filter(item => item._id !== productId);
                 localStorage.setItem('guestCart', JSON.stringify(updatedCart));
                 setCartItems(updatedCart);

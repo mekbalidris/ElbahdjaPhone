@@ -58,9 +58,9 @@ const MegaMenu = ({ closeMobileMenu }) => {
         { name: 'Watches', href: '/products?category=watches' }
     ];
     const brands = [
-        { name: 'El Bahdja', href: '/products?brand=el-bahdja' },
-        { name: 'Aura', href: '/products?brand=aura' },
-        { name: 'Nova', href: '/products?brand=nova' }
+        { name: 'Apple', href: '/products?brand=apple' },
+        { name: 'Samsung', href: '/products?brand=samsung' },
+        { name: 'Xiaomi', href: '/products?brand=xiaomi' }
     ];
     
     const handleLinkClick = (href) => {
