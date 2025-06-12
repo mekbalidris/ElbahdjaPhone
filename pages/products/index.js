@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, Fragment } from 'react';
+import React, { useState, useEffect, useMemo, Fragment, useRef, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { Dialog, Transition } from '@headlessui/react';
 import { useRouter } from 'next/router';
@@ -57,6 +57,10 @@ const ProductsPage = ({ handleAddToCart }) => {
     const [allProducts, setAllProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [displayedProducts, setDisplayedProducts] = useState([]);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const productsPerPage = 9;
     
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
@@ -66,6 +70,19 @@ const ProductsPage = ({ handleAddToCart }) => {
     const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
     const [minPriceLimit, setMinPriceLimit] = useState(0);
     const [maxPriceLimit, setMaxPriceLimit] = useState(2000);
+
+    // Intersection Observer for infinite scroll
+    const observer = useRef();
+    const lastProductElementRef = useCallback(node => {
+        if (isLoading) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage(prevPage => prevPage + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [isLoading, hasMore]);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -98,6 +115,7 @@ const ProductsPage = ({ handleAddToCart }) => {
         fetchProducts();
     }, [router.isReady, router.query]);
 
+    // Filter and sort products
     const filteredAndSortedProducts = useMemo(() => {
         return allProducts
             .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -115,7 +133,21 @@ const ProductsPage = ({ handleAddToCart }) => {
                 return 0;
             });
     }, [allProducts, searchTerm, selectedCategory, selectedBrand, showOnlyAvailable, priceRange, sortBy]);
-    
+
+    // Update displayed products when page changes
+    useEffect(() => {
+        const startIndex = 0;
+        const endIndex = page * productsPerPage;
+        const newProducts = filteredAndSortedProducts.slice(startIndex, endIndex);
+        setDisplayedProducts(newProducts);
+        setHasMore(endIndex < filteredAndSortedProducts.length);
+    }, [page, filteredAndSortedProducts]);
+
+    // Reset page when filters change
+    useEffect(() => {
+        setPage(1);
+    }, [searchTerm, selectedCategory, selectedBrand, sortBy, priceRange, showOnlyAvailable]);
+
     const availableBrands = useMemo(() => ([{ value: '', label: 'All Brands' }, ...Array.from(new Set(allProducts.filter(p => selectedCategory === 'all' || p.category === selectedCategory).map(p => p.brand).filter(Boolean))).map(brand => ({ value: brand, label: brand }))]), [allProducts, selectedCategory]);
     const categoryOptions = [
         { value: 'all', label: 'All Products' },
@@ -171,6 +203,42 @@ const ProductsPage = ({ handleAddToCart }) => {
     const handleCategorySelect = (category) => {
         setSelectedCategory(category);
         setSelectedBrand('');
+    };
+
+    const handleSearch = (e) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        
+        // Reset page when search term changes
+        setPage(1);
+        setDisplayedProducts([]);
+        
+        // Update URL without page parameter when searching
+        const params = new URLSearchParams(router.query);
+        if (value) {
+            params.set('search', value);
+        } else {
+            params.delete('search');
+            // Reset all filters when search is cleared
+            params.delete('brand');
+            params.delete('category');
+            params.delete('minPrice');
+            params.delete('maxPrice');
+            params.delete('sort');
+        }
+        router.push(`/products?${params.toString()}`, undefined, { shallow: true });
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            // If search is empty, reset all filters
+            if (!searchTerm) {
+                setSelectedBrand('');
+                setSelectedCategory('');
+                setPriceRange([0, 1000000]);
+                setSortBy('createdAt_desc');
+            }
+        }
     };
 
     const FilterControls = () => (
@@ -299,17 +367,61 @@ const ProductsPage = ({ handleAddToCart }) => {
                     </aside>
                     {/* Product Grid */}
                     <section className="flex-1">
-                        {isLoading ? (
-                            <div className="flex justify-center items-center h-64"><LoadingSpinner /></div>
-                        ) : filteredAndSortedProducts.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                                {filteredAndSortedProducts.map((product, index) => (
-                                    <div key={product._id} className="animate-fadeInUp" style={{animationDelay: `${index * 60}ms`}}>
-                                        <ProductCard product={product} onAddToCart={handleAddToCart} />
-                                    </div>
-                                ))}
+                        <div className="mb-6">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={handleSearch}
+                                    onKeyPress={handleKeyPress}
+                                    placeholder="Search products..."
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                />
+                                {searchTerm && (
+                                    <button
+                                        onClick={() => {
+                                            setSearchTerm('');
+                                            setPage(1);
+                                            setDisplayedProducts([]);
+                                            const params = new URLSearchParams(router.query);
+                                            params.delete('search');
+                                            params.delete('brand');
+                                            params.delete('category');
+                                            params.delete('minPrice');
+                                            params.delete('maxPrice');
+                                            params.delete('sort');
+                                            router.push(`/products?${params.toString()}`, undefined, { shallow: true });
+                                        }}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        <Icon name="x" className="w-5 h-5" />
+                                    </button>
+                                )}
                             </div>
-                        ) : (
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {displayedProducts.map((product, index) => (
+                                <div
+                                    key={product._id}
+                                    ref={index === displayedProducts.length - 1 ? lastProductElementRef : null}
+                                    className="animate-fadeInUp"
+                                    style={{animationDelay: `${index * 60}ms`}}
+                                >
+                                    <ProductCard product={product} onAddToCart={handleAddToCart} />
+                                </div>
+                            ))}
+                        </div>
+                        {isLoading && (
+                            <div className="flex justify-center items-center py-8">
+                                <LoadingSpinner />
+                            </div>
+                        )}
+                        {!hasMore && displayedProducts.length > 0 && (
+                            <div className="text-center py-8 text-gray-500">
+                                No more products to load
+                            </div>
+                        )}
+                        {!isLoading && displayedProducts.length === 0 && (
                             <div className="text-center py-16 md:py-24 bg-gray-50 rounded-2xl">
                                 <Icon name="frown" className={`w-20 h-20 ${brandPurple.text} mx-auto mb-5 opacity-70`} />
                                 <h2 className="text-2xl font-semibold text-slate-700 mb-2">No Products Found</h2>

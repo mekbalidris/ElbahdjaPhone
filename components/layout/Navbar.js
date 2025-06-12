@@ -205,10 +205,40 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
     }, [lastScrollY]);
 
     const handleSearch = (e) => {
-        e.preventDefault();
-        if (!searchQuery.trim()) return;
-        router.push(`/products?search=${encodeURIComponent(searchQuery)}`);
-        setMobileMenuOpen(false);
+        const value = e.target.value;
+        setSearchQuery(value);
+        
+        // Update URL with search parameter
+        const params = new URLSearchParams(router.query);
+        if (value) {
+            params.set('search', value);
+        } else {
+            params.delete('search');
+            // Reset all filters when search is cleared
+            params.delete('brand');
+            params.delete('category');
+            params.delete('minPrice');
+            params.delete('maxPrice');
+            params.delete('sort');
+        }
+        router.push(`/products?${params.toString()}`, undefined, { shallow: true });
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            // If search is empty, reset all filters
+            if (!searchQuery) {
+                const params = new URLSearchParams(router.query);
+                params.delete('search');
+                params.delete('brand');
+                params.delete('category');
+                params.delete('minPrice');
+                params.delete('maxPrice');
+                params.delete('sort');
+                router.push(`/products?${params.toString()}`, undefined, { shallow: true });
+            }
+            router.push('/products');
+        }
     };
 
     const handleLogout = async () => {
@@ -255,17 +285,34 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                     </div>
 
                     <div className="flex items-center space-x-3">
-                        <div className="hidden lg:block">
-                            <form onSubmit={handleSearch} className="relative">
-                                <input 
-                                    type="search" 
-                                    placeholder="Search..." 
-                                    value={searchQuery} 
-                                    onChange={(e) => setSearchQuery(e.target.value)} 
-                                    className={`w-full !rounded-full py-2 pl-10 pr-4 bg-gray-100 focus:bg-white border-transparent focus:border-amber-500 focus:ring-1 ${brandOrange.ring} text-sm transition`} 
-                                />
-                                <Icon name="search" className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-                            </form>
+                        <div className="relative flex-1 max-w-xl">
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={handleSearch}
+                                onKeyPress={handleKeyPress}
+                                placeholder="Search products..."
+                                className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                            />
+                            <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        const params = new URLSearchParams(router.query);
+                                        params.delete('search');
+                                        params.delete('brand');
+                                        params.delete('category');
+                                        params.delete('minPrice');
+                                        params.delete('maxPrice');
+                                        params.delete('sort');
+                                        router.push(`/products?${params.toString()}`, undefined, { shallow: true });
+                                    }}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                    <Icon name="x" className="w-5 h-5" />
+                                </button>
+                            )}
                         </div>
                         <button 
                             onClick={onCartClick}
