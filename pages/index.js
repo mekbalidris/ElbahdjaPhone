@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 import Button from '../components/ui/Button';
 import Icon from '../components/ui/Icon';
 import ProductCard from '../components/products/ProductCard';
@@ -33,6 +34,7 @@ const HomePage = ({ handleAddToCart }) => {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showcaseVideoVisible, setShowcaseVideoVisible] = useState(true);
+    const [isHovered, setIsHovered] = useState(false);
     const router = useRouter();
     const { currentUser } = useAuth();
     const isAdmin = currentUser?.role === 'seller';
@@ -67,10 +69,31 @@ const HomePage = ({ handleAddToCart }) => {
         },
     ], []);
 
+    // Add debug logging for categories
+    useEffect(() => {
+        console.log('Categories data:', categories);
+    }, [categories]);
+
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true);
             try {
+                // Test image accessibility
+                const testImagePaths = categories.map(cat => cat.image);
+                console.log('Testing image paths:', testImagePaths);
+                
+                for (const path of testImagePaths) {
+                    try {
+                        const response = await fetch(path);
+                        console.log(`Image ${path} status:`, response.status);
+                        if (!response.ok) {
+                            console.error(`Failed to load image ${path}:`, response.statusText);
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching image ${path}:`, error);
+                    }
+                }
+
                 // Fetch products
                 const productsRes = await fetch('/api/products');
                 if (!productsRes.ok) {
@@ -103,15 +126,32 @@ const HomePage = ({ handleAddToCart }) => {
     const offerProducts = useMemo(() => products.filter(p => p.offer).slice(0, 4), [products]);
 
     const categorySliderRef = useRef(null);
-    const scrollCategory = (direction) => {
-        if (categorySliderRef.current) {
-            const scrollAmount = categorySliderRef.current.offsetWidth * 0.75;
-            categorySliderRef.current.scrollBy({
-                left: direction === 'left' ? -scrollAmount : scrollAmount,
-                behavior: 'smooth'
-            });
+    const autoSlideIntervalRef = useRef(null);
+
+    // Auto slide functionality
+    useEffect(() => {
+        if (!isHovered) {
+            autoSlideIntervalRef.current = setInterval(() => {
+                if (categorySliderRef.current) {
+                    const { scrollLeft, scrollWidth, clientWidth } = categorySliderRef.current;
+                    const scrollAmount = 0.9; // Small amount for smooth movement
+                    
+                    categorySliderRef.current.scrollLeft += scrollAmount;
+
+                    // When we reach the end, reset to start
+                    if (scrollLeft >= scrollWidth - clientWidth) {
+                        categorySliderRef.current.scrollLeft = 0;
+                    }
+                }
+            }, 20); // Update every 20ms for smooth movement
         }
-    };
+
+        return () => {
+            if (autoSlideIntervalRef.current) {
+                clearInterval(autoSlideIntervalRef.current);
+            }
+        };
+    }, [isHovered]);
 
     useEffect(() => {
         const sections = document.querySelectorAll('.section-animate');
@@ -174,35 +214,48 @@ const HomePage = ({ handleAddToCart }) => {
             </section>
 
             {/* Screen 2: Category Slider */}
-            <section className="py-16 md:py-24 bg-gray-50 section-animate">
+            <section className="py-16 md:py-24 bg-gray-50 section-animate overflow-hidden">
                 <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12 md:mb-16">
                         <h2 className={`text-3xl md:text-4xl font-bold ${brandPurple.text} tracking-tight`}>Shop by Category</h2>
                         <p className="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">Browse our wide selection of products by category</p>
                     </div>
-                    <div className="flex justify-center items-center">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 max-w-7xl mx-auto">
-                            {categories.map((category, index) => (
+                    
+                    {/* Slider Container */}
+                    <div className="relative">
+                        {/* Slider */}
+                        <div 
+                            ref={categorySliderRef}
+                            className="flex overflow-x-hidden gap-6 pb-4"
+                            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                            onMouseEnter={() => setIsHovered(true)}
+                            onMouseLeave={() => setIsHovered(false)}
+                        >
+                            {/* Duplicate categories for seamless loop */}
+                            {[...categories, ...categories].map((category, index) => (
                                 <div
                                     key={index}
                                     onClick={() => router.push({ 
                                         pathname: '/products', 
                                         query: category.query 
                                     })}
-                                    className="group relative w-full h-64 bg-white rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+                                    className="group relative flex-none w-[80vw] sm:w-[60vw] md:w-[45vw] lg:w-[30vw] h-[400px] bg-white rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
                                     style={{animationDelay: `${index * 100}ms`}}
                                 >
-                                    <div className="absolute inset-0">
-                                        <img 
+                                    <div className="relative w-full h-full">
+                                        <Image 
                                             src={category.image} 
                                             alt={category.name}
-                                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                                            fill
+                                            sizes="(max-width: 768px) 80vw, (max-width: 1200px) 45vw, 30vw"
+                                            className="object-cover transform group-hover:scale-110 transition-transform duration-500"
+                                            priority={index === 0}
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
                                     </div>
-                                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                                        <h3 className="text-xl font-bold mb-2">{category.name}</h3>
-                                        <p className="text-sm text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                                        <h3 className="text-2xl font-bold mb-3">{category.name}</h3>
+                                        <p className="text-base text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                             {category.description}
                                         </p>
                                     </div>

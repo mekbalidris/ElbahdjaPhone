@@ -33,7 +33,6 @@ export default async function handler(req, res) {
         const recentOrders = await db.collection('orders')
             .find({})
             .sort({ createdAt: -1 })
-            .limit(5)
             .toArray();
 
         // Get top selling products

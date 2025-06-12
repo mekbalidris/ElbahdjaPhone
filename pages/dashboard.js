@@ -22,6 +22,14 @@ const SellerDashboardPage = () => {
     const [productSearchTerm, setProductSearchTerm] = useState('');
     const [selectedBrand, setSelectedBrand] = useState('');
 
+    // Pagination state for products
+    const [productsPage, setProductsPage] = useState(1);
+    const productsPerPage = 5;
+
+    // Pagination state for orders
+    const [ordersPage, setOrdersPage] = useState(1);
+    const ordersPerPage = 5;
+
     // Check for seller role and redirect if not authorized
     useEffect(() => {
         if (!authLoading) {
@@ -69,10 +77,15 @@ const SellerDashboardPage = () => {
         if (!authLoading && currentUser?.role === 'seller') {
             Promise.all([fetchStatistics(), fetchProducts()])
                 .catch(err => {
-                    console.error('Error fetching dashboard data:', err);
+                    console.error('Error fetching data:', err);
                 });
         }
     }, [currentUser, authLoading]);
+
+    // Reset product page when search term or brand changes
+    useEffect(() => {
+        setProductsPage(1);
+    }, [productSearchTerm, selectedBrand]);
 
     // Filter products owned by the current user and apply search filter
     const filteredUserProducts = products.filter(p => 
@@ -91,6 +104,28 @@ const SellerDashboardPage = () => {
             .filter(Boolean));
         return Array.from(brands).map(brand => ({ value: brand, label: brand.charAt(0).toUpperCase() + brand.slice(1) }));
     }, [products, currentUser?.id]);
+
+    // Paginate products
+    const totalProducts = filteredUserProducts.length;
+    const totalProductPages = Math.ceil(totalProducts / productsPerPage);
+    const paginatedProducts = filteredUserProducts.slice(
+        (productsPage - 1) * productsPerPage,
+        productsPage * productsPerPage
+    );
+
+    // Paginate orders
+    const recentOrders = statistics?.recentOrders || [];
+    const totalOrders = recentOrders.length;
+    const totalOrderPages = Math.ceil(totalOrders / ordersPerPage);
+    const paginatedOrders = recentOrders.slice(
+        (ordersPage - 1) * ordersPerPage,
+        ordersPage * ordersPerPage
+    );
+
+    // Debug orders count
+    useEffect(() => {
+        console.log('Recent Orders:', { totalOrders, totalOrderPages, paginatedOrders });
+    }, [recentOrders, ordersPage]);
 
     const handleAddProduct = async (productData) => {
         setIsLoadingProducts(true);
@@ -159,7 +194,6 @@ const SellerDashboardPage = () => {
             await fetchProducts();
         } catch (err) {
             console.error('Error deleting product:', err);
-            // Only show error if it's not a "not found" error after successful deletion
             if (!err.message?.includes('not found')) {
                 toast.error(err.message || 'Failed to delete product');
             } else {
@@ -184,12 +218,75 @@ const SellerDashboardPage = () => {
         toast.success(`Order status updated to ${newStatus}`);
     };
 
-    const handleOrderDelete = (orderId) => {
-        setStatistics(prev => ({
-            ...prev,
-            recentOrders: prev.recentOrders.filter(order => order._id !== orderId)
-        }));
-        toast.success('Order deleted successfully');
+    const handleOrderDelete = async (orderId) => {
+        try {
+            const res = await fetch(`/api/orders?_id=${orderId}`, {
+                method: 'DELETE'
+            });
+            if (!res.ok) {
+                throw new Error('Failed to delete order');
+            }
+            setStatistics(prev => ({
+                ...prev,
+                recentOrders: prev.recentOrders.filter(order => order._id !== orderId)
+            }));
+            toast.success('Order deleted successfully');
+            setOrdersPage(1); // Reset to first page after deletion
+        } catch (err) {
+            console.error('Error deleting order:', err);
+            toast.error(err.message || 'Failed to delete order');
+        }
+    };
+
+    // Pagination component
+    const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+        const getPageNumbers = () => {
+            const pages = [];
+            const maxPagesToShow = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+            let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+            if (endPage - startPage + 1 < maxPagesToShow) {
+                startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                pages.push(i);
+            }
+
+            return pages;
+        };
+
+        return (
+            <div className="flex items-center justify-center space-x-2 py-4">
+                <Button
+                    onClick={() => onPageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    variant="ghost"
+                    className="disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Previous
+                </Button>
+                {getPageNumbers().map(page => (
+                    <Button
+                        key={page}
+                        onClick={() => onPageChange(page)}
+                        variant={page === currentPage ? 'primary' : 'ghost'}
+                        className={`min-w-[40px] ${page === currentPage ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                    >
+                        {page}
+                    </Button>
+                ))}
+                <Button
+                    onClick={() => onPageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    variant="ghost"
+                    className="disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Next
+                </Button>
+            </div>
+        );
     };
 
     // Show loading state while checking auth
@@ -291,12 +388,16 @@ const SellerDashboardPage = () => {
                 </div>
 
                 {/* Recent Orders */}
-                {statistics?.recentOrders && statistics.recentOrders.length > 0 && (
-                    <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-6">Recent Orders</h2>
+                <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Recent Orders</h2>
+                    {isLoadingStats ? (
+                        <div className="flex justify-center items-center h-32">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                        </div>
+                    ) : recentOrders.length > 0 ? (
                         <div className="bg-white shadow overflow-hidden sm:rounded-md">
                             <ul className="divide-y divide-gray-200">
-                                {statistics.recentOrders.map(order => (
+                                {paginatedOrders.map(order => (
                                     <li 
                                         key={order._id} 
                                         className="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer transition-colors"
@@ -328,9 +429,20 @@ const SellerDashboardPage = () => {
                                     </li>
                                 ))}
                             </ul>
+                            <Pagination
+                                currentPage={ordersPage}
+                                totalPages={totalOrderPages}
+                                onPageChange={setOrdersPage}
+                            />
                         </div>
-                    </div>
-                )}
+                    ) : (
+                        <div className="text-center py-12 bg-white rounded-lg shadow">
+                            <Icon name="package" className="mx-auto h-12 w-12 text-gray-400" />
+                            <h3 className="mt-2 text-sm font-medium text-gray-900">No recent orders</h3>
+                            <p className="mt-1 text-sm text-gray-500">You haven't received any orders yet.</p>
+                        </div>
+                    )}
+                </div>
 
                 {/* Products Section */}
                 <div className="mb-8">
@@ -369,10 +481,10 @@ const SellerDashboardPage = () => {
                     <div className="flex justify-center items-center h-64">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
                     </div>
-                ) : filteredUserProducts.length > 0 ? (
+                ) : paginatedProducts.length > 0 ? (
                     <div className="bg-white shadow overflow-hidden sm:rounded-md">
                         <ul className="divide-y divide-gray-200">
-                            {filteredUserProducts.map(product => (
+                            {paginatedProducts.map(product => (
                                 <li key={product._id}>
                                     <div className="px-4 py-4 sm:px-6">
                                         <div className="flex items-center justify-between">
@@ -424,6 +536,11 @@ const SellerDashboardPage = () => {
                                 </li>
                             ))}
                         </ul>
+                        <Pagination
+                            currentPage={productsPage}
+                            totalPages={totalProductPages}
+                            onPageChange={setProductsPage}
+                        />
                     </div>
                 ) : (
                     <div className="text-center py-12 bg-white rounded-lg shadow">
@@ -477,4 +594,4 @@ const SellerDashboardPage = () => {
     );
 };
 
-export default SellerDashboardPage; 
+export default SellerDashboardPage;

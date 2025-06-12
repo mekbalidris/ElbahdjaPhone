@@ -75,7 +75,7 @@ const ProductCard = ({ product }) => {
 
     return (
         <div 
-            className="group relative bg-white rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl border border-gray-100 cursor-pointer"
+            className="group relative bg-slate-100 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl border border-gray-100 cursor-pointer"
             onClick={handleViewDetails}
         >
             {/* Product Image Container */}

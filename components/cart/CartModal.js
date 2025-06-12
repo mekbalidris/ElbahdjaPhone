@@ -33,12 +33,6 @@ export default function CartModal({ isOpen, onClose, isLoading: initialLoading }
     const total = subtotal + shippingCost;
 
     const handleCheckout = () => {
-        if (!currentUser) {
-            toast.error('Please login to proceed to checkout');
-            router.push('/auth');
-            onClose();
-            return;
-        }
         onClose();
         router.push('/checkout');
     };
