@@ -343,7 +343,7 @@ const SellerDashboardPage = () => {
                                     </div>
                                     <div className="ml-4">
                                         <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                                        <p className="text-2xl font-semibold text-gray-900">{statistics.totalRevenue} DA</p>
+                                        <p className="text-s font-semibold text-gray-900">{statistics.totalRevenue} DA</p>
                                     </div>
                                 </div>
                             </div>

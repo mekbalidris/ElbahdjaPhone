@@ -132,7 +132,12 @@ const ProductCard = ({ product }) => {
             <div className="p-4">
                 <h3 className="text-base font-semibold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 mb-2">{product.name}</h3>
                 <div className="flex items-center justify-between mb-4">
-                    <p className="text-amber-500 font-bold text-xl">{product.price?.toLocaleString()} DA</p>
+                    <div className="flex items-center space-x-2">
+                        <p className="text-amber-500 font-bold text-xl">{product.price?.toLocaleString()} DA</p>
+                        {product.oldPrice && (
+                            <p className="text-red-800 text-sm line-through">{product.oldPrice?.toLocaleString()} DA</p>
+                        )}
+                    </div>
                     {isAvailable ? (
                         <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded-full">In Stock</span>
                     ) : (

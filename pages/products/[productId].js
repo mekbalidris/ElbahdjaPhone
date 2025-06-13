@@ -153,7 +153,12 @@ const ProductDetailPage = () => {
                         <div className="space-y-3">
                             <p className={`font-bold ${brandOrange.text} uppercase tracking-wider text-sm`}>{product.category}</p>
                             <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">{product.name}</h1>
-                            <p className={`text-4xl font-bold ${brandPurple.text}`}>{product.price?.toLocaleString()} DA</p>
+                            <div className="flex items-center space-x-3">
+                                <p className={`text-4xl font-bold ${brandPurple.text}`}>{product.price?.toLocaleString()} DA</p>
+                                {product.oldPrice && (
+                                    <p className="text-red-800 text-xl line-through">{product.oldPrice?.toLocaleString()} DA</p>
+                                )}
+                            </div>
                         </div>
                         <div className="text-base text-slate-600 space-y-4 leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description?.replace(/\n/g, '<br />') }} />
                         {isAvailable ? (

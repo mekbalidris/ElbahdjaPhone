@@ -63,6 +63,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
     const [category, setCategory] = useState('phones');
     const [brand, setBrand] = useState('');
     const [price, setPrice] = useState('');
+    const [oldPrice, setOldPrice] = useState('');
     const [description, setDescription] = useState('');
     const [stock, setStock] = useState('');
     const [errors, setErrors] = useState({});
@@ -75,6 +76,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
             setCategory(product.category);
             setBrand(product.brand || '');
             setPrice(String(product.price));
+            setOldPrice(String(product.oldPrice || ''));
             setDescription(product.description);
             setStock(String(product.stock));
             setImages(product.images || [null, null, null, null]);
@@ -84,6 +86,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
             setCategory('phones');
             setBrand('');
             setPrice('');
+            setOldPrice('');
             setDescription('');
             setStock('');
             setImages([null, null, null, null]);
@@ -98,6 +101,8 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
         if (!category) newErrors.category = "Category is required.";
         if (!brand) newErrors.brand = "Brand is required.";
         if (!price || isNaN(parseFloat(price)) || parseFloat(price) <= 0) newErrors.price = "Valid price is required.";
+        if (oldPrice && (isNaN(parseFloat(oldPrice)) || parseFloat(oldPrice) <= 0)) newErrors.oldPrice = "Old price must be a valid number greater than 0.";
+        if (oldPrice && parseFloat(oldPrice) <= parseFloat(price)) newErrors.oldPrice = "Old price must be greater than current price.";
         if (!description.trim()) newErrors.description = "Description is required.";
         if (stock === '' || isNaN(parseInt(stock)) || parseInt(stock) < 0 || !Number.isInteger(parseFloat(stock))) newErrors.stock = "Valid stock quantity (whole number, 0 or more) is required.";
         setErrors(newErrors);
@@ -169,9 +174,11 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
             category, 
             brand,
             price: parseFloat(price), 
+            oldPrice: oldPrice ? parseFloat(oldPrice) : undefined,
             description, 
             stock: parseInt(stock), 
-            images: filteredImages 
+            images: filteredImages,
+            offer: !!oldPrice // Automatically set offer to true if oldPrice is provided
         };
         if (product && product.id) payload.id = product.id;
         onSubmit(payload);
@@ -189,7 +196,8 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
                             <Input label="Product Name" name="name" value={name} onChange={e => setName(e.target.value)} placeholder="e.g., Galaxy Nova X" required error={errors.name} />
                             <Select label="Category" name="category" options={CATEGORIES} value={category} onChange={e => setCategory(e.target.value)} required error={errors.category} />
                             <Select label="Brand" name="brand" options={BRANDS[category] || []} value={brand} onChange={e => setBrand(e.target.value)} required error={errors.brand} />
-                            <Input label="Price ($)" name="price" type="number" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g., 799.99" required error={errors.price} />
+                            <Input label="Current Price (DA)" name="price" type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g., 799.99" required error={errors.price} />
+                            <Input label="Old Price (DA) 'optional'" name="oldPrice" type="number" value={oldPrice} onChange={e => setOldPrice(e.target.value)} placeholder="e.g., 999.99" error={errors.oldPrice} />
                             <Input label="Stock (0 for Out of Stock)" name="stock" type="number" value={stock} onChange={e => setStock(e.target.value)} placeholder="e.g., 50" required error={errors.stock} />
                         </div>
                     </div>
