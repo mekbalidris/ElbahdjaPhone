@@ -9,8 +9,8 @@ import Icon from '../ui/Icon';
 import Button from '../ui/Button';
 
 // --- Color Palette (Client Inspired) ---
-const brandOrange = { text: 'text-amber-500', bg: 'bg-amber-500', hoverBg: 'hover:bg-amber-600', ring: 'focus:ring-amber-500' };
-const brandPurple = { text: 'text-purple-600', hoverText: 'hover:text-purple-700', ring: 'focus:ring-purple-500', bg: 'bg-purple-600' };
+const brandOrange = { text: 'text-red-600', bg: 'bg-red-600', hoverBg: 'hover:bg-red-700', ring: 'focus:ring-red-500' };
+const brandPurple = { text: 'text-slate-800', hoverText: 'hover:text-slate-900', ring: 'focus:ring-slate-500', bg: 'bg-slate-800' };
 
 // --- Sub-Components for Navbar ---
 const NavLink = ({ href, children }) => {
@@ -84,7 +84,7 @@ const MegaMenu = ({ closeMobileMenu }) => {
                                             e.preventDefault();
                                             handleLinkClick(item.href);
                                         }} 
-                                        className="text-slate-600 hover:text-amber-600 transition-colors"
+                                        className="text-slate-600 hover:text-red-600 transition-colors"
                                     >
                                         {item.name}
                                     </a>
@@ -102,7 +102,7 @@ const MegaMenu = ({ closeMobileMenu }) => {
                                             e.preventDefault();
                                             handleLinkClick(item.href);
                                         }} 
-                                        className="text-slate-600 hover:text-amber-600 transition-colors"
+                                        className="text-slate-600 hover:text-red-600 transition-colors"
                                     >
                                         {item.name}
                                     </a>
@@ -263,7 +263,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                         <Link href="/" legacyBehavior>
                             <a className="flex-shrink-0 flex items-center">
                                 <img src="/logo.png" alt="Logo" className="h-8 w-auto mr-2" onError={(e) => e.target.style.display='none'}/>
-                                <span className={`text-xl font-extrabold ${brandOrange.text}`}>EL Bahdja</span>
+                                <span className={`text-xl font-extrabold ${brandOrange.text}`}>Walid</span>
                                 <span className={`text-xl font-extrabold ${brandPurple.text} ml-1`}>Phone</span>
                             </a>
                         </Link>
@@ -316,7 +316,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                         </div>
                         <button 
                             onClick={onCartClick}
-                            className={`relative p-2 rounded-full text-slate-600 hover:${brandOrange.text} hover:bg-amber-500/10 transition-colors`} 
+                            className={`relative p-2 rounded-full text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors`} 
                             aria-label="Cart"
                         >
                             <Icon name="cart" className="w-6 h-6" />
@@ -433,7 +433,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                     <Link key={item.label} href={item.href} legacyBehavior>
                                         <a 
                                             onClick={() => setMobileMenuOpen(false)} 
-                                            className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-amber-500/10 hover:text-amber-600"
+                                            className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-red-50 hover:text-red-600"
                                         >
                                             {item.label}
                                         </a>
@@ -442,7 +442,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                 <Link href="/products" legacyBehavior>
                                     <a 
                                         onClick={() => setMobileMenuOpen(false)} 
-                                        className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-amber-500/10 hover:text-amber-600"
+                                        className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-red-50 hover:text-red-600"
                                     >
                                         Products
                                     </a>

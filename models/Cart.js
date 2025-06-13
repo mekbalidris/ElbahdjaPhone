@@ -9,14 +9,16 @@ const cartItemSchema = new mongoose.Schema({
     quantity: {
         type: Number,
         required: true,
-        min: 1
+        min: 1,
+        max: 999
     },
     price: {
         type: Number,
         required: true,
-        min: 0
+        min: 0,
+        get: v => Math.round(v * 100) / 100
     }
-});
+}, { _id: false }); // Disable _id for subdocuments to save space
 
 const cartSchema = new mongoose.Schema({
     owner: {
@@ -29,6 +31,11 @@ const cartSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
         expires: 30 * 24 * 60 * 60 // 30 days
+    }
+}, {
+    // Enable compression
+    compression: {
+        level: 6
     }
 });
 

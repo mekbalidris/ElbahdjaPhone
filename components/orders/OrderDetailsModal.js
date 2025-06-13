@@ -1,45 +1,74 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Icon from '../ui/Icon';
+import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-hot-toast';
 
 const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate, onDelete }) => {
+    const { currentUser } = useAuth();
+    const [loading, setLoading] = useState(false);
+    
     if (!order) return null;
 
     const handleStatusUpdate = async (newStatus) => {
+        if (!order) return;
+
         try {
-            const res = await fetch(`/api/orders/${order._id}`, {
+            setLoading(true);
+            const response = await fetch(`/api/orders/${order._id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
+                    'user-id': currentUser?.id
                 },
-                body: JSON.stringify({ status: newStatus }),
+                body: JSON.stringify({ status: newStatus })
             });
 
-            if (!res.ok) throw new Error('Failed to update order status');
-            
-            onStatusUpdate(newStatus);
+            if (!response.ok) {
+                throw new Error('Failed to update order status');
+            }
+
+            // Update the order status locally
+            const updatedOrder = { ...order, status: newStatus };
+            onStatusUpdate(updatedOrder);
+            onClose();
         } catch (error) {
             console.error('Error updating order status:', error);
+            toast.error('Failed to update order status');
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleDelete = async () => {
-        if (!window.confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
-            return;
-        }
+    const handleDeleteOrder = async () => {
+        if (!confirm('Are you sure you want to delete this order?')) return;
 
         try {
-            const res = await fetch(`/api/orders/${order._id}`, {
+            setLoading(true);
+            const response = await fetch(`/api/orders/${order._id}`, {
                 method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'user-id': currentUser?.id
+                }
             });
 
-            if (!res.ok) throw new Error('Failed to delete order');
-            
-            onDelete(order._id);
+            if (!response.ok) {
+                throw new Error('Failed to delete order');
+            }
+
+            // Add a small delay to ensure the deletion is complete
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            toast.success('Order deleted successfully');
             onClose();
+            onDelete(order._id);
         } catch (error) {
             console.error('Error deleting order:', error);
+            toast.error('Failed to delete order');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -61,6 +90,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate, onDelete })
                               order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
                               order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                               order.status === 'returned' ? 'bg-purple-100 text-purple-800' :
+                              order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
                               'bg-gray-100 text-gray-800'}`}>
                             {order.status?.charAt(0).toUpperCase() + order.status?.slice(1) || 'Pending'}
                         </span>
@@ -77,6 +107,23 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate, onDelete })
                         <Button
                             variant="outline"
                             size="sm"
+                            onClick={() => handleStatusUpdate('processing')}
+                            disabled={order.status === 'processing'}
+                        >
+                            Mark as Processing
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleStatusUpdate('returned')}
+                            disabled={order.status === 'returned'}
+                            className="text-purple-600 hover:text-purple-700"
+                        >
+                            Mark as Returned
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => handleStatusUpdate('cancelled')}
                             disabled={order.status === 'cancelled'}
                             className="text-red-600 hover:text-red-700"
@@ -86,7 +133,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate, onDelete })
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={handleDelete}
+                            onClick={handleDeleteOrder}
                             className="text-red-600 hover:text-red-700"
                         >
                             <Icon name="trash" className="w-4 h-4" />

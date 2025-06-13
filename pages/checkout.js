@@ -165,7 +165,7 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove }) => {
             </div>
             <div className="flex-grow">
                 <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
-                <p className="text-sm text-gray-500">{item.price.toFixed(2)} DA</p>
+                <p className="text-sm text-gray-500">{item.price} DA</p>
                 <div className="flex items-center space-x-2 mt-2">
                     <button
                         onClick={() => handleQuantityChange(-1)}
@@ -184,7 +184,7 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove }) => {
             </div>
             <div className="flex flex-col items-end space-y-2">
                 <p className="text-sm font-medium text-gray-900">
-                    {((item.price * (item.quantity || 1)).toFixed(2))} DA
+                    {((item.price * (item.quantity || 1)))} DA
                 </p>
                 <button
                     onClick={() => onRemove(item.productId)}
@@ -469,16 +469,16 @@ const CheckoutPage = () => {
                                 <div className="space-y-2 text-sm text-slate-700 pt-4 mt-4 border-t border-gray-200">
                                     <div className="flex justify-between">
                                         <span>Subtotal</span>
-                                        <span className="font-medium">{subtotal.toFixed(2)} DA</span>
+                                        <span className="font-medium">{subtotal} DA</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span>Shipping</span>
-                                        <span className="font-medium">{shippingCost.toFixed(2)} DA</span>
+                                        <span className="font-medium">{shippingCost} DA</span>
                                     </div>
                                 </div>
                                 <div className="flex justify-between text-lg font-bold text-slate-900 pt-3 mt-3 border-t-2 border-slate-300">
                                     <span>Total</span>
-                                    <span>{total.toFixed(2)} DA</span>
+                                    <span>{total} DA</span>
                                 </div>
                                 <div className="mt-6 p-4 bg-amber-50 rounded-lg text-amber-900 flex items-center space-x-3">
                                     <ActualIcon name="package" className="w-8 h-8 text-amber-500 shrink-0" />
@@ -492,12 +492,12 @@ const CheckoutPage = () => {
                                 <ActualButton
                                     onClick={handlePlaceOrder}
                                     size="lg"
-                                    className="w-full mt-6"
+                                    className="w-full mt-6 bg-amber-500 hover:bg-amber-600 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
                                     disabled={isPlacingOrder}
                                     isLoading={isPlacingOrder}
                                     iconLeft="lock"
                                 >
-                                    {isPlacingOrder ? 'Processing...' : `Confirm Order (${total.toFixed(2)} DA)`}
+                                    {isPlacingOrder ? 'Processing...' : `Confirm Order (${total} DA)`}
                                 </ActualButton>
                                 <p className="text-xs text-slate-500 mt-4 text-center">
                                     By placing your order, you agree to our terms and conditions.

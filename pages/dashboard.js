@@ -209,17 +209,17 @@ const SellerDashboardPage = () => {
         }
     };
 
-    const handleOrderStatusUpdate = (newStatus) => {
+    const handleOrderStatusUpdate = (updatedOrder) => {
         setStatistics(prev => ({
             ...prev,
             recentOrders: prev.recentOrders.map(order => 
-                order._id === selectedOrder._id 
-                    ? { ...order, status: newStatus }
+                order._id === updatedOrder._id 
+                    ? updatedOrder
                     : order
             )
         }));
-        setSelectedOrder(prev => ({ ...prev, status: newStatus }));
-        toast.success(`Order status updated to ${newStatus}`);
+        setSelectedOrder(updatedOrder);
+        toast.success('Order status updated successfully');
     };
 
     const handleOrderDelete = async (orderId) => {
@@ -422,6 +422,7 @@ const SellerDashboardPage = () => {
                                                       order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
                                                       order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                                                       order.status === 'returned' ? 'bg-purple-100 text-purple-800' :
+                                                      order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
                                                       'bg-gray-100 text-gray-800'}`}>
                                                     {order.status || 'N/A'}
                                                 </span>

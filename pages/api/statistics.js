@@ -1,4 +1,5 @@
 import clientPromise from '../../lib/mongodb';
+import { ObjectId } from 'mongodb';
 
 export default async function handler(req, res) {
     if (req.method !== 'GET') {
@@ -33,42 +34,30 @@ export default async function handler(req, res) {
         const recentOrders = await db.collection('orders')
             .find({})
             .sort({ createdAt: -1 })
+            .limit(10)
             .toArray();
 
-        // Get top selling products
+        // Get top selling products (only from completed orders)
         const topProducts = await db.collection('orders').aggregate([
+            { $match: { status: 'completed' } }, // Only count completed orders
             { $unwind: '$items' },
             {
                 $group: {
                     _id: '$items.productId',
-                    totalSold: { $sum: '$items.quantity' }
+                    totalSold: { $sum: '$items.quantity' },
+                    productName: { $first: '$items.name' }
                 }
             },
             { $sort: { totalSold: -1 } },
-            { $limit: 5 }
+            { $limit: 3 }
         ]).toArray();
-
-        // Get product details for top selling products
-        const productIds = topProducts.map(p => p._id);
-        const products = await db.collection('products')
-            .find({ _id: { $in: productIds } })
-            .toArray();
-
-        const topProductsWithDetails = topProducts.map(tp => {
-            const product = products.find(p => p._id.toString() === tp._id.toString());
-            return {
-                ...tp,
-                productName: product?.name || 'Unknown Product',
-                productPrice: product?.price || 0
-            };
-        });
 
         res.status(200).json({
             totalOrders,
             totalRevenue,
             ordersByStatus,
             recentOrders,
-            topProducts: topProductsWithDetails
+            topProducts
         });
     } catch (error) {
         console.error('Statistics API Error:', error);

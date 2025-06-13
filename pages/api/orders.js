@@ -1,5 +1,6 @@
 import clientPromise from '../../lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { sendOrderConfirmationEmail } from '../../lib/email';
 
 export default async function handler(req, res) {
   const client = await clientPromise;
@@ -54,7 +55,27 @@ export default async function handler(req, res) {
       // Insert the order
       await ordersCollection.insertOne(order);
 
-      res.status(201).json(order);
+      // Send email notification to admin
+      let emailResult = null;
+      try {
+        emailResult = await sendOrderConfirmationEmail(order);
+        if (!emailResult.success) {
+          console.error('Email sending failed:', emailResult);
+        }
+      } catch (emailError) {
+        console.error('Failed to send order confirmation email:', emailError);
+        emailResult = {
+          success: false,
+          error: emailError.message,
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Return order data along with email sending status
+      res.status(201).json({
+        ...order,
+        emailNotification: emailResult
+      });
     } catch (err) {
       console.error('Error creating order:', err);
       res.status(500).json({ error: 'Failed to create order' });

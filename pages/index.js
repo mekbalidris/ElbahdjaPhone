@@ -10,24 +10,24 @@ import { ChevronDown, Smartphone, Laptop, Headphones, Grid, Instagram, Facebook,
 
 // --- Color Palette (Client Inspired - Tailwind classes) ---
 const brandOrange = {
-    bg: 'bg-amber-500',
-    text: 'text-amber-500',
-    border: 'border-amber-500',
-    hoverBg: 'hover:bg-amber-600',
-    gradientFrom: 'from-amber-500',
-    gradientTo: 'to-orange-600',
-    ring: 'focus:ring-amber-500'
+    bg: 'bg-red-600',
+    text: 'text-red-600',
+    border: 'border-red-600',
+    hoverBg: 'hover:bg-red-700',
+    gradientFrom: 'from-red-600',
+    gradientTo: 'to-red-700',
+    ring: 'focus:ring-red-500'
 };
 
 const brandPurple = {
-    bg: 'bg-purple-600',
-    text: 'text-purple-600',
-    border: 'border-purple-600',
-    hoverBg: 'hover:bg-purple-700',
-    gradientFrom: 'from-purple-600',
-    gradientTo: 'to-indigo-700',
-    ring: 'focus:ring-purple-600',
-    hoverText: 'hover:text-purple-700'
+    bg: 'bg-slate-800',
+    text: 'text-slate-800',
+    border: 'border-slate-800',
+    hoverBg: 'hover:bg-slate-900',
+    gradientFrom: 'from-slate-800',
+    gradientTo: 'to-slate-900',
+    ring: 'focus:ring-slate-500',
+    hoverText: 'hover:text-slate-900'
 };
 
 // --- Main HomePage Component ---
@@ -278,7 +278,7 @@ const HomePage = ({ handleAddToCart }) => {
     if (isLoading && products.length === 0) {
         return (
             <div className="fixed inset-0 bg-gray-50 flex flex-col items-center justify-center z-[100]">
-                <div className={`${brandOrange.text} text-4xl font-bold mb-4`}>EL Bahdja Phone</div>
+                <div className={`${brandOrange.text} text-4xl font-bold mb-4`}>Walid Phone</div>
                 <div className={`w-16 h-16 border-4 ${brandOrange.border} border-t-transparent rounded-full animate-spin`}></div>
                 <p className="text-slate-700 mt-4 text-lg">Loading...</p>
             </div>
@@ -301,7 +301,7 @@ const HomePage = ({ handleAddToCart }) => {
                 <div className="absolute top-6 right-10 mt-12 flex items-center gap-4 z-20">
                     <a href="https://www.google.com/maps/place/Walid+phone/@36.1664465,1.3350221,608m/data=!3m2!1e3!4b1!4m6!3m5!1s0x12840f0029054703:0xb3b6d49ec8f29932!8m2!3d36.1664429!4d1.3371872!16s%2Fg%2F11vr4lwwpv?entry=ttu" 
                        target="_blank" rel="noopener noreferrer"
-                       className="text-white hover:text-amber-500 transition-colors duration-300 flex items-center gap-2">
+                       className="text-white hover:text-red-400 transition-colors duration-300 flex items-center gap-2">
                         <MapPin className="w-5 h-5" />
                         <span className="text-sm">Find Us</span>
                     </a>
@@ -310,7 +310,7 @@ const HomePage = ({ handleAddToCart }) => {
                            navigator.clipboard.writeText('0558626516');
                            toast.success('Phone number copied successfully!');
                        }}
-                       className="text-white hover:text-amber-500 transition-colors duration-300 flex items-center gap-2 cursor-pointer">
+                       className="text-white hover:text-red-400 transition-colors duration-300 flex items-center gap-2 cursor-pointer">
                         <Phone className="w-5 h-5" />
                         <span className="text-sm">0558 62 65 16</span>
                     </button>
@@ -319,12 +319,12 @@ const HomePage = ({ handleAddToCart }) => {
                 {/* Social Media Links */}
                 <div className="absolute top-6 left-8 flex items-center gap-4 z-20 mt-12">
                     <a href="https://www.instagram.com/walidphone_/?hl=en" target="_blank" rel="noopener noreferrer"
-                       className="text-white hover:text-amber-500 transition-colors duration-300 flex items-center gap-2">
+                       className="text-white hover:text-red-400 transition-colors duration-300 flex items-center gap-2">
                         <Instagram className="w-5 h-5" />
                         <span className="text-sm">walidphone_</span>
                     </a>
                     <a href="https://www.facebook.com/p/Walid-phone-100057403661350/?locale=bg_BG" target="_blank" rel="noopener noreferrer"
-                       className="text-white hover:text-amber-500 transition-colors duration-300 flex items-center gap-2">
+                       className="text-white hover:text-red-400 transition-colors duration-300 flex items-center gap-2">
                         <Facebook className="w-5 h-5" />
                         <span className="text-sm">Walid phone</span>
                     </a>
@@ -333,7 +333,7 @@ const HomePage = ({ handleAddToCart }) => {
                            navigator.clipboard.writeText('email@gmail.com');
                            toast.success('Email copied successfully!');
                        }}
-                       className="text-white hover:text-amber-500 transition-colors duration-300 flex items-center gap-2 cursor-pointer">
+                       className="text-white hover:text-red-400 transition-colors duration-300 flex items-center gap-2 cursor-pointer">
                         <Mail className="w-5 h-5" />
                         <span className="text-sm">email@gmail.com</span>
                     </button>
@@ -342,7 +342,7 @@ const HomePage = ({ handleAddToCart }) => {
                 <div className="relative z-10 space-y-8 max-w-4xl animate-fadeInUp" style={{animationDelay: '0.2s'}}>
                     <div className="space-y-4">
                         <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-tight text-white">
-                            Welcome to <span className={`bg-clip-text text-transparent bg-gradient-to-r ${brandOrange.gradientFrom} ${brandPurple.gradientTo}`}>EL Bahdja Phone</span>
+                            Welcome to <span className={`bg-clip-text text-transparent bg-gradient-to-r ${brandOrange.gradientFrom} ${brandPurple.gradientTo}`}>Walid Phone</span>
                         </h1>
                         <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto font-light leading-relaxed">
                             Your trusted destination for premium smartphones, laptops, and accessories

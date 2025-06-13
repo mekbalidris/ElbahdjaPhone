@@ -10,11 +10,11 @@ const Button = ({ children, onClick, variant = 'primary', size = 'md', className
         xl: "px-8 py-4 text-lg rounded-lg",
     };
     const variantStyles = {
-        primary: "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500",
+        primary: "bg-amber-500 hover:bg-amber-600 text-white focus:ring-amber-500",
         secondary: "bg-gray-200 hover:bg-gray-300 text-gray-800 focus:ring-gray-400",
         danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500",
-        outline: "bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-50 focus:ring-blue-500",
-        ghost: "bg-transparent hover:bg-gray-100 text-blue-600 focus:ring-blue-500",
+        outline: "bg-transparent border border-red-600 text-red-600 hover:bg-red-50 focus:ring-red-500",
+        ghost: "bg-transparent hover:bg-gray-100 text-red-600 focus:ring-red-500",
     };
     
     const getIconSize = () => {
