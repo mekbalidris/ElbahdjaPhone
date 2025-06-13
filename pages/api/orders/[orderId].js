@@ -25,6 +25,12 @@ export default async function handler(req, res) {
                 return res.status(200).json(order);
 
             case 'PATCH':
+                // Require user authentication for status updates
+                const userId = req.headers['user-id'];
+                if (!userId) {
+                    return res.status(401).json({ error: 'Unauthorized' });
+                }
+
                 const { status } = req.body;
                 
                 if (!status) {
@@ -114,6 +120,12 @@ export default async function handler(req, res) {
                 return res.status(200).json({ message: 'Order status updated successfully' });
 
             case 'DELETE':
+                // Require user authentication for deletion
+                const deleteUserId = req.headers['user-id'];
+                if (!deleteUserId) {
+                    return res.status(401).json({ error: 'Unauthorized' });
+                }
+
                 // Get the order before deleting to check if it was completed
                 const orderToDelete = await ordersCollection.findOne({ _id: new ObjectId(orderId) });
                 if (!orderToDelete) {

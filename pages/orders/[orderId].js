@@ -14,30 +14,21 @@ const OrderDetailPage = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Wait for router to be ready and user authentication to load
-        if (!router.isReady || authLoading) return;
+        // Wait for router to be ready
+        if (!router.isReady) return;
 
-        // If no user is logged in, redirect to login
-        if (!currentUser) {
-            toast.error('Please log in to view order details.');
-            router.push('/auth');
-            return;
-        }
-
-        // Fetch order details once orderId is available and user is logged in
-        if (orderId && currentUser) {
+        // Fetch order details once orderId is available
+        if (orderId) {
             const fetchOrder = async () => {
                 setIsLoading(true);
                 setError(null);
                 try {
-                    // Call the correct API endpoint for fetching a single order by ID
                     const res = await fetch(`/api/orders/${orderId}`, {
-                         headers: { // Send user ID for authorization check on the backend
-                            'user-id': currentUser.id
-                         }
+                        headers: {
+                            ...(currentUser && { 'user-id': currentUser.id })
+                        }
                     });
                     
-                    // Check for JSON content type before parsing
                     const contentType = res.headers.get('content-type');
                     let resultData = null;
                     if (contentType && contentType.includes('application/json')) {
@@ -45,14 +36,11 @@ const OrderDetailPage = () => {
                     }
 
                     if (!res.ok) {
-                         // Use error message from API response if available
                         const errorMessage = resultData?.error || 'Failed to fetch order details';
                         throw new Error(errorMessage);
                     }
 
-                    // Set the order data
                     setOrder(resultData);
-
                 } catch (err) {
                     console.error('Error fetching order:', err);
                     setError(err.message || 'Failed to load order details.');
@@ -62,14 +50,12 @@ const OrderDetailPage = () => {
                 }
             };
             fetchOrder();
-        } else if (!orderId && router.isReady) { // If router is ready but no orderId in query
-             setError('No order ID provided.');
-             setIsLoading(false);
-             toast.error('No order ID found.');
-             // Optionally redirect to a different page, e.g., orders list or home
-             // router.push('/orders');
+        } else if (!orderId && router.isReady) {
+            setError('No order ID provided.');
+            setIsLoading(false);
+            toast.error('No order ID found.');
         }
-    }, [router.isReady, orderId, currentUser, authLoading]); // Re-run effect if these dependencies change
+    }, [router.isReady, orderId, currentUser]);
 
     if (authLoading || isLoading) {
         return (

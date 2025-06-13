@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, Fragment } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Button from '../components/ui/Button';
@@ -6,7 +6,7 @@ import Icon from '../components/ui/Icon';
 import ProductCard from '../components/products/ProductCard';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
-import { ChevronDown, Smartphone, Laptop, Headphones, Grid } from 'lucide-react';
+import { ChevronDown, Smartphone, Laptop, Headphones, Grid, Instagram, Facebook, Mail, MapPin, Phone } from 'lucide-react';
 
 // --- Color Palette (Client Inspired - Tailwind classes) ---
 const brandOrange = {
@@ -26,7 +26,8 @@ const brandPurple = {
     hoverBg: 'hover:bg-purple-700',
     gradientFrom: 'from-purple-600',
     gradientTo: 'to-indigo-700',
-    ring: 'focus:ring-purple-600'
+    ring: 'focus:ring-purple-600',
+    hoverText: 'hover:text-purple-700'
 };
 
 // --- Main HomePage Component ---
@@ -35,41 +36,30 @@ const HomePage = ({ handleAddToCart }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [showcaseVideoVisible, setShowcaseVideoVisible] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+    const [dragDistance, setDragDistance] = useState(0);
     const router = useRouter();
     const { currentUser } = useAuth();
     const isAdmin = currentUser?.role === 'seller';
+
+    // Pagination state
+    const [featuredPage, setFeaturedPage] = useState(1);
+    const [offerPage, setOfferPage] = useState(1);
+    const productsPerPage = 4;
 
     const [heroVideoKey, setHeroVideoKey] = useState(Date.now());
     const [showcaseVideoKey, setShowcaseVideoKey] = useState(Date.now() + 1);
 
     const categories = useMemo(() => [
-        { 
-            name: 'All Phones', 
-            query: { category: 'phones' }, 
-            image: '/images/categories/phones.jpg',
-            description: 'Latest smartphones from top brands'
-        },
-        { 
-            name: 'Laptops', 
-            query: { category: 'laptops' }, 
-            image: '/images/categories/laptops.jpg',
-            description: 'Powerful laptops for work and gaming'
-        },
-        { 
-            name: 'Headphones', 
-            query: { category: 'accessories', subCategory: 'headphones' }, 
-            image: '/images/categories/headphones.jpg',
-            description: 'Premium audio accessories'
-        },
-        { 
-            name: 'Gadgets', 
-            query: { category: 'accessories' }, 
-            image: '/images/categories/gadgets.jpg',
-            description: 'Smart gadgets and accessories'
-        },
+        { name: 'Phones', query: { category: 'phones' }, icon: 'smartphone', image: '/images/categories/phones.jpg', description: 'Latest smartphones from top brands' },
+        { name: 'Laptops', query: { category: 'laptops' }, icon: 'laptop', image: '/images/categories/laptops.jpg', description: 'Powerful laptops for work and gaming' },
+        { name: 'Headphones', query: { category: 'accessories' }, icon: 'headphones', image: '/images/categories/headphones.jpg', description: 'Premium audio accessories' },
+        { name: 'Gadgets', query: { category: 'accessories' }, icon: 'grid', image: '/images/categories/gadgets.jpg', description: 'Smart gadgets and accessories' },
     ], []);
 
-    // Add debug logging for categories
+    // Debug logging for categories
     useEffect(() => {
         console.log('Categories data:', categories);
     }, [categories]);
@@ -122,28 +112,89 @@ const HomePage = ({ handleAddToCart }) => {
         fetchData();
     }, []);
 
-    const featuredProducts = useMemo(() => products.filter(p => p.featured).slice(0, 4), [products]);
-    const offerProducts = useMemo(() => products.filter(p => p.offer).slice(0, 4), [products]);
+    // Paginate products
+    const featuredProducts = useMemo(() => products.filter(p => p.featured), [products]);
+    const offerProducts = useMemo(() => products.filter(p => p.offer), [products]);
+
+    const totalFeaturedPages = Math.ceil(featuredProducts.length / productsPerPage);
+    const totalOfferPages = Math.ceil(offerProducts.length / productsPerPage);
+
+    const paginatedFeaturedProducts = featuredProducts.slice(
+        (featuredPage - 1) * productsPerPage,
+        featuredPage * productsPerPage
+    );
+    const paginatedOfferProducts = offerProducts.slice(
+        (offerPage - 1) * productsPerPage,
+        offerPage * productsPerPage
+    );
 
     const categorySliderRef = useRef(null);
     const autoSlideIntervalRef = useRef(null);
 
+    // Add drag functionality
+    const handleMouseDown = (e) => {
+        setIsDragging(true);
+        setStartX(e.pageX - categorySliderRef.current.offsetLeft);
+        setScrollLeft(categorySliderRef.current.scrollLeft);
+        setDragDistance(0);
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - categorySliderRef.current.offsetLeft;
+        const walk = (x - startX) * 2; // Scroll speed multiplier
+        categorySliderRef.current.scrollLeft = scrollLeft - walk;
+        setDragDistance(Math.abs(walk));
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    const handleTouchStart = (e) => {
+        setIsDragging(true);
+        setStartX(e.touches[0].pageX - categorySliderRef.current.offsetLeft);
+        setScrollLeft(categorySliderRef.current.scrollLeft);
+        setDragDistance(0);
+    };
+
+    const handleTouchMove = (e) => {
+        if (!isDragging) return;
+        const x = e.touches[0].pageX - categorySliderRef.current.offsetLeft;
+        const walk = (x - startX) * 2;
+        categorySliderRef.current.scrollLeft = scrollLeft - walk;
+        setDragDistance(Math.abs(walk));
+    };
+
+    const handleTouchEnd = () => {
+        setIsDragging(false);
+    };
+
+    const handleCategoryClick = (category, e) => {
+        if (dragDistance < 5) {
+            router.push({ 
+                pathname: '/products', 
+                query: category.query 
+            });
+        }
+    };
+
     // Auto slide functionality
     useEffect(() => {
-        if (!isHovered) {
+        if (!isHovered && !isDragging) {
             autoSlideIntervalRef.current = setInterval(() => {
                 if (categorySliderRef.current) {
                     const { scrollLeft, scrollWidth, clientWidth } = categorySliderRef.current;
-                    const scrollAmount = 0.9; // Small amount for smooth movement
+                    const scrollAmount = 0.9;
                     
                     categorySliderRef.current.scrollLeft += scrollAmount;
 
-                    // When we reach the end, reset to start
                     if (scrollLeft >= scrollWidth - clientWidth) {
                         categorySliderRef.current.scrollLeft = 0;
                     }
                 }
-            }, 20); // Update every 20ms for smooth movement
+            }, 20);
         }
 
         return () => {
@@ -151,7 +202,7 @@ const HomePage = ({ handleAddToCart }) => {
                 clearInterval(autoSlideIntervalRef.current);
             }
         };
-    }, [isHovered]);
+    }, [isHovered, isDragging]);
 
     useEffect(() => {
         const sections = document.querySelectorAll('.section-animate');
@@ -162,11 +213,67 @@ const HomePage = ({ handleAddToCart }) => {
                     observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.15 });
+        }, { threshold: 0.1 });
 
         sections.forEach(section => observer.observe(section));
         return () => sections.forEach(section => observer.unobserve(section));
     }, [isLoading]);
+
+    // Debug social media icons
+    useEffect(() => {
+        console.log('Rendering social media icons in top-right corner');
+    }, []);
+
+    // Pagination component
+    const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+        const getPageNumbers = () => {
+            const pages = [];
+            const maxPagesToShow = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+            let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+            if (endPage - startPage + 1 < maxPagesToShow) {
+                startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                pages.push(i);
+            }
+
+            return pages;
+        };
+
+        return (
+            <div className="flex items-center justify-center space-x-2 py-4">
+                <Button
+                    onClick={() => onPageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    variant="ghost"
+                    className={`disabled:opacity-50 disabled:cursor-not-allowed ${brandPurple.text} ${brandPurple.hoverBg}`}
+                >
+                    Previous
+                </Button>
+                {getPageNumbers().map(page => (
+                    <Button
+                        key={page}
+                        onClick={() => onPageChange(page)}
+                        variant={page === currentPage ? 'primary' : 'ghost'}
+                        className={`min-w-[40px] ${page === currentPage ? `${brandOrange.bg} text-white` : `${brandPurple.text} hover:bg-gray-100`}`}
+                    >
+                        {page}
+                    </Button>
+                ))}
+                <Button
+                    onClick={() => onPageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    variant="ghost"
+                    className={`disabled:opacity-50 disabled:cursor-not-allowed ${brandPurple.text} ${brandPurple.hoverBg}`}
+                >
+                    Next
+                </Button>
+            </div>
+        );
+    };
 
     if (isLoading && products.length === 0) {
         return (
@@ -184,15 +291,67 @@ const HomePage = ({ handleAddToCart }) => {
             <section className="min-h-screen flex flex-col items-center justify-center p-6 relative text-center bg-gradient-to-br from-slate-900 via-slate-800 to-black pt-16">
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-black"></div>
                 <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+
+                {/* Logo Placeholder */}
+                <div className="absolute top-6 left-6 z-20">
+                    <div className={`${brandOrange.text} text-2xl font-bold`}>EL Bahdja Phone</div>
+                </div>
+
+                {/* Contact Information */}
+                <div className="absolute top-6 right-10 mt-12 flex items-center gap-4 z-20">
+                    <a href="https://www.google.com/maps/place/Walid+phone/@36.1664465,1.3350221,608m/data=!3m2!1e3!4b1!4m6!3m5!1s0x12840f0029054703:0xb3b6d49ec8f29932!8m2!3d36.1664429!4d1.3371872!16s%2Fg%2F11vr4lwwpv?entry=ttu" 
+                       target="_blank" rel="noopener noreferrer"
+                       className="text-white hover:text-amber-500 transition-colors duration-300 flex items-center gap-2">
+                        <MapPin className="w-5 h-5" />
+                        <span className="text-sm">Find Us</span>
+                    </a>
+                    <button 
+                       onClick={() => {
+                           navigator.clipboard.writeText('0558626516');
+                           toast.success('Phone number copied successfully!');
+                       }}
+                       className="text-white hover:text-amber-500 transition-colors duration-300 flex items-center gap-2 cursor-pointer">
+                        <Phone className="w-5 h-5" />
+                        <span className="text-sm">0558 62 65 16</span>
+                    </button>
+                </div>
+
+                {/* Social Media Links */}
+                <div className="absolute top-6 left-8 flex items-center gap-4 z-20 mt-12">
+                    <a href="https://www.instagram.com/walidphone_/?hl=en" target="_blank" rel="noopener noreferrer"
+                       className="text-white hover:text-amber-500 transition-colors duration-300 flex items-center gap-2">
+                        <Instagram className="w-5 h-5" />
+                        <span className="text-sm">walidphone_</span>
+                    </a>
+                    <a href="https://www.facebook.com/p/Walid-phone-100057403661350/?locale=bg_BG" target="_blank" rel="noopener noreferrer"
+                       className="text-white hover:text-amber-500 transition-colors duration-300 flex items-center gap-2">
+                        <Facebook className="w-5 h-5" />
+                        <span className="text-sm">Walid phone</span>
+                    </a>
+                    <button 
+                       onClick={() => {
+                           navigator.clipboard.writeText('email@gmail.com');
+                           toast.success('Email copied successfully!');
+                       }}
+                       className="text-white hover:text-amber-500 transition-colors duration-300 flex items-center gap-2 cursor-pointer">
+                        <Mail className="w-5 h-5" />
+                        <span className="text-sm">email@gmail.com</span>
+                    </button>
+                </div>
+
                 <div className="relative z-10 space-y-8 max-w-4xl animate-fadeInUp" style={{animationDelay: '0.2s'}}>
-                    <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-tight text-white">
-                        Welcome to <span className={`bg-clip-text text-transparent bg-gradient-to-r ${brandOrange.gradientFrom} ${brandPurple.gradientTo}`}>EL Bahdja Phone</span>
-                    </h1>
-                    <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto font-light leading-relaxed">
-                        Discover the latest smartphones, laptops, and accessories at unbeatable prices
-                    </p>
+                    <div className="space-y-4">
+                        <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-tight text-white">
+                            Welcome to <span className={`bg-clip-text text-transparent bg-gradient-to-r ${brandOrange.gradientFrom} ${brandPurple.gradientTo}`}>EL Bahdja Phone</span>
+                        </h1>
+                        <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto font-light leading-relaxed">
+                            Your trusted destination for premium smartphones, laptops, and accessories
+                        </p>
+                    </div>
+
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center pt-8">
-                        <Button onClick={() => router.push('/products')} variant="primary" size="xl" className={`!${brandOrange.bg} ${brandOrange.hoverBg} !text-white`}>
+                        <Button onClick={() => router.push('/products')} variant="primary" size="xl" 
+                                className={`!${brandOrange.bg} ${brandOrange.hoverBg} !text-white transform hover:scale-105 transition-transform duration-300`}>
                             Explore Devices
                         </Button>
                         <Button 
@@ -202,14 +361,15 @@ const HomePage = ({ handleAddToCart }) => {
                             }} 
                             variant="outlinePurple" 
                             size="xl" 
-                            className={`bg-white text-black hover:bg-gray-300`}
+                            className={`bg-white text-black hover:bg-gray-300 transform hover:scale-105 transition-transform duration-300`}
                         >
                             Special Offers
                         </Button>
                     </div>
                 </div>
+
                 <div className="absolute bottom-10 text-gray-400 animate-bounce-slow z-10">
-                    <Icon name="chevronDown" className="w-10 h-10" path="m19.5 8.25-7.5 7.5-7.5-7.5"/>
+                    <ChevronDown className="w-10 h-10" />
                 </div>
             </section>
 
@@ -226,19 +386,25 @@ const HomePage = ({ handleAddToCart }) => {
                         {/* Slider */}
                         <div 
                             ref={categorySliderRef}
-                            className="flex overflow-x-hidden gap-6 pb-4"
+                            className="flex overflow-x-hidden gap-6 pb-4 cursor-grab active:cursor-grabbing"
                             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                             onMouseEnter={() => setIsHovered(true)}
-                            onMouseLeave={() => setIsHovered(false)}
+                            onMouseLeave={(e) => {
+                                setIsHovered(false);
+                                handleMouseUp(e);
+                            }}
+                            onMouseDown={handleMouseDown}
+                            onMouseMove={handleMouseMove}
+                            onMouseUp={handleMouseUp}
+                            onTouchStart={handleTouchStart}
+                            onTouchMove={handleTouchMove}
+                            onTouchEnd={handleTouchEnd}
                         >
                             {/* Duplicate categories for seamless loop */}
                             {[...categories, ...categories].map((category, index) => (
                                 <div
                                     key={index}
-                                    onClick={() => router.push({ 
-                                        pathname: '/products', 
-                                        query: category.query 
-                                    })}
+                                    onClick={(e) => handleCategoryClick(category, e)}
                                     className="group relative flex-none w-[80vw] sm:w-[60vw] md:w-[45vw] lg:w-[30vw] h-[400px] bg-white rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
                                     style={{animationDelay: `${index * 100}ms`}}
                                 >
@@ -253,7 +419,7 @@ const HomePage = ({ handleAddToCart }) => {
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
                                     </div>
-                                    <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                                    <div className="absolute bottom-0 left-6 right-0 p-8 text-white">
                                         <h3 className="text-2xl font-bold mb-3">{category.name}</h3>
                                         <p className="text-base text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                             {category.description}
@@ -301,13 +467,20 @@ const HomePage = ({ handleAddToCart }) => {
 
                     {isLoading && !offerProducts.length ? (
                         <div className="flex justify-center items-center h-64"><div className={`w-12 h-12 border-4 ${brandOrange.border} border-t-transparent rounded-full animate-spin`}></div></div>
-                    ) : offerProducts.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-                            {offerProducts.map((product, index) => (
-                                <div key={product._id} className="animate-fadeInUp" style={{animationDelay: `${0.3 + index * 0.1}s`}}>
-                                    <ProductCard product={product} onAddToCart={handleAddToCart} />
-                                </div>
-                            ))}
+                    ) : paginatedOfferProducts.length > 0 ? (
+                        <div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                                {paginatedOfferProducts.map((product, index) => (
+                                    <div key={product._id} className="animate-fadeInUp" style={{animationDelay: `${0.3 + index * 0.1}s`}}>
+                                        <ProductCard product={product} onAddToCart={handleAddToCart} />
+                                    </div>
+                                ))}
+                            </div>
+                            <Pagination
+                                currentPage={offerPage}
+                                totalPages={totalOfferPages}
+                                onPageChange={setOfferPage}
+                            />
                         </div>
                     ) : (
                         <p className="text-center text-slate-500 text-lg py-8">No special offers available right now. Check back soon!</p>
@@ -334,13 +507,20 @@ const HomePage = ({ handleAddToCart }) => {
                     </div>
                     {isLoading && !featuredProducts.length ? (
                         <div className="flex justify-center items-center h-64"><div className={`w-12 h-12 border-4 ${brandPurple.border} border-t-transparent rounded-full animate-spin`}></div></div>
-                    ) : featuredProducts.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-                            {featuredProducts.map((product, index) => (
-                                <div key={product._id} className="animate-fadeInUp" style={{animationDelay: `${0.2 + index * 0.15}s`}}>
-                                    <ProductCard product={product} onAddToCart={handleAddToCart} />
-                                </div>
-                            ))}
+                    ) : paginatedFeaturedProducts.length > 0 ? (
+                        <div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                                {paginatedFeaturedProducts.map((product, index) => (
+                                    <div key={product._id} className="animate-fadeInUp" style={{animationDelay: `${0.2 + index * 0.15}s`}}>
+                                        <ProductCard product={product} onAddToCart={handleAddToCart} />
+                                    </div>
+                                ))}
+                            </div>
+                            <Pagination
+                                currentPage={featuredPage}
+                                totalPages={totalFeaturedPages}
+                                onPageChange={setFeaturedPage}
+                            />
                         </div>
                     ) : (
                         <p className="text-center text-slate-500 text-lg py-8">Curating our featured products... Please check back soon!</p>
@@ -382,4 +562,4 @@ const HomePage = ({ handleAddToCart }) => {
     );
 };
 
-export default HomePage; 
+export default HomePage;
