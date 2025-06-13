@@ -259,6 +259,16 @@ const CheckoutPage = () => {
         setIsPlacingOrder(true);
         const loadingToast = toast.loading('Placing your order...');
         try {
+            // Generate or get user ID
+            let userId;
+            if (currentUser) {
+                userId = currentUser.id;
+            } else {
+                // For guests, generate a unique ID or get existing one from localStorage
+                userId = localStorage.getItem('guestUserId') || `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                localStorage.setItem('guestUserId', userId);
+            }
+
             const orderData = {
                 items: cartItems.map(item => ({
                     productId: item.productId,
@@ -278,14 +288,14 @@ const CheckoutPage = () => {
                 },
                 paymentMethod: 'cash_on_delivery',
                 isGuestOrder: !currentUser,
-                userId: currentUser?.id || null
+                userId: userId // Store the user ID in the order
             };
 
             const response = await fetch('/api/orders', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(currentUser && { 'user-id': currentUser.id })
+                    'user-id': userId // Add user ID to headers
                 },
                 body: JSON.stringify(orderData)
             });
@@ -304,6 +314,13 @@ const CheckoutPage = () => {
                     return;
                 }
                 throw new Error(responseData.error || 'Failed to place order');
+            }
+
+            // Store order ID in localStorage for guests
+            if (!currentUser) {
+                const guestOrders = JSON.parse(localStorage.getItem('guestOrders') || '[]');
+                guestOrders.push(responseData._id);
+                localStorage.setItem('guestOrders', JSON.stringify(guestOrders));
             }
 
             // Clear the cart after successful order placement

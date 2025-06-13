@@ -89,8 +89,7 @@ export default async function handler(req, res) {
                              await productsCollection.bulkWrite(bulkOps);
                          }
                     }
-
-                } else if (currentOrder.status === 'completed' && status !== 'completed') {
+                } else if (status !== 'completed' && currentOrder.status === 'completed') {
                     // Subtract the order total from revenue if uncompleting
                     await statisticsCollection.updateOne(
                         { _id: 'main' },

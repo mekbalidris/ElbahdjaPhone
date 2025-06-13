@@ -43,10 +43,16 @@ export function AuthProvider({ children }) {
                 throw new Error(responseData.error || 'Login failed. Please check your credentials.');
             }
             
-            setCurrentUser(responseData);
+            // Ensure the user ID is properly set
+            const userWithId = {
+                ...responseData,
+                id: responseData._id // Ensure the ID is properly set
+            };
+            
+            setCurrentUser(userWithId);
             // Store user data in cookie with 7 days expiration
-            Cookies.set('currentUser', JSON.stringify(responseData), { expires: 7 });
-            return responseData;
+            Cookies.set('currentUser', JSON.stringify(userWithId), { expires: 7 });
+            return userWithId;
         } catch (error) {
             console.error('Login error in AuthContext:', error);
             throw error;
@@ -58,13 +64,24 @@ export function AuthProvider({ children }) {
             const res = await fetch('/api/users', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userData),
+                body: JSON.stringify({
+                    action: 'register',
+                    ...userData
+                }),
             });
             const responseData = await res.json();
 
             if (!res.ok) {
                 throw new Error(responseData.error || 'Registration failed. Please try again.');
             }
+            
+            // Store the user data including ID in the cookie
+            const userWithId = {
+                ...responseData,
+                id: responseData._id // Ensure the ID is properly set
+            };
+            Cookies.set('currentUser', JSON.stringify(userWithId), { expires: 7 });
+            setCurrentUser(userWithId);
             
             return responseData;
         } catch (error) {

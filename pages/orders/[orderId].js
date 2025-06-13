@@ -23,11 +23,7 @@ const OrderDetailPage = () => {
                 setIsLoading(true);
                 setError(null);
                 try {
-                    const res = await fetch(`/api/orders/${orderId}`, {
-                        headers: {
-                            ...(currentUser && { 'user-id': currentUser.id })
-                        }
-                    });
+                    const res = await fetch(`/api/orders/${orderId}`);
                     
                     const contentType = res.headers.get('content-type');
                     let resultData = null;
@@ -55,9 +51,9 @@ const OrderDetailPage = () => {
             setIsLoading(false);
             toast.error('No order ID found.');
         }
-    }, [router.isReady, orderId, currentUser]);
+    }, [router.isReady, orderId]);
 
-    if (authLoading || isLoading) {
+    if (isLoading) {
         return (
             <div className="min-h-[80vh] flex items-center justify-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>

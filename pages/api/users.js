@@ -46,7 +46,12 @@ export default async function handler(req, res) {
                 
                 // Return the new user object (without password)
                 const insertedUser = await usersCollection.findOne({ _id: result.insertedId }, { projection: { password: 0 } });
-                res.status(201).json(insertedUser);
+                // Ensure the ID is properly set in the response
+                const userResponse = {
+                    ...insertedUser,
+                    id: insertedUser._id.toString()
+                };
+                res.status(201).json(userResponse);
 
             } catch (error) {
                 console.error('Registration API Error:', error);
@@ -70,9 +75,13 @@ export default async function handler(req, res) {
                     return res.status(401).json({ error: 'Invalid credentials' });
                 }
 
-                // Return user data (excluding password)
+                // Return user data (excluding password) with proper ID
                 const { password: _, ...userWithoutPassword } = user;
-                res.status(200).json(userWithoutPassword);
+                const userResponse = {
+                    ...userWithoutPassword,
+                    id: user._id.toString()
+                };
+                res.status(200).json(userResponse);
 
             } catch (error) {
                 console.error('Login API Error:', error);

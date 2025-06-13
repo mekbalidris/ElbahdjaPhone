@@ -285,7 +285,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                     </div>
 
                     <div className="flex items-center space-x-3">
-                        <div className="relative flex-1 max-w-xl">
+                        <div className="relative flex-1 max-w-xl hidden md:block">
                             <input
                                 type="text"
                                 value={searchQuery}

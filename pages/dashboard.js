@@ -60,7 +60,12 @@ const SellerDashboardPage = () => {
     const fetchProducts = async () => {
         setIsLoadingProducts(true);
         try {
-            const res = await fetch('/api/products');
+            const res = await fetch('/api/products', {
+                headers: {
+                    'user-id': currentUser?.id,
+                    'user-role': currentUser?.role
+                }
+            });
             if (!res.ok) throw new Error('Failed to fetch products');
             const data = await res.json();
             setProducts(data);
@@ -89,7 +94,6 @@ const SellerDashboardPage = () => {
 
     // Filter products owned by the current user and apply search filter
     const filteredUserProducts = products.filter(p => 
-        p.sellerId === currentUser?.id &&
         (p.name?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
          p.description?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
          p.category?.toLowerCase().includes(productSearchTerm.toLowerCase())) &&

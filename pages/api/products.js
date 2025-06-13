@@ -49,7 +49,7 @@ export default async function handler(req, res) {
            return res.status(500).json({ error: 'Failed to fetch product' });
         }
       } else {
-        // Fetch all products for the homepage/products page
+        // Always return all products for dashboard view
         const products = await collection.find({}).toArray();
         res.status(200).json(products);
       }
@@ -73,11 +73,11 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: 'Invalid request body' });
       }
 
-      const { _id, ...updates } = req.body; // Use 'updates' to avoid conflict with 'update' keyword
+      const { _id, ...updates } = req.body;
       console.log('Product ID (_id):', _id);
       console.log('Update object:', updates);
 
-      // Ensure _id is provided and is a string (expected format from frontend)
+      // Ensure _id is provided and is a string
       if (!_id || typeof _id !== 'string') {
           console.error('Missing or invalid _id in request body for PATCH');
           return res.status(400).json({ error: 'Product ID (_id) is required and must be a string for PATCH' });
@@ -85,21 +85,19 @@ export default async function handler(req, res) {
 
       let objectId;
       try {
-          // Validate and convert the string _id to a MongoDB ObjectId
           if (!ObjectId.isValid(_id)) {
                console.error('Invalid ObjectId format for PATCH:', _id);
                return res.status(400).json({ error: 'Invalid Product ID format.' });
           }
           objectId = new ObjectId(_id);
       } catch (err) {
-          // This catch might be redundant due to isValid check but good for safety
           console.error('Error creating ObjectId from provided ID:', err);
           return res.status(400).json({ error: 'Invalid product ID format' });
       }
 
       try {
-          const filter = { _id: objectId }; // Use the converted ObjectId for the query
-          const updateDoc = { $set: updates }; // Apply the updates received
+          const filter = { _id: objectId };
+          const updateDoc = { $set: updates };
 
           const result = await collection.updateOne(
               filter,
@@ -111,11 +109,9 @@ export default async function handler(req, res) {
               return res.status(404).json({ error: 'Product not found with provided ID' });
           }
 
-          // Optionally fetch the updated document to return it
           const updatedProduct = await collection.findOne(filter);
 
           if (result.modifiedCount === 0 && result.matchedCount === 1) {
-               // Product was found but no changes were made (e.g., setting featured: true when already true)
                return res.status(200).json({ message: 'Product status unchanged (already up-to-date).', product: updatedProduct });
           }
 
@@ -123,7 +119,6 @@ export default async function handler(req, res) {
 
       } catch (err) {
           console.error('Error updating product in database:', err);
-          // Return a 500 error for database-related issues
           return res.status(500).json({ error: 'Internal server error while updating product.' });
       }
     } else if (req.method === 'DELETE') {
