@@ -20,11 +20,11 @@ const brandOrange = {
 };
 
 const brandPurple = {
-    bg: 'bg-slate-800',
-    text: 'text-slate-800',
+    bg: 'bg-slate-950',
+    text: 'text-slate-950',
     border: 'border-slate-800',
     hoverBg: 'hover:bg-slate-900',
-    gradientFrom: 'from-slate-800',
+    gradientFrom: 'from-slate-950',
     gradientTo: 'to-slate-900',
     ring: 'focus:ring-slate-500',
     hoverText: 'hover:text-slate-900'
@@ -288,9 +288,15 @@ const HomePage = ({ handleAddToCart }) => {
     return (
         <div className="bg-gray-50 min-h-screen font-sans text-slate-800 selection:bg-amber-500 selection:text-white overflow-x-hidden">
             {/* Screen 1: Hero Section */}
-            <section className="min-h-screen flex flex-col items-center justify-center p-6 relative text-center bg-gradient-to-br from-slate-900 via-slate-800 to-black pt-16">
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-black"></div>
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+            <section className="min-h-screen flex flex-col items-center justify-center p-6 relative text-center pt-16">
+                <Image 
+                    src="/images/background.jpg" 
+                    alt="Background" 
+                    fill 
+                    priority 
+                    className="object-cover z-0"
+                />
+                <div className="absolute inset-0 bg-black opacity-30 z-10"></div> {/* Dark overlay for text readability */}
 
                 {/* Logo Placeholder */}
                 <div className="absolute top-6 left-6 z-20">
@@ -342,7 +348,7 @@ const HomePage = ({ handleAddToCart }) => {
                 <div className="relative z-10 space-y-8 max-w-4xl animate-fadeInUp" style={{animationDelay: '0.2s'}}>
                     <div className="space-y-4">
                         <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-tight text-white">
-                            Welcome to <span className={`bg-clip-text text-transparent bg-gradient-to-r ${brandOrange.gradientFrom} ${brandPurple.gradientTo}`}>Walid Phone</span>
+                            Welcome to <span className={`bg-clip-text text-transparent bg-gradient-to-r from-blue-200 ${brandOrange.gradientTo}`}>Walid Phone</span>
                         </h1>
                         <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto font-light leading-relaxed">
                             Your trusted destination for premium smartphones, laptops, and accessories
