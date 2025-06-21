@@ -9,13 +9,13 @@ import Button from '../ui/Button';
 
 // --- Color Palette (Client Inspired - Tailwind classes) ---
 const brandOrange = {
-    bg: 'bg-red-600',
-    text: 'text-red-600',
-    border: 'border-red-600',
-    hoverBg: 'hover:bg-red-700',
-    ring: 'focus:ring-red-500',
-    gradientFrom: 'from-red-600',
-    gradientTo: 'to-red-700',
+    bg: 'bg-orange-600',
+    text: 'text-orange-600',
+    border: 'border-orange-600',
+    hoverBg: 'hover:bg-orange-700',
+    ring: 'focus:ring-orange-500',
+    gradientFrom: 'from-orange-600',
+    gradientTo: 'to-orange-700',
 };
 
 const brandPurple = {
@@ -105,7 +105,7 @@ const ProductCard = ({ product }) => {
                 
                 {/* Deal Tag */}
                 {product.offer && (
-                    <span className="absolute top-3 left-3 bg-red-600 text-white text-[0.65rem] font-bold px-2.5 py-1 rounded-full shadow-md tracking-wider animate-pulse">
+                    <span className="absolute top-3 left-3 bg-orange-600 text-white text-[0.65rem] font-bold px-2.5 py-1 rounded-full shadow-md tracking-wider animate-pulse">
                         DEAL
                     </span>
                 )}
@@ -135,13 +135,13 @@ const ProductCard = ({ product }) => {
                     {isAvailable ? (
                         <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded-full ml-2 whitespace-nowrap">In Stock</span>
                     ) : (
-                        <span className="text-sm text-red-600 bg-red-50 px-2 py-1 rounded-full ml-2 whitespace-nowrap">Out of Stock</span>
+                        <span className="text-sm text-orange-600 bg-orange-50 px-2 py-1 rounded-full ml-2 whitespace-nowrap">Out of Stock</span>
                     )}
                 </div>
                 <div className="flex items-center justify-between mb-4">
                     <p className="text-amber-500 font-bold text-xl">{product.price?.toLocaleString()} DA</p>
                     {product.oldPrice && (
-                        <p className="text-red-800 text-sm line-through">{product.oldPrice?.toLocaleString()} DA</p>
+                        <p className="text-orange-800 text-sm line-through">{product.oldPrice?.toLocaleString()} DA</p>
                     )}
                 </div>
                 <div className="p-4 space-y-2">
@@ -149,7 +149,7 @@ const ProductCard = ({ product }) => {
                         onClick={handleAddToCartClick}
                         variant="outline" 
                         size="sm"
-                        className="w-full border-red-600 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors" 
+                        className="w-full border-orange-600 text-orange-400 hover:bg-orange-50 hover:text-orange-700 transition-colors" 
                         disabled={!isAvailable}
                         iconLeft="shoppingBag"
                     >

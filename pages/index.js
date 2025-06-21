@@ -10,24 +10,24 @@ import { ChevronDown, Smartphone, Laptop, Headphones, Grid, Instagram, Facebook,
 
 // --- Color Palette (Client Inspired - Tailwind classes) ---
 const brandOrange = {
-    bg: 'bg-red-600',
-    text: 'text-red-600',
-    border: 'border-red-600',
-    hoverBg: 'hover:bg-red-700',
-    gradientFrom: 'from-red-600',
-    gradientTo: 'to-red-700',
-    ring: 'focus:ring-red-500'
+    bg: 'bg-orange-600',
+    text: 'text-orange-600',
+    border: 'border-orange-600',
+    hoverBg: 'hover:bg-orange-700',
+    gradientFrom: 'from-orange-600',
+    gradientTo: 'to-orange-700',
+    ring: 'focus:ring-orange-500'
 };
 
 const brandPurple = {
-    bg: 'bg-slate-950',
-    text: 'text-slate-950',
-    border: 'border-slate-800',
-    hoverBg: 'hover:bg-slate-900',
-    gradientFrom: 'from-slate-950',
-    gradientTo: 'to-slate-900',
-    ring: 'focus:ring-slate-500',
-    hoverText: 'hover:text-slate-900'
+    bg: 'bg-[#26225C]',
+    text: 'text-[#26225C]',
+    border: 'border-[#26225C]',
+    hoverBg: 'hover:bg-[#26225C]/90',
+    gradientFrom: 'from-[#26225C]',
+    gradientTo: 'to-[#26225C]',
+    ring: 'focus:ring-[#26225C]',
+    hoverText: 'hover:text-[#26225C]'
 };
 
 // --- Main HomePage Component ---
@@ -278,7 +278,7 @@ const HomePage = ({ handleAddToCart }) => {
     if (isLoading && products.length === 0) {
         return (
             <div className="fixed inset-0 bg-gray-50 flex flex-col items-center justify-center z-[100]">
-                <div className={`${brandOrange.text} text-4xl font-bold mb-4`}>Walid Phone</div>
+                <div className={`${brandOrange.text} text-4xl font-bold mb-4`}>Store Phone</div>
                 <div className={`w-16 h-16 border-4 ${brandOrange.border} border-t-transparent rounded-full animate-spin`}></div>
                 <p className="text-slate-700 mt-4 text-lg">Loading...</p>
             </div>
@@ -300,7 +300,7 @@ const HomePage = ({ handleAddToCart }) => {
 
                 {/* Logo Placeholder */}
                 <div className="absolute top-6 left-6 z-20">
-                    <div className={`${brandOrange.text} text-2xl font-bold`}>EL Bahdja Phone</div>
+                    <div className={`${brandOrange.text} text-2xl font-bold`}>Store Phone</div>
                 </div>
 
                 {/* Contact Information */}
@@ -327,12 +327,12 @@ const HomePage = ({ handleAddToCart }) => {
                     <a href="https://www.instagram.com/walidphone_/?hl=en" target="_blank" rel="noopener noreferrer"
                        className="text-white hover:text-red-400 transition-colors duration-300 flex items-center gap-2">
                         <Instagram className="w-5 h-5" />
-                        <span className="text-sm">walidphone_</span>
+                        <span className="text-sm">Storephone_</span>
                     </a>
                     <a href="https://www.facebook.com/p/Walid-phone-100057403661350/?locale=bg_BG" target="_blank" rel="noopener noreferrer"
                        className="text-white hover:text-red-400 transition-colors duration-300 flex items-center gap-2">
                         <Facebook className="w-5 h-5" />
-                        <span className="text-sm">Walid phone</span>
+                        <span className="text-sm">Store phone</span>
                     </a>
                     <button 
                        onClick={() => {
@@ -348,7 +348,7 @@ const HomePage = ({ handleAddToCart }) => {
                 <div className="relative z-10 space-y-8 max-w-4xl animate-fadeInUp" style={{animationDelay: '0.2s'}}>
                     <div className="space-y-4">
                         <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-tight text-white">
-                            Welcome to <span className={`bg-clip-text text-transparent bg-gradient-to-r from-blue-200 ${brandOrange.gradientTo}`}>Walid Phone</span>
+                            Welcome to <span className={`bg-clip-text text-transparent bg-gradient-to-r from-blue-200 ${brandOrange.gradientTo}`}>Store Phone</span>
                         </h1>
                         <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto font-light leading-relaxed">
                             Your trusted destination for premium smartphones, laptops, and accessories

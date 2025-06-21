@@ -9,8 +9,8 @@ import Icon from '../ui/Icon';
 import Button from '../ui/Button';
 
 // --- Color Palette (Client Inspired) ---
-const brandOrange = { text: 'text-red-600', bg: 'bg-red-600', hoverBg: 'hover:bg-red-700', ring: 'focus:ring-red-500' };
-const brandPurple = { text: 'text-slate-800', hoverText: 'hover:text-slate-900', ring: 'focus:ring-slate-500', bg: 'bg-slate-800' };
+const brandOrange = { text: 'text-orange-600', bg: 'bg-orange-600', hoverBg: 'hover:bg-orange-700', ring: 'focus:ring-orange-500' };
+const brandPurple = { text: 'text-[#26225C]', hoverText: 'hover:text-[#26225C]', ring: 'focus:ring-[#26225C]', bg: 'bg-[#26225C]' };
 
 // --- Sub-Components for Navbar ---
 const NavLink = ({ href, children }) => {
@@ -84,7 +84,7 @@ const MegaMenu = ({ closeMobileMenu }) => {
                                             e.preventDefault();
                                             handleLinkClick(item.href);
                                         }} 
-                                        className="text-slate-600 hover:text-red-600 transition-colors"
+                                        className="text-slate-600 hover:text-orange-600 transition-colors"
                                     >
                                         {item.name}
                                     </a>
@@ -102,7 +102,7 @@ const MegaMenu = ({ closeMobileMenu }) => {
                                             e.preventDefault();
                                             handleLinkClick(item.href);
                                         }} 
-                                        className="text-slate-600 hover:text-red-600 transition-colors"
+                                        className="text-slate-600 hover:text-orange-600 transition-colors"
                                     >
                                         {item.name}
                                     </a>
@@ -254,7 +254,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
     };
 
     return (
-        <nav className={`bg-white/80 backdrop-blur-lg shadow-sm font-sans z-50 transition-transform duration-300 fixed top-0 left-0 right-0 ${
+        <nav className={`bg-white/70 backdrop-blur-[10px] shadow-sm font-sans z-50 transition-transform duration-300 fixed top-0 left-0 right-0 ${
             !isVisible ? '-translate-y-full' : 'translate-y-0'
         }`}>
             <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -263,7 +263,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                         <Link href="/" legacyBehavior>
                             <a className="flex-shrink-0 flex items-center">
                                 <img src="/logo.png" alt="Logo" className="h-8 w-auto mr-2" onError={(e) => e.target.style.display='none'}/>
-                                <span className={`text-xl font-extrabold ${brandOrange.text}`}>Walid</span>
+                                <span className={`text-xl font-extrabold ${brandOrange.text}`}>Store</span>
                                 <span className={`text-xl font-extrabold ${brandPurple.text} ml-1`}>Phone</span>
                             </a>
                         </Link>
@@ -316,7 +316,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                         </div>
                         <button 
                             onClick={onCartClick}
-                            className={`relative p-2 rounded-full text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors`} 
+                            className={`relative p-2 rounded-full text-slate-600 hover:text-orange-600 hover:bg-orange-50 transition-colors`} 
                             aria-label="Cart"
                         >
                             <Icon name="cart" className="w-6 h-6" />
@@ -374,7 +374,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                             </Link>
                                             <button 
                                                 onClick={handleLogout} 
-                                                className={`flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-500/10 hover:text-red-700`}
+                                                className={`flex items-center w-full text-left px-4 py-2 text-sm text-orange-600 hover:bg-orange-500/10 hover:text-orange-700`}
                                             >
                                                 <Icon name="logout" className="w-4 h-4 mr-2"/>Logout
                                             </button>
@@ -433,7 +433,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                     <Link key={item.label} href={item.href} legacyBehavior>
                                         <a 
                                             onClick={() => setMobileMenuOpen(false)} 
-                                            className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-red-50 hover:text-red-600"
+                                            className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-orange-50 hover:text-orange-600"
                                         >
                                             {item.label}
                                         </a>
@@ -442,7 +442,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                 <Link href="/products" legacyBehavior>
                                     <a 
                                         onClick={() => setMobileMenuOpen(false)} 
-                                        className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-red-50 hover:text-red-600"
+                                        className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-orange-50 hover:text-orange-600"
                                     >
                                         Products
                                     </a>
@@ -499,7 +499,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                             </Link>
                                             <button 
                                                 onClick={handleLogout} 
-                                                className="flex items-center w-full px-3 py-2 text-base font-medium text-red-600 hover:bg-red-500/10 hover:text-red-700"
+                                                className="flex items-center w-full px-3 py-2 text-base font-medium text-orange-600 hover:bg-orange-500/10 hover:text-orange-700"
                                             >
                                                 <Icon name="logout" className="w-5 h-5 mr-3"/>Logout
                                             </button>

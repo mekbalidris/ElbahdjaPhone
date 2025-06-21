@@ -40,28 +40,28 @@ const FallbackButton = ({ children, onClick, variant = 'primary', size = 'md', c
 };
 const FallbackInput = React.forwardRef(({ type = 'text', placeholder, value, onChange, name, label, required = false, className = '', error, iconLeft }, ref) => (
     <div className="mb-4 w-full">
-        {label && <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>}
+        {label && <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-orange-500">*</span>}</label>}
         <div className="relative">
             {iconLeft && <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><MinimalIcon name={iconLeft} className="text-gray-400 w-5 h-5" /></div>}
-            <input ref={ref} type={type} id={name} name={name} placeholder={placeholder} value={value} onChange={onChange} required={required} className={`w-full px-3 py-2.5 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 ${error ? 'focus:ring-red-500' : 'focus:ring-blue-500'} focus:border-transparent ${iconLeft ? 'pl-10' : ''} ${className}`} />
+            <input ref={ref} type={type} id={name} name={name} placeholder={placeholder} value={value} onChange={onChange} required={required} className={`w-full px-3 py-2.5 border ${error ? 'border-orange-500' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 ${error ? 'focus:ring-orange-500' : 'focus:ring-blue-500'} focus:border-transparent ${iconLeft ? 'pl-10' : ''} ${className}`} />
         </div>
-        {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+        {error && <p className="mt-1 text-xs text-orange-600">{error}</p>}
     </div>
 ));
 const FallbackSelect = React.forwardRef(({ options, value, onChange, name, label, required = false, className = '', error }, ref) => (
     <div className="mb-4 w-full">
-        {label && <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>}
-        <select ref={ref} id={name} name={name} value={value} onChange={onChange} required={required} className={`w-full px-3 py-2.5 border ${error ? 'border-red-500' : 'border-gray-300'} bg-white rounded-lg shadow-sm focus:outline-none focus:ring-2 ${error ? 'focus:ring-red-500' : 'focus:ring-blue-500'} focus:border-transparent ${className}`}>
+        {label && <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-orange-500">*</span>}</label>}
+        <select ref={ref} id={name} name={name} value={value} onChange={onChange} required={required} className={`w-full px-3 py-2.5 border ${error ? 'border-orange-500' : 'border-gray-300'} bg-white rounded-lg shadow-sm focus:outline-none focus:ring-2 ${error ? 'focus:ring-orange-500' : 'focus:ring-blue-500'} focus:border-transparent ${className}`}>
             {options.map(option => (<option key={option.value} value={option.value} disabled={option.disabled}>{option.label}</option>))}
         </select>
-        {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+        {error && <p className="mt-1 text-xs text-orange-600">{error}</p>}
     </div>
 ));
 const FallbackTextArea = React.forwardRef(({ placeholder, value, onChange, name, label, rows = 3, className = '', error }, ref) => (
     <div className="mb-4 w-full">
         {label && <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>}
-        <textarea ref={ref} name={name} placeholder={placeholder} value={value} onChange={onChange} rows={rows} className={`w-full px-3 py-2.5 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 ${error ? 'focus:ring-red-500' : 'focus:ring-blue-500'} focus:border-transparent ${className}`} />
-        {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+        <textarea ref={ref} name={name} placeholder={placeholder} value={value} onChange={onChange} rows={rows} className={`w-full px-3 py-2.5 border ${error ? 'border-orange-500' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 ${error ? 'focus:ring-orange-500' : 'focus:ring-blue-500'} focus:border-transparent ${className}`} />
+        {error && <p className="mt-1 text-xs text-orange-600">{error}</p>}
     </div>
 ));
 
@@ -188,7 +188,7 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove }) => {
                 </p>
                 <button
                     onClick={() => onRemove(item.productId)}
-                    className="text-red-500 hover:text-red-600"
+                    className="text-orange-500 hover:text-orange-600"
                 >
                     <Trash2 className="h-5 w-5" />
                 </button>
