@@ -133,11 +133,11 @@ const ProductDetailPage = () => {
                     </div>
                     {/* Main Image */}
                     <div className="lg:col-span-4 mb-8">
-                         <div className="bg-gray-100 rounded-2xl shadow-lg overflow-hidden h-[30rem] w-[30rem] sticky top-24 flex items-center justify-center">
+                         <div className="bg-gray-100 rounded-2xl shadow-lg overflow-hidden h-[30rem] w-[30rem] sticky top-24 flex items-center justify-center max-sm:relative max-sm:top-0 max-sm:w-[90vw] max-sm:h-[300px] max-sm:mx-auto">
                             <img 
                                 src={activeImage} 
                                 alt={product.name} 
-                                className={`w-full h-full object-cover transition-transform duration-300 ${isHovering ? '' : ''}`}
+                                className={`w-full h-full object-cover transition-transform duration-300 ${isHovering ? '' : ''} max-sm:w-full max-sm:h-full max-sm:max-w-[90vw] max-sm:max-h-[300px]`}
                                 style={{
                                     transform: isHovering ? 'scale(2.5)' : 'scale(1)',
                                     transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`
