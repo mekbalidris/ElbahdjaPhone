@@ -113,7 +113,7 @@ const ProductDetailPage = () => {
     if (!product) return <div className="min-h-screen flex items-center justify-center"><h1 className="text-2xl text-slate-700">Product not found.</h1></div>;
 
     return (
-        <div className="bg-white font-sans mt-[1rem]">
+        <div className="bg-white font-sans mt-[1.8rem]">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
                 <div className="mb-6">
                     <button onClick={() => router.back()} className={`inline-flex items-center text-sm font-medium ${brandPurple.text} hover:text-purple-700`}>
@@ -192,12 +192,15 @@ const ProductDetailPage = () => {
                 </div>
                 <section className="pt-16 mt-16 border-t border-gray-200/80">
                     <h2 className="text-2xl font-bold text-center mb-8 text-slate-800">Related Products</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {relatedProducts.map(related => (
-                            <ProductCard key={related._id} product={related} />
-                        ))}
-                        {fallbackProducts.map(related => (
-                            <ProductCard key={related._id} product={related} />
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+                        {[...relatedProducts, ...fallbackProducts].map((related, index) => (
+                            <div
+                                key={related._id}
+                                className="animate-fadeInUp"
+                                style={{animationDelay: `${index * 60}ms`}}
+                            >
+                                <ProductCard product={related} />
+                            </div>
                         ))}
                     </div>
                 </section>

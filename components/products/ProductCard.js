@@ -147,9 +147,8 @@ const ProductCard = ({ product, compact = false }) => {
                         onClick={handleAddToCartClick}
                         variant="outline" 
                         size={compact ? "xs" : "sm"}
-                        className={`w-full border-orange-600 text-orange-400 hover:bg-orange-50 hover:text-orange-700 transition-colors ${compact ? 'text-xs px-2 py-1' : ''}`}
+                        className={`w-full border-orange-600 text-orange-600 hover:bg-orange-50 hover:text-orange-700 transition-colors font-semibold whitespace-nowrap ${compact ? 'text-xs px-2 py-1' : ''}`}
                         disabled={!isAvailable}
-                        iconLeft="shoppingBag"
                     >
                         Add to Cart
                     </Button>
