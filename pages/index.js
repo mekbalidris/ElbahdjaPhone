@@ -304,21 +304,35 @@ const HomePage = ({ handleAddToCart }) => {
                 </div>
 
                 {/* Contact Information */}
-                <div className="absolute top-6 right-10 mt-12 flex items-center gap-4 z-20">
-                    <a href="https://www.google.com/maps/place/Walid+phone/@36.1664465,1.3350221,608m/data=!3m2!1e3!4b1!4m6!3m5!1s0x12840f0029054703:0xb3b6d49ec8f29932!8m2!3d36.1664429!4d1.3371872!16s%2Fg%2F11vr4lwwpv?entry=ttu" 
-                       target="_blank" rel="noopener noreferrer"
-                       className="text-white hover:text-red-400 transition-colors duration-300 flex items-center gap-2">
-                        <MapPin className="w-5 h-5" />
-                        <span className="text-sm">Find Us</span>
-                    </a>
+                <div className="absolute top-6 right-10 mt-12 flex items-center gap-4 z-20 max-sm:static max-sm:mt-4 max-sm:flex-row max-sm:overflow-x-auto max-sm:gap-2 max-sm:w-full max-sm:justify-center">
                     <button 
                        onClick={() => {
                            navigator.clipboard.writeText('0558626516');
                            toast.success('Phone number copied successfully!');
                        }}
-                       className="text-white hover:text-red-400 transition-colors duration-300 flex items-center gap-2 cursor-pointer">
+                       className="text-white hover:text-red-400 transition-colors duration-300 flex items-center gap-2 cursor-pointer"
+                    >
                         <Phone className="w-5 h-5" />
                         <span className="text-sm">0558 62 65 16</span>
+                    </button>
+                    <a href="https://www.instagram.com/walidphone_/?hl=en" target="_blank" rel="noopener noreferrer"
+                       className="text-white hover:text-red-400 transition-colors duration-300 flex items-center gap-2 max-sm:inline-flex">
+                        <Instagram className="w-5 h-5" />
+                        <span className="text-sm">Storephone_</span>
+                    </a>
+                    <a href="https://www.facebook.com/p/Walid-phone-100057403661350/?locale=bg_BG" target="_blank" rel="noopener noreferrer"
+                       className="text-white hover:text-red-400 transition-colors duration-300 flex items-center gap-2 max-sm:hidden">
+                        <Facebook className="w-5 h-5" />
+                        <span className="text-sm">Store phone</span>
+                    </a>
+                    <button 
+                       onClick={() => {
+                           navigator.clipboard.writeText('email@gmail.com');
+                           toast.success('Email copied successfully!');
+                       }}
+                       className="text-white hover:text-red-400 transition-colors duration-300 flex items-center gap-2 cursor-pointer max-sm:hidden">
+                        <Mail className="w-5 h-5" />
+                        <span className="text-sm">email@gmail.com</span>
                     </button>
                 </div>
 

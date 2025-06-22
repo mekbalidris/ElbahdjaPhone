@@ -28,7 +28,7 @@ const brandPurple = {
     gradientTo: 'to-slate-900',
 };
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, compact = false }) => {
     const router = useRouter();
     const { addToCart } = useCart();
     const { currentUser } = useAuth();
@@ -75,37 +75,35 @@ const ProductCard = ({ product }) => {
 
     return (
         <div 
-            className="group relative bg-slate-100 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl border border-gray-100 cursor-pointer"
+            className={`group relative bg-slate-100 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl border border-gray-100 cursor-pointer ${compact ? 'p-1' : ''}`}
             onClick={handleViewDetails}
         >
             {/* Product Image Container */}
             <div 
-                className="relative aspect-square overflow-hidden bg-gray-100"
+                className={`relative aspect-square overflow-hidden bg-gray-100 w-full h-full ${compact ? 'h-28 sm:h-32' : ''}`}
                 onMouseEnter={() => setIsImageHovered(true)}
                 onMouseLeave={() => setIsImageHovered(false)}
             >
-                <div className="relative w-full h-full">
-                    <Image
-                        src={imageUrl}
-                        alt={product.name || "Product image"}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className={`object-cover transition-all duration-500 ${
-                            isImageHovered ? 'scale-110 blur-sm' : 'scale-100 blur-0'
-                        } ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                        onLoad={() => setIsImageLoaded(true)}
-                        onError={(e) => {
-                            e.target.src = 'https://placehold.co/600x400/fecaca/f87171?text=Error';
-                        }}
-                    />
-                </div>
+                <Image
+                    src={imageUrl}
+                    alt={product.name || "Product image"}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className={`object-cover object-center w-full h-full transition-all duration-500 ${
+                        isImageHovered ? 'scale-110 blur-sm' : 'scale-100 blur-0'
+                    } ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    onLoad={() => setIsImageLoaded(true)}
+                    onError={(e) => {
+                        e.target.src = 'https://placehold.co/600x400/fecaca/f87171?text=Error';
+                    }}
+                />
                 {!isImageLoaded && (
                     <div className="absolute inset-0 bg-gray-200 animate-pulse" />
                 )}
                 
                 {/* Deal Tag */}
                 {product.offer && (
-                    <span className="absolute top-3 left-3 bg-orange-600 text-white text-[0.65rem] font-bold px-2.5 py-1 rounded-full shadow-md tracking-wider animate-pulse">
+                    <span className="absolute top-2 left-2 bg-orange-600 text-white text-[0.55rem] font-bold px-2 py-0.5 rounded-full shadow-md tracking-wider animate-pulse">
                         DEAL
                     </span>
                 )}
@@ -120,8 +118,8 @@ const ProductCard = ({ product }) => {
                             handleViewDetails(e);
                         }}
                         variant="primary"
-                        size="sm"
-                        className="bg-black backdrop-blur-sm hover:bg-white hover:text-amber-500 transform hover:scale-105 transition-all duration-300"
+                        size={compact ? "xs" : "sm"}
+                        className={`bg-black backdrop-blur-sm hover:bg-white hover:text-amber-500 transform hover:scale-105 transition-all duration-300 ${compact ? 'text-xs px-2 py-1' : ''}`}
                     >
                         View Details
                     </Button>
@@ -129,27 +127,27 @@ const ProductCard = ({ product }) => {
             </div>
 
             {/* Product Info */}
-            <div className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-base font-semibold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2">{product.name}</h3>
+            <div className={`${compact ? 'p-2' : 'p-4'}`}>
+                <div className="flex items-center justify-between mb-1">
+                    <h3 className={`font-semibold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 ${compact ? 'text-xs' : 'text-base'}`}>{product.name}</h3>
                     {isAvailable ? (
-                        <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded-full ml-2 whitespace-nowrap">In Stock</span>
+                        <span className={`text-green-600 bg-green-50 rounded-full ml-2 whitespace-nowrap ${compact ? 'text-[10px] px-1 py-0.5' : 'text-sm px-2 py-1'}`}>In Stock</span>
                     ) : (
-                        <span className="text-sm text-orange-600 bg-orange-50 px-2 py-1 rounded-full ml-2 whitespace-nowrap">Out of Stock</span>
+                        <span className={`text-orange-600 bg-orange-50 rounded-full ml-2 whitespace-nowrap ${compact ? 'text-[10px] px-1 py-0.5' : 'text-sm px-2 py-1'}`}>Out of Stock</span>
                     )}
                 </div>
-                <div className="flex items-center justify-between mb-4">
-                    <p className="text-amber-500 font-bold text-xl">{product.price?.toLocaleString()} DA</p>
+                <div className="flex items-center justify-between mb-2">
+                    <p className={`text-amber-500 font-bold ${compact ? 'text-sm' : 'text-xl'}`}>{product.price?.toLocaleString()} DA</p>
                     {product.oldPrice && (
-                        <p className="text-orange-800 text-sm line-through">{product.oldPrice?.toLocaleString()} DA</p>
+                        <p className={`text-orange-800 line-through ${compact ? 'text-xs' : 'text-sm'}`}>{product.oldPrice?.toLocaleString()} DA</p>
                     )}
                 </div>
-                <div className="p-4 space-y-2">
+                <div className={`${compact ? 'p-0 space-y-1' : 'p-4 space-y-2'}`}>
                     <Button
                         onClick={handleAddToCartClick}
                         variant="outline" 
-                        size="sm"
-                        className="w-full border-orange-600 text-orange-400 hover:bg-orange-50 hover:text-orange-700 transition-colors" 
+                        size={compact ? "xs" : "sm"}
+                        className={`w-full border-orange-600 text-orange-400 hover:bg-orange-50 hover:text-orange-700 transition-colors ${compact ? 'text-xs px-2 py-1' : ''}`}
                         disabled={!isAvailable}
                         iconLeft="shoppingBag"
                     >
@@ -158,8 +156,8 @@ const ProductCard = ({ product }) => {
                     <Button
                         onClick={handleBuyNowClick}
                         variant="primary"
-                        size="sm"
-                        className="w-full bg-slate-800 hover:bg-slate-900 text-white transition-colors"
+                        size={compact ? "xs" : "sm"}
+                        className={`w-full bg-slate-800 hover:bg-slate-900 text-white transition-colors ${compact ? 'text-xs px-2 py-1' : ''}`}
                         disabled={!isAvailable}
                         iconLeft="zap"
                     >

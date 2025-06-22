@@ -51,6 +51,18 @@ const FilterDrawer = ({ isOpen, onClose, children }) => (
     </Transition.Root>
 );
 
+// Add a hook to detect mobile
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  return isMobile;
+}
+
 const ProductsPage = ({ handleAddToCart }) => {
     const router = useRouter();
     
@@ -83,6 +95,8 @@ const ProductsPage = ({ handleAddToCart }) => {
         });
         if (node) observer.current.observe(node);
     }, [isLoading, hasMore]);
+
+    const isMobile = useIsMobile();
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -399,7 +413,7 @@ const ProductsPage = ({ handleAddToCart }) => {
                                 )}
                             </div>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
                             {displayedProducts.map((product, index) => (
                                 <div
                                     key={product._id}
@@ -407,7 +421,7 @@ const ProductsPage = ({ handleAddToCart }) => {
                                     className="animate-fadeInUp"
                                     style={{animationDelay: `${index * 60}ms`}}
                                 >
-                                    <ProductCard product={product} onAddToCart={handleAddToCart} />
+                                    <ProductCard product={product} compact={isMobile} onAddToCart={handleAddToCart} />
                                 </div>
                             ))}
                         </div>
