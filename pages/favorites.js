@@ -1,5 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useFavorites } from '../context/FavoritesContext';
 import ProductCard from '../components/products/ProductCard';
 import Navbar from '../components/layout/Navbar';
@@ -64,12 +65,12 @@ const FavoritesPage = () => {
                                 <p className="text-gray-500 mb-6">
                                     Commencez à ajouter des produits à vos favoris pour les retrouver facilement ici.
                                 </p>
-                                <a
+                                <Link
                                     href="/products"
                                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-yellow-700 hover:bg-yellow-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors duration-200"
                                 >
                                     Découvrir nos produits
-                                </a>
+                                </Link>
                             </div>
                         </div>
                     )}
