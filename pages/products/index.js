@@ -63,6 +63,9 @@ function useIsMobile() {
   return isMobile;
 }
 
+const clothingSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '34', '36', '38', '40', '42', '44', '46'];
+const shoeSizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46'];
+
 const ProductsPage = ({ handleAddToCart }) => {
     const router = useRouter();
     
@@ -72,7 +75,7 @@ const ProductsPage = ({ handleAddToCart }) => {
     const [displayedProducts, setDisplayedProducts] = useState([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
-    const productsPerPage = 9;
+    const [productsPerPage, setProductsPerPage] = useState(15);
     
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
@@ -82,6 +85,7 @@ const ProductsPage = ({ handleAddToCart }) => {
     const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
     const [minPriceLimit, setMinPriceLimit] = useState(0);
     const [maxPriceLimit, setMaxPriceLimit] = useState(2000);
+    const [selectedSize, setSelectedSize] = useState('');
 
     // Intersection Observer for infinite scroll
     const observer = useRef();
@@ -133,11 +137,12 @@ const ProductsPage = ({ handleAddToCart }) => {
     const filteredAndSortedProducts = useMemo(() => {
         return allProducts
             .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
-            .filter(p => selectedCategory === 'all' || p.category === selectedCategory)
+            .filter(p => selectedCategory === 'all' || (p.category && p.category.toUpperCase() === selectedCategory.toUpperCase()))
             .filter(p => selectedBrand === '' || p.brand === selectedBrand)
             .filter(p => !showOnlyAvailable || p.stock > 0)
             .filter(p => priceRange.min === '' || p.price >= parseFloat(priceRange.min))
             .filter(p => priceRange.max === '' || p.price <= parseFloat(priceRange.max))
+            .filter(p => !selectedSize || (p.sizes && p.sizes.includes(selectedSize)) || (p.size && p.size === selectedSize))
             .sort((a, b) => {
                 const [field, order] = sortBy.split('_');
                 const valA = field === 'createdAt' ? new Date(a[field]) : a[field];
@@ -146,7 +151,7 @@ const ProductsPage = ({ handleAddToCart }) => {
                 if (valA > valB) return order === 'asc' ? 1 : -1;
                 return 0;
             });
-    }, [allProducts, searchTerm, selectedCategory, selectedBrand, showOnlyAvailable, priceRange, sortBy]);
+    }, [allProducts, searchTerm, selectedCategory, selectedBrand, showOnlyAvailable, priceRange, sortBy, selectedSize]);
 
     // Update displayed products when page changes
     useEffect(() => {
@@ -163,37 +168,50 @@ const ProductsPage = ({ handleAddToCart }) => {
     }, [searchTerm, selectedCategory, selectedBrand, sortBy, priceRange, showOnlyAvailable]);
 
     const availableBrands = useMemo(() => ([{ value: '', label: 'All Brands' }, ...Array.from(new Set(allProducts.filter(p => selectedCategory === 'all' || p.category === selectedCategory).map(p => p.brand).filter(Boolean))).map(brand => ({ value: brand, label: brand }))]), [allProducts, selectedCategory]);
+    // Dynamically generate category options from products
+    const uniqueCategories = Array.from(new Set(allProducts.map(p => (p.category || '').toUpperCase()))).filter(Boolean);
     const categoryOptions = [
-        { value: 'all', label: 'All Products' },
-        { value: 'phones', label: 'Smartphones' },
-        { value: 'laptops', label: 'Laptops' },
-        { value: 'accessories', label: 'Accessories' },
-        { value: 'watches', label: 'Watches' },
-        { value: 'tablets', label: 'Tablets' },
-        { value: 'gaming', label: 'Gaming' },
-        { value: 'audio', label: 'Audio' },
-        { value: 'cameras', label: 'Cameras & Photography' },
-        { value: 'drones', label: 'Drones' }
+        { value: 'all', label: 'Tous les produits' },
+        { value: 'SHORT', label: 'Short' },
+        { value: 'ACCESSORIES', label: 'Accessoires' },
+        { value: 'T-SHIRTS', label: 'T-shirts' },
+        { value: 'PANTALONS', label: 'Pantalons' },
+        { value: 'CHAUSSURES', label: 'Chaussures' },
+        { value: 'VESTES', label: 'Vestes' },
     ];
 
     const subCategoryOptions = {
+        men: [
+            { value: 'shirts', label: 'Shirts' },
+            { value: 'pants', label: 'Pants' },
+            { value: 'jackets', label: 'Jackets' },
+            { value: 't-shirts', label: 'T-Shirts' },
+            { value: 'suits', label: 'Suits' },
+            { value: 'underwear', label: 'Underwear' }
+        ],
+        women: [
+            { value: 'dresses', label: 'Dresses' },
+            { value: 'tops', label: 'Tops' },
+            { value: 'skirts', label: 'Skirts' },
+            { value: 'pants', label: 'Pants' },
+            { value: 'jackets', label: 'Jackets' },
+            { value: 'lingerie', label: 'Lingerie' }
+        ],
+        shoes: [
+            { value: 'sneakers', label: 'Sneakers' },
+            { value: 'formal', label: 'Formal Shoes' },
+            { value: 'casual', label: 'Casual Shoes' },
+            { value: 'boots', label: 'Boots' },
+            { value: 'sandals', label: 'Sandals' },
+            { value: 'sports', label: 'Sports Shoes' }
+        ],
         accessories: [
-            { value: 'headphones', label: 'Headphones' },
-            { value: 'chargers', label: 'Chargers' },
-            { value: 'cases', label: 'Cases & Covers' },
-            { value: 'screen-protectors', label: 'Screen Protectors' },
-            { value: 'power-banks', label: 'Power Banks' },
-            { value: 'cables', label: 'Cables & Adapters' }
-        ],
-        gaming: [
-            { value: 'consoles', label: 'Gaming Consoles' },
-            { value: 'controllers', label: 'Controllers' },
-            { value: 'accessories', label: 'Gaming Accessories' }
-        ],
-        audio: [
-            { value: 'earbuds', label: 'Wireless Earbuds' },
-            { value: 'speakers', label: 'Bluetooth Speakers' },
-            { value: 'headphones', label: 'Headphones' }
+            { value: 'belts', label: 'Belts' },
+            { value: 'scarves', label: 'Scarves' },
+            { value: 'hats', label: 'Hats' },
+            { value: 'sunglasses', label: 'Sunglasses' },
+            { value: 'gloves', label: 'Gloves' },
+            { value: 'socks', label: 'Socks' }
         ]
     };
 
@@ -337,6 +355,36 @@ const ProductsPage = ({ handleAddToCart }) => {
                         onChange={(e) => setShowOnlyAvailable(e.target.checked)} 
                     />
                 </div>
+                <div className="mb-6 flex flex-col md:flex-row md:items-center md:gap-8 gap-4">
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-800 mb-2">Filtrer par tailles (vêtements)</label>
+                        <div className="flex flex-wrap gap-2">
+                            {clothingSizes.map(size => (
+                                <button
+                                    key={size}
+                                    className={`px-3 py-1 rounded border text-sm font-medium ${selectedSize === size ? 'bg-yellow-900 text-white border-yellow-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                                    onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
+                                >
+                                    {size}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-800 mb-2">Filtrer par pointures (chaussures)</label>
+                        <div className="flex flex-wrap gap-2">
+                            {shoeSizes.map(size => (
+                                <button
+                                    key={size}
+                                    className={`px-3 py-1 rounded border text-sm font-medium ${selectedSize === size ? 'bg-yellow-900 text-white border-yellow-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                                    onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
+                                >
+                                    {size}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
                 <Button 
                     onClick={resetFilters} 
                     variant="outline" 
@@ -348,109 +396,159 @@ const ProductsPage = ({ handleAddToCart }) => {
         </div>
     );
 
+    const gridOptions = [3, 4, 5];
+
     return (
-        <div className="bg-white min-h-screen font-sans pt-20">
-            <header className="bg-gray-50 border-b border-gray-200">
-                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="flex items-center space-x-2 text-sm text-slate-500">
-                        <Link href="/" legacyBehavior><a className="hover:text-amber-600">Home</a></Link>
-                        <Icon name="chevronRight" className="w-4 h-4"/>
-                        <span className="font-semibold text-slate-700">Products</span>
-                    </div>
-                    <h1 className={`text-4xl sm:text-5xl font-extrabold ${brandOrange.text} tracking-tight mt-2`}>
-                        {categoryOptions.find(c => c.value === selectedCategory)?.label || 'All Products'}
-                    </h1>
-                </div>
-            </header>
-
-            <div className="bg-white border-b border-gray-200">
-                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-                    <div className="text-sm text-slate-600">
-                        <span className="font-semibold text-slate-800">{filteredAndSortedProducts.length}</span> products found
-                    </div>
-                </div>
-            </div>
-
-            <main className="py-8 md:py-12">
-                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-8">
-                    {/* Sidebar Filters */}
-                    <aside className="hidden md:block w-72 flex-shrink-0">
-                        <div className="bg-gray-50 rounded-xl p-6 shadow border border-gray-200 sticky top-24">
-                            <FilterControls />
+        <div className="bg-white min-h-screen">
+            <main className="container mx-auto px-2 sm:px-4 lg:px-6 py-12">
+                <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-800 tracking-tight mb-8">Boutique</h1>
+                <div className="flex flex-col md:flex-row gap-8">
+                    {/* Sidebar filters */}
+                    <aside className="w-full md:w-64 flex-shrink-0 mb-8 md:mb-0">
+                        {/* Category filter as select */}
+                        <div className="mb-8">
+                            <label className="block text-base font-bold text-slate-800 mb-3">Catégories</label>
+                            <select
+                                value={selectedCategory}
+                                onChange={e => setSelectedCategory(e.target.value)}
+                                className="w-full px-4 py-2 rounded-lg border border-gray-300 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                            >
+                                {categoryOptions.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                        {/* Size filter (collapsible) */}
+                        <details className="mb-6" open>
+                            <summary className="cursor-pointer font-semibold text-slate-800 mb-2">Tailles (vêtements)</summary>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {clothingSizes.map(size => (
+                                    <button
+                                        key={size}
+                                        className={`px-3 py-1 rounded border text-sm font-medium ${selectedSize === size ? 'bg-yellow-900 text-white border-yellow-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                                        onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
+                                    >
+                                        {size}
+                                    </button>
+                                ))}
+                            </div>
+                        </details>
+                        {/* Pointure filter (collapsible) */}
+                        <details className="mb-6" open>
+                            <summary className="cursor-pointer font-semibold text-slate-800 mb-2">Pointures (chaussures)</summary>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {shoeSizes.map(size => (
+                                    <button
+                                        key={size}
+                                        className={`px-3 py-1 rounded border text-sm font-medium ${selectedSize === size ? 'bg-yellow-900 text-white border-yellow-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                                        onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
+                                    >
+                                        {size}
+                                    </button>
+                                ))}
+                            </div>
+                        </details>
+                        {/* Price filter */}
+                        <div className="mb-8">
+                            <label className="block text-base font-bold text-slate-800 mb-3">Filtrer par prix</label>
+                            <div className="flex items-center gap-2 mb-2">
+                                <input
+                                    type="number"
+                                    placeholder="Min"
+                                    value={priceRange.min}
+                                    onChange={e => setPriceRange(p => ({ ...p, min: e.target.value }))}
+                                    className="w-20 px-2 py-1 rounded border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                />
+                                <span className="text-gray-500">–</span>
+                                <input
+                                    type="number"
+                                    placeholder="Max"
+                                    value={priceRange.max}
+                                    onChange={e => setPriceRange(p => ({ ...p, max: e.target.value }))}
+                                    className="w-20 px-2 py-1 rounded border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                />
+                            </div>
+                            <button
+                                onClick={() => setPriceRange({ min: '', max: '' })}
+                                className="text-xs text-gray-500 hover:underline mt-1"
+                            >Réinitialiser</button>
+                        </div>
+                        {/* Best sellers section */}
+                        <div className="mb-8">
+                            <label className="block text-base font-bold text-slate-800 mb-3">Meilleures ventes</label>
+                            <ul className="space-y-2">
+                                {allProducts
+                                    .filter(p => typeof p.buy === 'number' || typeof p.sold === 'number' || typeof p.sales === 'number' || p.offer || p.oldPrice)
+                                    .sort((a, b) => (b.buy || b.sold || b.sales || 0) - (a.buy || a.sold || a.sales || 0))
+                                    .slice(0, 4)
+                                    .map(product => (
+                                        <li key={product._id}>
+                                            <a href={`/products/${product._id}`} className="flex items-center gap-2 hover:bg-yellow-50 rounded p-1 transition">
+                                                <img
+                                                    src={product.images?.[0] || '/public/images/categories/placeholder.jpg'}
+                                                    alt={product.name}
+                                                    className="w-10 h-10 object-cover rounded"
+                                                />
+                                                <div>
+                                                    <div className="text-xs font-semibold text-gray-800 truncate max-w-[100px]">{product.name}</div>
+                                                    <div className="text-xs text-yellow-700 font-bold">{product.price?.toLocaleString()} DA</div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    ))}
+                                {allProducts.filter(p => typeof p.buy === 'number' || typeof p.sold === 'number' || typeof p.sales === 'number' || p.offer || p.oldPrice).length === 0 && (
+                                    <li className="text-xs text-gray-400">Aucun produit</li>
+                                )}
+                            </ul>
                         </div>
                     </aside>
-                    {/* Product Grid */}
-                    <section className="flex-1">
-                        <div className="mb-6">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    value={searchTerm}
-                                    onChange={handleSearch}
-                                    onKeyPress={handleKeyPress}
-                                    placeholder="Search products..."
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    {/* Main content: search, sort, grid */}
+                    <div className="flex-1">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+                            {/* Breadcrumbs */}
+                            <div className="text-sm text-gray-500 mb-2 sm:mb-0">
+                                <span>Accueil</span> <span className="mx-1">/</span> <span className="font-semibold text-gray-900">Boutique</span>
+                            </div>
+                            {/* Sort dropdown */}
+                            <div className="ml-2">
+                                <StyledSelect
+                                    value={sortBy}
+                                    onChange={setSortBy}
+                                    options={[
+                                        { value: 'createdAt_desc', label: 'Tri du plus récent au plus ancien' },
+                                        { value: 'createdAt_asc', label: 'Tri du plus ancien au plus récent' },
+                                        { value: 'price_asc', label: 'Prix croissant' },
+                                        { value: 'price_desc', label: 'Prix décroissant' },
+                                    ]}
                                 />
-                                {searchTerm && (
-                                    <button
-                                        onClick={() => {
-                                            setSearchTerm('');
-                                            setPage(1);
-                                            setDisplayedProducts([]);
-                                            const params = new URLSearchParams(router.query);
-                                            params.delete('search');
-                                            params.delete('brand');
-                                            params.delete('category');
-                                            params.delete('minPrice');
-                                            params.delete('maxPrice');
-                                            params.delete('sort');
-                                            router.push(`/products?${params.toString()}`, undefined, { shallow: true });
-                                        }}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                    >
-                                        <Icon name="x" className="w-5 h-5" />
-                                    </button>
-                                )}
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-                            {displayedProducts.map((product, index) => (
-                                <div
-                                    key={product._id}
-                                    ref={index === displayedProducts.length - 1 ? lastProductElementRef : null}
-                                    className="animate-fadeInUp"
-                                    style={{animationDelay: `${index * 60}ms`}}
-                                >
-                                    <ProductCard product={product} compact={isMobile} onAddToCart={handleAddToCart} />
-                                </div>
+                        {/* Search box */}
+                        <div className="mb-6">
+                            <Input
+                                type="text"
+                                placeholder="Rechercher un produit..."
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                            />
+                        </div>
+                        {/* Product grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6 justify-items-center"> 
+                            {displayedProducts.map((product, idx) => (
+                                <ProductCard key={product._id} product={product} ref={idx === displayedProducts.length - 1 ? lastProductElementRef : null} />
                             ))}
                         </div>
-                        {isLoading && (
-                            <div className="flex justify-center items-center py-8">
-                                <LoadingSpinner />
-                            </div>
-                        )}
-                        {!hasMore && displayedProducts.length > 0 && (
-                            <div className="text-center py-8 text-gray-500">
-                                No more products to load
-                            </div>
-                        )}
+                        {isLoading && <div className="flex justify-center py-8"><LoadingSpinner /></div>}
                         {!isLoading && displayedProducts.length === 0 && (
-                            <div className="text-center py-16 md:py-24 bg-gray-50 rounded-2xl">
-                                <Icon name="frown" className={`w-20 h-20 ${brandPurple.text} mx-auto mb-5 opacity-70`} />
-                                <h2 className="text-2xl font-semibold text-slate-700 mb-2">No Products Found</h2>
-                                <p className="text-slate-500 max-w-md mx-auto">Try adjusting your filters to find what you're looking for</p>
-                                <Button onClick={resetFilters} variant="primary" className="mt-8">Clear Filters</Button>
+                            <div className="text-center py-20">
+                                <p className="text-xl text-gray-500">Aucun produit trouvé.</p>
+                                <p className="text-gray-400 mt-2">Essayez d&apos;autres filtres ou revenez plus tard !</p>
                             </div>
                         )}
-                    </section>
+                    </div>
                 </div>
             </main>
-
-            <style jsx global>{`
-                @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-                .animate-fadeInUp { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; }
-            `}</style>
         </div>
     );
 };

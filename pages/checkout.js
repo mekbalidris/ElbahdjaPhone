@@ -73,6 +73,8 @@ const ActualTextArea = TextArea || FallbackTextArea;
 const ActualIcon = Icon || MinimalIcon;
 // --- End Fallback UI Components ---
 
+const clothingSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+const shoeSizes = ['39', '40', '41', '42', '43', '44', '45', '46'];
 
 const algerianWilayas = [
     { value: '', label: 'Select Wilaya', disabled: true },
@@ -146,52 +148,179 @@ const CheckoutSection = ({ title, iconName, children }) => {
     );
 };
 
-const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove }) => {
+const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions }) => {
+    const [showOptions, setShowOptions] = useState(false);
+    const [selectedSize, setSelectedSize] = useState(item.size || '');
+    const [selectedColor, setSelectedColor] = useState(item.color || '');
+    
+    // Determine if product is clothing or shoes
+    const isShoe = item.category?.toLowerCase().includes('chaussure') || item.category?.toLowerCase().includes('shoes');
+    const availableSizes = item.sizes && item.sizes.length > 0 ? item.sizes : (isShoe ? shoeSizes : clothingSizes);
+
     const handleQuantityChange = (change) => {
         const newQuantity = (item.quantity || 1) + change;
         if (newQuantity >= 1) {
-            onUpdateQuantity(item.productId, newQuantity);
+            onUpdateQuantity(item._id, newQuantity, item.size, item.color);
         }
     };
 
+    const handleUpdateOptions = () => {
+        if (item.colors?.length > 0 && !selectedColor) {
+            toast.error('Veuillez sélectionner une couleur.');
+            return;
+        }
+        if (item.sizes?.length > 0 && !selectedSize) {
+            toast.error('Veuillez sélectionner une taille.');
+            return;
+        }
+        
+        onUpdateOptions(item._id, selectedSize, selectedColor, item.size, item.color);
+        setShowOptions(false);
+        toast.success('Options mises à jour !');
+    };
+
     return (
-        <div className="flex items-center space-x-4 py-4 border-b border-gray-200">
-            <div className="flex-shrink-0 w-20 h-20">
-                <img
-                    src={item.images?.[0] || item.imageUrl || 'https://placehold.co/200x200'}
-                    alt={item.name}
-                    className="w-full h-full object-cover rounded-lg"
-                />
-            </div>
-            <div className="flex-grow">
-                <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
-                <p className="text-sm text-gray-500">{item.price} DA</p>
-                <div className="flex items-center space-x-2 mt-2">
+        <div className="py-4 border-b border-gray-200">
+            <div className="flex items-center space-x-4">
+                <div className="flex-shrink-0 w-20 h-20">
+                    <img
+                        src={item.images?.[0] || item.imageUrl || 'https://placehold.co/200x200'}
+                        alt={item.name}
+                        className="w-full h-full object-cover rounded-lg"
+                    />
+                </div>
+                <div className="flex-grow">
+                    <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
+                    <p className="text-sm text-gray-500">{item.price} DA</p>
+                    
+                    {/* Show selected options */}
+                    <div className="flex flex-wrap gap-2 mt-2">
+                        {item.color && (
+                            <div className="flex items-center space-x-1">
+                                <span className="text-xs text-gray-500">Couleur:</span>
+                                <div 
+                                    className="w-4 h-4 rounded-full border border-gray-300"
+                                    style={{ backgroundColor: item.color.toLowerCase() }}
+                                    title={item.color}
+                                />
+                                <span className="text-xs text-gray-700">{item.color}</span>
+                            </div>
+                        )}
+                        {item.size && (
+                            <div className="flex items-center space-x-1">
+                                <span className="text-xs text-gray-500">Taille:</span>
+                                <span className="text-xs text-gray-700 font-medium">{item.size}</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Options toggle button */}
+                    {(item.colors?.length > 0 || item.sizes?.length > 0) && (
+                        <button
+                            onClick={() => setShowOptions(!showOptions)}
+                            className="text-xs text-blue-600 hover:text-blue-700 mt-2 flex items-center space-x-1"
+                        >
+                            <Edit2 className="w-3 h-3" />
+                            <span>Modifier les options</span>
+                        </button>
+                    )}
+
+                    {/* Options selection */}
+                    {showOptions && (
+                        <div className="mt-3 p-3 bg-gray-50 rounded-lg space-y-3">
+                            {/* Color Selection */}
+                            {item.colors && item.colors.length > 0 && (
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-2">
+                                        Couleur <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {item.colors.map(color => (
+                                            <button
+                                                key={color}
+                                                onClick={() => setSelectedColor(color)}
+                                                className={`w-6 h-6 rounded-full border-2 transition-all ${
+                                                    selectedColor === color 
+                                                        ? 'border-gray-900 scale-110' 
+                                                        : 'border-gray-200 hover:border-gray-300'
+                                                }`}
+                                                style={{ backgroundColor: color.toLowerCase() }}
+                                                title={color}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Size Selection */}
+                            {item.sizes && item.sizes.length > 0 && (
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-700 mb-2">
+                                        Taille <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="flex flex-wrap gap-1">
+                                        {availableSizes.map(size => (
+                                            <button
+                                                key={size}
+                                                onClick={() => setSelectedSize(size)}
+                                                className={`px-2 py-1 text-xs border rounded transition-colors ${
+                                                    selectedSize === size 
+                                                        ? 'bg-gray-900 text-white border-gray-900' 
+                                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+                                                }`}
+                                            >
+                                                {size}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Update button */}
+                            <div className="flex space-x-2 pt-2">
+                                <button
+                                    onClick={() => setShowOptions(false)}
+                                    className="text-xs px-3 py-1 border border-gray-300 text-gray-700 rounded hover:bg-gray-100"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    onClick={handleUpdateOptions}
+                                    className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                >
+                                    Mettre à jour
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex items-center space-x-2 mt-2">
+                        <button
+                            onClick={() => handleQuantityChange(-1)}
+                            className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
+                        >
+                            <Minus className="h-4 w-4 text-gray-500" />
+                        </button>
+                        <span className="text-sm font-medium w-8 text-center">{item.quantity || 1}</span>
+                        <button
+                            onClick={() => handleQuantityChange(1)}
+                            className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
+                        >
+                            <Plus className="h-4 w-4 text-gray-500" />
+                        </button>
+                    </div>
+                </div>
+                <div className="flex flex-col items-end space-y-2">
+                    <p className="text-sm font-medium text-gray-900">
+                        {((item.price * (item.quantity || 1)))} DA
+                    </p>
                     <button
-                        onClick={() => handleQuantityChange(-1)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
+                        onClick={() => onRemove(item._id, item.size, item.color)}
+                        className="text-orange-500 hover:text-orange-600"
                     >
-                        <Minus className="h-4 w-4 text-gray-500" />
-                    </button>
-                    <span className="text-sm font-medium w-8 text-center">{item.quantity || 1}</span>
-                    <button
-                        onClick={() => handleQuantityChange(1)}
-                        className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
-                    >
-                        <Plus className="h-4 w-4 text-gray-500" />
+                        <Trash2 className="h-5 w-5" />
                     </button>
                 </div>
-            </div>
-            <div className="flex flex-col items-end space-y-2">
-                <p className="text-sm font-medium text-gray-900">
-                    {((item.price * (item.quantity || 1)))} DA
-                </p>
-                <button
-                    onClick={() => onRemove(item.productId)}
-                    className="text-orange-500 hover:text-orange-600"
-                >
-                    <Trash2 className="h-5 w-5" />
-                </button>
             </div>
         </div>
     );
@@ -211,7 +340,7 @@ const LoadingSpinner = ({ size = "md" }) => {
 const CheckoutPage = () => {
     const router = useRouter();
     const { currentUser } = useAuth();
-    const { cartItems, isLoading: isLoadingCart, updateQuantity, removeFromCart, clearCart } = useCart();
+    const { cartItems, isLoading: isLoadingCart, updateQuantity, removeFromCart, updateCartItemOptions, clearCart } = useCart();
     const [isPlacingOrder, setIsPlacingOrder] = useState(false);
     const [formErrors, setFormErrors] = useState({});
     const [contactInfo, setContactInfo] = useState({
@@ -242,13 +371,15 @@ const CheckoutPage = () => {
         const errors = {};
         if (!contactInfo.fullName.trim()) errors.fullName = 'Full name is required.';
         if (!contactInfo.email.trim() || !/\S+@\S+\.\S+/.test(contactInfo.email)) errors.email = 'Valid email is required.';
-        if (!contactInfo.phone.trim()) errors.phone = 'Phone number is required.';
-        else if (!/^(05|06|07)\d{8}$/.test(contactInfo.phone.replace(/\s/g, ''))) errors.phone = 'Valid Algerian phone number is required (10 digits).';
         if (!deliveryAddress.wilaya) errors.wilaya = 'Wilaya is required.';
         if (!deliveryAddress.city.trim()) errors.city = 'City / Commune is required.';
         if (!deliveryAddress.address.trim()) errors.address = 'A detailed street address is required.';
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
+    };
+
+    const handleUpdateOptions = (productId, newSize, newColor, oldSize, oldColor) => {
+        updateCartItemOptions(productId, oldSize, oldColor, newSize, newColor);
     };
 
     const handlePlaceOrder = async () => {
@@ -276,6 +407,8 @@ const CheckoutPage = () => {
                     price: item.price,
                     quantity: item.quantity || 1,
                     imageUrl: item.images?.[0] || item.imageUrl,
+                    size: item.size,
+                    color: item.color,
                     attributes: item.attributes || null
                 })),
                 contactInfo,
@@ -388,15 +521,13 @@ const CheckoutPage = () => {
                                 placeholder="Enter your email address"
                             />
                             <ActualInput
-                                label="Phone Number"
+                                label="Numéro de téléphone (optionnel)"
                                 name="phone"
                                 type="tel"
                                 value={contactInfo.phone}
                                 onChange={handleInputChange(setContactInfo, 'phone')}
                                 error={formErrors.phone}
-                                required
-                                iconLeft="phone"
-                                placeholder="Enter your phone number"
+                                placeholder="ex: 0555 12 34 56"
                             />
                             <h3 className="text-md font-semibold text-slate-700 pt-5 mt-5 border-t border-gray-200">
                                 Shipping Address
@@ -456,13 +587,14 @@ const CheckoutPage = () => {
                                     <ActualIcon name="shoppingBag" className="w-6 h-6 text-amber-500 mr-2" />
                                     Order Summary
                                 </h2>
-                                <div className="max-h-64 overflow-y-auto divide-y divide-gray-200 pr-2 custom-scrollbar">
+                                <div className="max-h-96 overflow-y-auto divide-y divide-gray-200 pr-2 custom-scrollbar">
                                     {cartItems.map(item => (
                                         <OrderSummaryItem
-                                            key={`${item.productId}-${item._id}`}
+                                            key={`${item._id}-${item.size}-${item.color}`}
                                             item={item}
                                             onUpdateQuantity={updateQuantity}
                                             onRemove={removeFromCart}
+                                            onUpdateOptions={handleUpdateOptions}
                                         />
                                     ))}
                                 </div>

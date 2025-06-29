@@ -286,7 +286,7 @@ const ProfilePage = () => {
                                 {/* Email is disabled as it typically comes from auth */}
                                 <Input label="Full Name" name="name" value={profileData.name} onChange={handleInputChange} placeholder="Your full name" disabled={!editMode} error={null}/>
                                 <Input label="Email Address" name="email" type="email" value={profileData.email} placeholder="Your email" disabled={true} className="bg-slate-100 cursor-not-allowed" error={null}/>
-                                <Input label="Phone Number" name="phone" type="tel" value={profileData.phone} onChange={handleInputChange} placeholder="e.g., +1 555-1234" disabled={!editMode} error={null}/>
+                                <Input label="Numéro de téléphone (optionnel)" name="phone" type="tel" value={profileData.phone} onChange={handleInputChange} placeholder="ex: 0555 12 34 56" disabled={!editMode} error={null}/>
                                 <Input label="Country" name="addressCountry" value={profileData.addressCountry} onChange={handleInputChange} placeholder="Your country" disabled={!editMode} error={null}/>
                                 <Input label="Street Address" name="addressStreet" value={profileData.addressStreet} onChange={handleInputChange} placeholder="123 Main St" className="md:col-span-2" disabled={!editMode} error={null}/>
                                 <Input label="City" name="addressCity" value={profileData.addressCity} onChange={handleInputChange} placeholder="Your city" disabled={!editMode} error={null}/>

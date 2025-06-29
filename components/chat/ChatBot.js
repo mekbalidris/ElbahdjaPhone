@@ -4,26 +4,26 @@ import { MessageSquare, X, Send, Info } from 'lucide-react';
 import { Transition } from '@headlessui/react';
 
 const CATEGORIES = {
-    en: ['Phones', 'Laptops', 'Accessories', 'Watches'],
-    fr: ['Téléphones', 'Ordinateurs portables', 'Accessoires', 'Montres'],
-    ar: ['هواتف', 'حواسيب محمولة', 'ملحقات', 'ساعات']
+    en: ['Men', 'Women', 'Shoes', 'Accessories'],
+    fr: ['Hommes', 'Femmes', 'Chaussures', 'Accessoires'],
+    ar: ['رجال', 'نساء', 'أحذية', 'إكسسوارات']
 };
 
 const BRANDS = {
-    phones: {
-        en: ['Apple', 'Samsung', 'Xiaomi', 'Huawei', 'Oppo', 'Vivo', 'OnePlus', 'Google'],
-        fr: ['Apple', 'Samsung', 'Xiaomi', 'Huawei', 'Oppo', 'Vivo', 'OnePlus', 'Google'],
-        ar: ['آبل', 'سامسونج', 'شاومي', 'هواوي', 'أوبو', 'فيفو', 'ون بلس', 'جوجل']
+    men: {
+        en: ['Nike', 'Adidas', 'Puma', 'Under Armour', 'Levi\'s', 'Calvin Klein', 'Tommy Hilfiger'],
+        fr: ['Nike', 'Adidas', 'Puma', 'Under Armour', 'Levi\'s', 'Calvin Klein', 'Tommy Hilfiger'],
+        ar: ['نايك', 'أديداس', 'بوما', 'أندر أرمور', 'ليفايز', 'كالفن كلاين', 'تومي هيلفيغر']
     },
-    laptops: {
-        en: ['Apple', 'Dell', 'HP', 'Lenovo', 'ASUS', 'Acer', 'MSI', 'Razer'],
-        fr: ['Apple', 'Dell', 'HP', 'Lenovo', 'ASUS', 'Acer', 'MSI', 'Razer'],
-        ar: ['آبل', 'ديل', 'إتش بي', 'لينوفو', 'آسوس', 'إيسر', 'إم إس آي', 'رازر']
+    women: {
+        en: ['Zara', 'H&M', 'Mango', 'Forever 21', 'Victoria\'s Secret', 'Gap', 'Uniqlo'],
+        fr: ['Zara', 'H&M', 'Mango', 'Forever 21', 'Victoria\'s Secret', 'Gap', 'Uniqlo'],
+        ar: ['زارا', 'إتش آند إم', 'مانجو', 'فوريفر 21', 'فيكتوريا سيكريت', 'غاب', 'يونيكلو']
     },
-    watches: {
-        en: ['Apple', 'Samsung'],
-        fr: ['Apple', 'Samsung'],
-        ar: ['آبل', 'سامسونج']
+    shoes: {
+        en: ['Nike', 'Adidas', 'Puma', 'Converse', 'Vans', 'New Balance'],
+        fr: ['Nike', 'Adidas', 'Puma', 'Converse', 'Vans', 'New Balance'],
+        ar: ['نايك', 'أديداس', 'بوما', 'كونفيرس', 'فانز', 'نيو بالانس']
     }
 };
 
@@ -168,34 +168,34 @@ const ChatBot = () => {
 
     const helperMessages = {
         en: [
-            "👋 Welcome to El Bahdja Assistant!",
+            "👋 Welcome to COSMOS Assistant!",
             "I can help you with:",
             "• Product information and prices",
-            "• Available categories and brands",
+            "• Available clothing categories and brands",
             "• Shipping and delivery details",
-            "• Warranty information",
+            "• Size and color options",
             "• Payment methods",
-            "Feel free to ask me anything about our store!"
+            "Feel free to ask me anything about our clothing store!"
         ],
         fr: [
-            "👋 Bienvenue chez El Bahdja Assistant !",
+            "👋 Bienvenue chez l'Assistant COSMOS !",
             "Je peux vous aider avec :",
             "• Informations et prix des produits",
-            "• Catégories et marques disponibles",
+            "• Catégories de vêtements et marques disponibles",
             "• Détails de livraison",
-            "• Informations sur la garantie",
+            "• Options de taille et couleur",
             "• Méthodes de paiement",
-            "N'hésitez pas à me poser des questions sur notre magasin !"
+            "N'hésitez pas à me poser des questions sur notre boutique de vêtements !"
         ],
         ar: [
-            "👋 مرحباً بك في مساعد البهجة!",
+            "👋 مرحباً بك في مساعد كوزموس!",
             "يمكنني مساعدتك في:",
             "• معلومات وأسعار المنتجات",
-            "• الفئات والعلامات التجارية المتاحة",
+            "• فئات الملابس والعلامات التجارية المتاحة",
             "• تفاصيل الشحن والتوصيل",
-            "• معلومات الضمان",
+            "• خيارات المقاسات والألوان",
             "• طرق الدفع",
-            "لا تتردد في طرح أي سؤال عن متجرنا!"
+            "لا تتردد في طرح أي سؤال عن متجر الملابس!"
         ]
     };
 

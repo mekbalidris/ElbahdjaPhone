@@ -16,24 +16,6 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const cart = await collection.findOne({ userId });
-      // When fetching the cart, populate product details for each item
-      if (cart && cart.items && cart.items.length > 0) {
-          const productIds = cart.items.map(item => item.productId);
-          const products = await productsCollection.find({ _id: { $in: productIds } }).toArray();
-
-          // Map cart items to include full product details
-          cart.items = cart.items.map(item => {
-              const product = products.find(p => p._id.toString() === item.productId.toString());
-              if (!product) return null; // Or handle as an error if a product in cart is not found
-              return {
-                  ...item, // Keep existing item data like quantity (though quantity will be 1 now)
-                  name: product.name,
-                  price: product.price,
-                  imageUrl: product.images?.[0] || product.imageUrl,
-                  // Add other product details if needed in cart display (e.g., attributes)
-              };
-          }).filter(item => item !== null); // Filter out any items where the product wasn't found
-      }
       res.status(200).json(cart || { userId, items: [] });
     } catch (err) {
       console.error('Error fetching cart:', err);
@@ -41,7 +23,33 @@ export default async function handler(req, res) {
     }
   } else if (req.method === 'POST') {
     try {
-      const { productId } = req.body; // Expecting only productId
+      const { items } = req.body;
+      
+      // If items array is provided, replace the entire cart
+      if (Array.isArray(items)) {
+        const cart = {
+          userId,
+          items: items.map(item => ({
+            ...item,
+            _id: new ObjectId(item._id),
+            productId: new ObjectId(item._id) // Keep productId for backward compatibility
+          }))
+        };
+        
+        await collection.replaceOne(
+          { userId },
+          cart,
+          { upsert: true }
+        );
+        
+        return res.status(200).json(cart);
+      }
+      
+      // Legacy support for single product addition
+      const { productId } = req.body;
+      if (!productId) {
+        return res.status(400).json({ error: 'Product ID is required' });
+      }
       
       // Get the product details to add to the cart item
       const product = await productsCollection.findOne({ _id: new ObjectId(productId) });
@@ -53,13 +61,16 @@ export default async function handler(req, res) {
       let cart = await collection.findOne({ userId });
       
       const newItem = {
-           productId: new ObjectId(productId),
-           // Store necessary product details directly in the cart item
-           name: product.name,
-           price: product.price,
-           imageUrl: product.images?.[0] || product.imageUrl,
-           attributes: product.attributes || null, // Include attributes if they exist
-           quantity: 1, // Default quantity for new items
+        _id: new ObjectId(productId),
+        productId: new ObjectId(productId),
+        name: product.name,
+        price: product.price,
+        images: product.images || [],
+        imageUrl: product.images?.[0] || product.imageUrl,
+        stock: product.stock,
+        quantity: 1,
+        size: null,
+        color: null
       };
 
       if (!cart) {
@@ -70,9 +81,11 @@ export default async function handler(req, res) {
         };
         await collection.insertOne(cart);
       } else {
-        // Check if item already exists in cart
+        // Check if item already exists in cart (same product, size, and color)
         const existingItemIndex = cart.items.findIndex(item => 
-          item.productId.toString() === productId
+          item._id.toString() === productId &&
+          item.size === newItem.size &&
+          item.color === newItem.color
         );
 
         if (existingItemIndex !== -1) {
@@ -89,33 +102,15 @@ export default async function handler(req, res) {
         );
       }
 
-      // Fetch and return the updated cart with populated product details
-      const updatedCart = await collection.findOne({ userId });
-       if (updatedCart && updatedCart.items && updatedCart.items.length > 0) {
-          const productIds = updatedCart.items.map(item => item.productId);
-          const products = await productsCollection.find({ _id: { $in: productIds } }).toArray();
-
-          updatedCart.items = updatedCart.items.map(item => {
-              const product = products.find(p => p._id.toString() === item.productId.toString());
-              if (!product) return null;
-              return {
-                  ...item,
-                  name: product.name,
-                  price: product.price,
-                  imageUrl: product.images?.[0] || product.imageUrl,
-              };
-          }).filter(item => item !== null);
-      }
-
-      res.status(200).json(updatedCart);
+      res.status(200).json(cart);
 
     } catch (err) {
-      console.error('Error adding to cart:', err);
-      res.status(500).json({ error: 'Failed to add item to cart' });
+      console.error('Error updating cart:', err);
+      res.status(500).json({ error: 'Failed to update cart' });
     }
   } else if (req.method === 'DELETE') {
     try {
-      const { productId } = req.body; // Expecting productId in the body for DELETE
+      const { productId, size, color } = req.body;
       
       const cart = await collection.findOne({ userId });
       if (!cart) {
@@ -131,15 +126,18 @@ export default async function handler(req, res) {
         return res.status(200).json({ userId, items: [] });
       }
 
+      // Remove item with specific size and color
       const itemIndexToRemove = cart.items.findIndex(item => 
-           item.productId.toString() === productId
+        item._id.toString() === productId &&
+        item.size === size &&
+        item.color === color
       );
 
       if (itemIndexToRemove === -1) {
         return res.status(404).json({ error: 'Item not found in cart' });
       }
 
-      // Remove only one instance of the item
+      // Remove the item
       cart.items.splice(itemIndexToRemove, 1);
 
       await collection.updateOne(
@@ -147,25 +145,7 @@ export default async function handler(req, res) {
         { $set: { items: cart.items } }
       );
 
-      // Fetch and return the updated cart with populated product details
-      const updatedCart = await collection.findOne({ userId });
-       if (updatedCart && updatedCart.items && updatedCart.items.length > 0) {
-          const productIds = updatedCart.items.map(item => item.productId);
-          const products = await productsCollection.find({ _id: { $in: productIds } }).toArray();
-
-          updatedCart.items = updatedCart.items.map(item => {
-              const product = products.find(p => p._id.toString() === item.productId.toString());
-              if (!product) return null;
-              return {
-                  ...item,
-                  name: product.name,
-                  price: product.price,
-                  imageUrl: product.images?.[0] || product.imageUrl,
-              };
-          }).filter(item => item !== null);
-      }
-
-      res.status(200).json(updatedCart);
+      res.status(200).json(cart);
 
     } catch (err) {
       console.error('Error removing item from cart:', err);
@@ -173,7 +153,7 @@ export default async function handler(req, res) {
     }
   } else if (req.method === 'PATCH') {
     try {
-      const { productId, quantity } = req.body;
+      const { productId, quantity, size, color } = req.body;
       
       if (!productId || typeof quantity !== 'number' || quantity < 1) {
         return res.status(400).json({ error: 'Invalid request parameters' });
@@ -185,7 +165,9 @@ export default async function handler(req, res) {
       }
 
       const itemIndex = cart.items.findIndex(item => 
-        item.productId.toString() === productId.toString()
+        item._id.toString() === productId &&
+        item.size === size &&
+        item.color === color
       );
 
       if (itemIndex === -1) {
@@ -200,31 +182,13 @@ export default async function handler(req, res) {
         { $set: { items: cart.items } }
       );
 
-      // Fetch and return the updated cart with populated product details
-      const updatedCart = await collection.findOne({ userId });
-      if (updatedCart && updatedCart.items && updatedCart.items.length > 0) {
-        const productIds = updatedCart.items.map(item => item.productId);
-        const products = await productsCollection.find({ _id: { $in: productIds } }).toArray();
+      res.status(200).json(cart);
 
-        updatedCart.items = updatedCart.items.map(item => {
-          const product = products.find(p => p._id.toString() === item.productId.toString());
-          if (!product) return null;
-          return {
-            ...item,
-            name: product.name,
-            price: product.price,
-            imageUrl: product.images?.[0] || product.imageUrl,
-          };
-        }).filter(item => item !== null);
-      }
-
-      res.status(200).json(updatedCart);
     } catch (err) {
-      console.error('Error updating cart quantity:', err);
-      res.status(500).json({ error: 'Failed to update item quantity' });
+      console.error('Error updating quantity:', err);
+      res.status(500).json({ error: 'Failed to update quantity' });
     }
   } else {
-    res.setHeader('Allow', ['GET', 'POST', 'DELETE', 'PATCH']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+    res.status(405).json({ error: 'Method not allowed' });
   }
 } 

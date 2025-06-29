@@ -9,266 +9,182 @@ export function CartProvider({ children }) {
     const [cartItems, setCartItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Load cart data on mount
+    // Creates a unique ID for a cart item based on product ID, size, and color
+    const getCartItemId = (productId, size, color) => {
+        return `${productId}${size ? `-${size}` : ''}${color ? `-${color}` : ''}`;
+    };
+    
     useEffect(() => {
-        if (currentUser) {
-            fetchCartItems();
-        } else {
-            // Load guest cart from localStorage
-            const guestCart = localStorage.getItem('guestCart');
-            if (guestCart) {
+        const loadCart = async () => {
+            setIsLoading(true);
+            let initialCart = [];
+            if (currentUser) {
                 try {
-                    const parsedCart = JSON.parse(guestCart);
-                    setCartItems(parsedCart);
-                } catch (error) {
-                    console.error('Error parsing guest cart:', error);
-                    localStorage.removeItem('guestCart');
-                    setCartItems([]);
+                    const res = await fetch('/api/cart', { headers: { 'user-id': currentUser.id } });
+                    if (res.ok) {
+                        const data = await res.json();
+                        initialCart = data.items || [];
+                    } else {
+                        throw new Error('Failed to fetch cart from server.');
+                    }
+                } catch (err) {
+                    console.error('Error fetching cart:', err);
+                    toast.error('Could not load your cart.');
                 }
             } else {
-                setCartItems([]);
+                // Load guest cart from localStorage
+                const guestCartJson = localStorage.getItem('guestCart');
+                if (guestCartJson) {
+                    try {
+                        initialCart = JSON.parse(guestCartJson);
+                    } catch {
+                        localStorage.removeItem('guestCart');
+                    }
+                }
             }
+            setCartItems(initialCart);
             setIsLoading(false);
-        }
+        };
+        loadCart();
     }, [currentUser]);
-
-    const fetchCartItems = async () => {
-        if (!currentUser) {
-            setIsLoading(false);
-            return;
-        }
-
-        setIsLoading(true);
-        try {
-            const res = await fetch('/api/cart', {
-                headers: {
-                    'user-id': currentUser.id
-                }
-            });
-            if (!res.ok) throw new Error('Failed to fetch cart');
-            const data = await res.json();
-            setCartItems(data.items || []);
-        } catch (err) {
-            console.error('Error fetching cart:', err);
-            toast.error('Failed to load cart items');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const addToCart = async (product) => {
-        if (product.stock <= 0) {
-            toast.error('This product is currently out of stock.');
-            return;
-        }
-
-        const loadingToast = toast.loading('Adding to cart...');
-        try {
-            if (currentUser) {
-                // Handle logged-in user
-                const res = await fetch('/api/cart', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'user-id': currentUser.id
-                    },
-                    body: JSON.stringify({ productId: product._id })
-                });
-
-                if (!res.ok) throw new Error('Failed to add to cart');
-                
-                const data = await res.json();
-                setCartItems(data.items || []);
-            } else {
-                // Handle guest user
-                const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-                const existingItemIndex = guestCart.findIndex(item => item._id === product._id);
-
-                if (existingItemIndex !== -1) {
-                    // Check if adding one more would exceed stock
-                    if (guestCart[existingItemIndex].quantity + 1 > product.stock) {
-                        toast.error(`Only ${product.stock} items available in stock.`);
-                        return;
-                    }
-                    guestCart[existingItemIndex].quantity = (guestCart[existingItemIndex].quantity || 1) + 1;
-                } else {
-                    guestCart.push({
-                        _id: product._id,
-                        productId: product._id,
-                        name: product.name,
-                        price: product.price,
-                        imageUrl: product.images?.[0] || product.imageUrl,
-                        stock: product.stock,
-                        quantity: 1
-                    });
-                }
-
-                localStorage.setItem('guestCart', JSON.stringify(guestCart));
-                setCartItems(guestCart);
-            }
-
-            toast.dismiss(loadingToast);
-            toast.success(`${product.name || 'Item'} added to cart!`);
-        } catch (err) {
-            console.error('Error adding to cart:', err);
-            toast.dismiss(loadingToast);
-            toast.error('Failed to add item to cart');
-        }
-    };
-
-    const removeFromCart = async (productId) => {
-        const loadingToast = toast.loading('Removing item...');
-        try {
-            if (currentUser) {
-                // Handle logged-in user
-                const res = await fetch('/api/cart', {
-                    method: 'DELETE',
-                    headers: {
-                        'user-id': currentUser.id,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ productId })
-                });
-
-                if (!res.ok) throw new Error('Failed to remove from cart');
-                
-                const data = await res.json();
-                setCartItems(data.items || []);
-            } else {
-                // Handle guest user
-                const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-                // Keep all items EXCEPT the one we want to remove
-                const updatedCart = guestCart.filter(item => item._id !== productId);
-                localStorage.setItem('guestCart', JSON.stringify(updatedCart));
-                setCartItems(updatedCart);
-            }
-
-            toast.dismiss(loadingToast);
-            toast.success('Item removed from cart');
-        } catch (err) {
-            console.error('Error removing from cart:', err);
-            toast.dismiss(loadingToast);
-            toast.error('Failed to remove item from cart');
-        }
-    };
-
-    const updateQuantity = async (productId, newQuantity) => {
-        if (newQuantity < 1) return;
-
-        const loadingToast = toast.loading('Updating quantity...');
-        try {
-            if (currentUser) {
-                // Handle logged-in user
-                const res = await fetch('/api/cart', {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'user-id': currentUser.id
-                    },
-                    body: JSON.stringify({ productId, quantity: newQuantity })
-                });
-
-                if (!res.ok) throw new Error('Failed to update quantity');
-                
-                const data = await res.json();
-                setCartItems(data.items || []);
-            } else {
-                // Handle guest user
-                const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-                const itemIndex = guestCart.findIndex(item => item._id === productId);
-                
-                if (itemIndex !== -1) {
-                    // Check if new quantity exceeds stock
-                    if (newQuantity > guestCart[itemIndex].stock) {
-                        toast.error(`Only ${guestCart[itemIndex].stock} items available in stock.`);
-                        return;
-                    }
-                    
-                    guestCart[itemIndex].quantity = newQuantity;
-                    localStorage.setItem('guestCart', JSON.stringify(guestCart));
-                    setCartItems(guestCart);
-                }
-            }
-
-            toast.dismiss(loadingToast);
-        } catch (err) {
-            console.error('Error updating quantity:', err);
-            toast.dismiss(loadingToast);
-            toast.error('Failed to update quantity');
-        }
-    };
-
-    const clearCart = async () => {
-        try {
-            if (currentUser) {
-                const res = await fetch('/api/cart', {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'user-id': currentUser.id
-                    }
-                });
-                if (!res.ok) throw new Error('Failed to clear cart');
-            } else {
-                localStorage.removeItem('guestCart');
-            }
-            setCartItems([]);
-        } catch (err) {
-            console.error('Error clearing cart:', err);
-            toast.error('Failed to clear cart');
-        }
-    };
-
-    // Function to transfer guest cart to user cart after login
-    const transferGuestCart = async () => {
-        if (!currentUser) return;
-
-        const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-        if (guestCart.length === 0) return;
-
-        try {
-            // Add each guest cart item to the user's cart
-            for (const item of guestCart) {
+    
+    const saveCart = async (newCartItems) => {
+        setCartItems(newCartItems);
+        if (currentUser) {
+            try {
                 await fetch('/api/cart', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'user-id': currentUser.id
-                    },
-                    body: JSON.stringify({ 
-                        productId: item._id,
-                        quantity: item.quantity 
-                    })
+                    headers: { 'Content-Type': 'application/json', 'user-id': currentUser.id },
+                    body: JSON.stringify({ items: newCartItems }),
                 });
+            } catch (error) {
+                console.error("Failed to save cart to backend:", error);
+                toast.error("Could not sync your cart with the server.");
             }
-
-            // Clear guest cart
-            localStorage.removeItem('guestCart');
-            
-            // Refresh user's cart
-            await fetchCartItems();
-        } catch (err) {
-            console.error('Error transferring guest cart:', err);
-            toast.error('Failed to transfer cart items');
+        } else {
+            localStorage.setItem('guestCart', JSON.stringify(newCartItems));
         }
     };
 
-    // Transfer guest cart when user logs in
+    const addToCart = (product, quantity, size, color) => {
+        if (product.stock <= 0) {
+            toast.error('This product is out of stock.');
+            return;
+        }
+
+        const newCartItems = [...cartItems];
+        const cartItemId = getCartItemId(product._id, size, color);
+        const existingItemIndex = newCartItems.findIndex(item => getCartItemId(item._id, item.size, item.color) === cartItemId);
+
+        if (existingItemIndex !== -1) {
+            newCartItems[existingItemIndex].quantity += quantity;
+        } else {
+            newCartItems.push({ ...product, quantity, size, color });
+        }
+        
+        saveCart(newCartItems);
+        toast.success(`${product.name} added to cart!`);
+    };
+
+    const removeFromCart = (productId, size, color) => {
+        const cartItemId = getCartItemId(productId, size, color);
+        const newCartItems = cartItems.filter(item => getCartItemId(item._id, item.size, item.color) !== cartItemId);
+        saveCart(newCartItems);
+        toast.success('Item removed from cart.');
+    };
+
+    const updateQuantity = (productId, newQuantity, size, color) => {
+        if (newQuantity < 1) {
+            removeFromCart(productId, size, color);
+            return;
+        }
+
+        const cartItemId = getCartItemId(productId, size, color);
+        const newCartItems = cartItems.map(item =>
+            getCartItemId(item._id, item.size, item.color) === cartItemId
+                ? { ...item, quantity: newQuantity }
+                : item
+        );
+        saveCart(newCartItems);
+    };
+
+    const updateCartItemOptions = (productId, oldSize, oldColor, newSize, newColor) => {
+        // Find the item with old options
+        const oldCartItemId = getCartItemId(productId, oldSize, oldColor);
+        const itemIndex = cartItems.findIndex(item => getCartItemId(item._id, item.size, item.color) === oldCartItemId);
+
+        if (itemIndex === -1) {
+            toast.error('Item not found in cart.');
+            return;
+        }
+
+        const item = cartItems[itemIndex];
+        const newCartItemId = getCartItemId(productId, newSize, newColor);
+
+        // Check if the new combination already exists
+        const existingItemIndex = cartItems.findIndex(item => getCartItemId(item._id, item.size, item.color) === newCartItemId);
+        
+        if (existingItemIndex !== -1 && existingItemIndex !== itemIndex) {
+            // If the new combination exists, merge quantities
+            const newCartItems = [...cartItems];
+            newCartItems[existingItemIndex].quantity += item.quantity;
+            newCartItems.splice(itemIndex, 1); // Remove the old item
+            saveCart(newCartItems);
+            toast.success('Options updated and quantities merged!');
+        } else {
+            // Update the existing item with new options
+            const newCartItems = cartItems.map((cartItem, index) =>
+                index === itemIndex
+                    ? { ...cartItem, size: newSize, color: newColor }
+                    : cartItem
+            );
+            saveCart(newCartItems);
+            toast.success('Options updated successfully!');
+        }
+    };
+    
+    const getCartSubtotal = () => {
+        return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+    };
+
+    const clearCart = () => {
+        saveCart([]);
+    };
+    
+    // This function can be expanded for more complex cart merging logic
+    const transferGuestCartToUser = async () => {
+        const guestCartJson = localStorage.getItem('guestCart');
+        if (guestCartJson) {
+            const guestCart = JSON.parse(guestCartJson);
+            if (guestCart.length > 0) {
+                // A simple overwrite, but you could merge instead
+                await saveCart(guestCart);
+                localStorage.removeItem('guestCart');
+                 toast.success('Your guest cart has been moved to your account.');
+            }
+        }
+    };
+    
     useEffect(() => {
-        if (currentUser) {
-            transferGuestCart();
+        if(currentUser) {
+            transferGuestCartToUser();
         }
     }, [currentUser]);
 
+
     return (
-        <CartContext.Provider value={{
-            cartItems,
-            isLoading,
-            addToCart,
-            removeFromCart,
-            updateQuantity,
-            clearCart
-        }}>
+        <CartContext.Provider
+            value={{
+                cartItems,
+                isLoading,
+                addToCart,
+                removeFromCart,
+                updateQuantity,
+                updateCartItemOptions,
+                getCartSubtotal,
+                clearCart,
+            }}
+        >
             {children}
         </CartContext.Provider>
     );

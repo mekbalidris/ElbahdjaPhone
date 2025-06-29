@@ -6,12 +6,13 @@ import CartModal from '../components/cart/CartModal';
 import '../styles/globals.css';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { CartProvider, useCart } from '../context/CartContext';
+import { FavoritesProvider } from '../context/FavoritesContext';
 import ChatBot from '../components/chat/ChatBot';
 
 // Create a separate component for the app content
 function AppContent({ Component, pageProps }) {
     const [isCartModalOpen, setIsCartModalOpen] = useState(false);
-    const { cartItems, isLoading: isLoadingCart, updateQuantity, removeFromCart } = useCart();
+    const { cartItems } = useCart();
     const [isMounted, setIsMounted] = useState(false);
 
     // Handle mounting state
@@ -38,10 +39,6 @@ function AppContent({ Component, pageProps }) {
                 <CartModal
                     isOpen={isCartModalOpen}
                     onClose={() => setIsCartModalOpen(false)}
-                    items={cartItems}
-                    isLoading={isLoadingCart}
-                    onUpdateQuantity={updateQuantity}
-                    onRemoveItem={removeFromCart}
                 />
                 <ChatBot />
             </div>
@@ -53,7 +50,9 @@ export default function App({ Component, pageProps }) {
     return (
         <AuthProvider>
             <CartProvider>
-                <AppContent Component={Component} pageProps={pageProps} />
+                <FavoritesProvider>
+                    <AppContent Component={Component} pageProps={pageProps} />
+                </FavoritesProvider>
             </CartProvider>
         </AuthProvider>
     );

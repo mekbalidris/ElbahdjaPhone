@@ -40,9 +40,48 @@ const productSchema = new mongoose.Schema({
         trim: true,
         maxLength: 50 // Limit category length
     },
+    sizes: [{
+        type: String,
+        trim: true,
+        uppercase: true,
+        maxLength: 10
+    }],
+    colors: [{
+        type: String,
+        trim: true,
+        maxLength: 20
+    }],
+    brand: {
+        type: String,
+        trim: true,
+        maxLength: 50
+    },
+    gender: {
+        type: String,
+        enum: ['Men', 'Women', 'Unisex'],
+        trim: true
+    },
     offer: {
         type: Boolean,
         default: false
+    },
+    coupe: {
+        type: String,
+        trim: true,
+        maxLength: 50,
+        required: false
+    },
+    matiere: {
+        type: String,
+        trim: true,
+        maxLength: 50,
+        required: false
+    },
+    saison: {
+        type: String,
+        trim: true,
+        maxLength: 50,
+        required: false
     },
     createdAt: {
         type: Date,
@@ -70,5 +109,7 @@ productSchema.index({ name: 'text', description: 'text' });
 productSchema.index({ category: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ stock: 1 });
+productSchema.index({ gender: 1 });
+productSchema.index({ brand: 1 });
 
 export default mongoose.models.Product || mongoose.model('Product', productSchema); 
