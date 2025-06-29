@@ -7,26 +7,47 @@ import { connectToDatabase } from '../lib/mongodb';
 
 const HomePage = ({ products, error }) => {
     return (
-        <div className="bg-white min-h-screen">
-            <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <HeroSection />
-                <CategoryGrid products={products} />
-                <SpecialOffers products={products} />
-                <div className="mt-16">
-                    <h2 className="text-3xl font-serif font-bold text-gray-800 mb-8 text-center">Nouveaux produits</h2>
-                    {error ? (
-                        <div className="text-center text-red-500 py-8">{error}</div>
-                    ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
-                            {products && products.length > 0 ? (
-                                products.map(product => <ProductCard key={product._id} product={product} />)
+        <div className="bg-white">
+            {/* Sticky Hero Section - stays at the top until scrolled past */}
+            <div className="sticky top-0 left-0 w-full h-screen z-0">
+                <div className="w-full h-full bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center">
+                    <div className="text-center text-white px-4">
+                        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight font-serif mb-4">
+                            Cosmos Algérie
+                        </h1>
+                        <p className="max-w-2xl mx-auto text-lg mb-2">
+                            La marque Cosmos est une marque de chaussures 100% algérienne, fabriquée dans un atelier artisanal pour vous offrir une expérience authentique et des produits de qualité garantie.
+                        </p>
+                        <p className="max-w-2xl mx-auto text-base opacity-90">
+                            Découvrez notre collection soigneusement sélectionnée pour vous.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Content overlays the hero as you scroll */}
+            <div className="relative z-10 -mt-20">
+                <div className="bg-white rounded-t-3xl">
+                    <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                        <CategoryGrid products={products} />
+                        <SpecialOffers products={products} />
+                        <div className="mt-16">
+                            <h2 className="text-3xl font-serif font-bold text-gray-800 mb-8 text-center">Nouveaux produits</h2>
+                            {error ? (
+                                <div className="text-center text-red-500 py-8">{error}</div>
                             ) : (
-                                <div className="col-span-full text-center text-gray-500">Aucun produit trouvé.</div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+                                    {products && products.length > 0 ? (
+                                        products.map(product => <ProductCard key={product._id} product={product} />)
+                                    ) : (
+                                        <div className="col-span-full text-center text-gray-500">Aucun produit trouvé.</div>
+                                    )}
+                                </div>
                             )}
                         </div>
-                    )}
+                    </main>
                 </div>
-            </main>
+            </div>
         </div>
     );
 };

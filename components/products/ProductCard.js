@@ -5,6 +5,7 @@ import { useCart } from '../../context/CartContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { toast } from 'react-hot-toast';
 import Button from '../ui/Button';
+import { ShoppingCart, ShoppingBag, Search, Heart } from 'lucide-react';
 
 const FADE_DURATION = 300; // ms
 
@@ -24,11 +25,11 @@ const ProductCard = ({ product }) => {
     const [quantity, setQuantity] = useState(1);
     const intervalRef = useRef(null);
     const fadeTimeoutRef = useRef(null);
+    
     const images = product.images && product.images.length > 0 ? product.images : [
         `https://placehold.co/600x400/e2e8f0/94a3b8?text=${encodeURIComponent(product.name || "Product")}`
     ];
 
-    // Helper to change image with fade
     const changeImageWithFade = (newIdx) => {
         setIsFading(true);
         fadeTimeoutRef.current = setTimeout(() => {
@@ -39,7 +40,7 @@ const ProductCard = ({ product }) => {
 
     useEffect(() => {
         if (hovered && images.length > 1) {
-            changeImageWithFade(1); // Show second image immediately with fade
+            changeImageWithFade(1);
             let idx = 1;
             intervalRef.current = setInterval(() => {
                 idx = (idx + 1) % images.length;
@@ -59,7 +60,6 @@ const ProductCard = ({ product }) => {
     if (!product) return null;
     const isAvailable = product.stock > 0;
 
-    // Determine if product is clothing or shoes
     const isShoe = product.category?.toLowerCase().includes('chaussure') || product.category?.toLowerCase().includes('shoes');
     const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : (isShoe ? shoeSizes : clothingSizes);
 
@@ -67,7 +67,7 @@ const ProductCard = ({ product }) => {
         router.push(`/products/${product._id}`);
     };
 
-    const handleAddToCartClick = async (e) => {
+    const handleAddToCartClick = (e) => {
         e.stopPropagation();
         if (!isAvailable) {
             toast.error('Ce produit est en rupture de stock.');
@@ -90,7 +90,7 @@ const ProductCard = ({ product }) => {
         e.stopPropagation();
         toggleFavorite(product);
     };
-
+    
     const handleQuantityChange = (change) => {
         setQuantity(prev => {
             const newQuantity = prev + change;
@@ -113,7 +113,6 @@ const ProductCard = ({ product }) => {
             return;
         }
 
-        // Add to cart first, then redirect to checkout
         addToCart(product, quantity, selectedSize, selectedColor);
         setShowBuyModal(false);
         router.push('/checkout');
@@ -124,36 +123,28 @@ const ProductCard = ({ product }) => {
     return (
         <>
             <div
-                className="group bg-white rounded-2xl overflow-hidden shadow border border-gray-200 cursor-pointer flex flex-col transition-all duration-300 hover:shadow-xl relative w-full max-w-[280px]"
+                className="group bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200 cursor-pointer flex flex-col transition-all duration-300 hover:shadow-xl relative w-full max-w-[300px]"
                 onClick={handleViewDetails}
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
             >
                 {/* Product Image Container */}
-                <div className="relative w-full h-[17rem] overflow-hidden bg-gray-100">
-                    {/* Heart icon in top right */}
+                <div className="relative w-full h-[20rem] overflow-hidden bg-gray-100">
+                    {/* Favorite Button (Heart Icon) */}
                     <button
-                        onClick={e => { e.stopPropagation(); handleAddToFavorites(e); }}
-                        className={`absolute top-3 right-3 z-10 flex items-center justify-center w-9 h-9 rounded-full border transition-all duration-200 ${
+                        onClick={handleAddToFavorites}
+                        className={`absolute top-3 right-3 z-20 flex items-center justify-center w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm shadow-md transition-all duration-300 ${
                             isProductFavorite 
-                                ? 'bg-red-500 border-red-500 text-white hover:bg-red-600' 
-                                : 'border-gray-200 text-gray-400 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
+                                ? 'text-red-500' 
+                                : 'text-gray-500 hover:text-red-500 hover:scale-110'
                         }`}
                         title={isProductFavorite ? "Retirer de mes favoris" : "Ajouter à mes favoris"}
                     >
-                        <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            fill={isProductFavorite ? "currentColor" : "none"} 
-                            viewBox="0 0 24 24" 
-                            strokeWidth={isProductFavorite ? 0 : 2} 
-                            stroke="currentColor" 
-                            className="w-5 h-5"
-                        >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 0 1 6.364 0L12 7.636l1.318-1.318a4.5 4.5 0 1 1 6.364 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 0 1 0-6.364z" />
-                        </svg>
+                        <Heart className="w-5 h-5" fill={isProductFavorite ? "currentColor" : "none"} />
                     </button>
+
                     <div
-                        className={`w-full h-full transition-opacity duration-300 ${isFading ? 'opacity-0' : 'opacity-100'}`}
+                        className={`w-full h-full transition-opacity duration-${FADE_DURATION} ${isFading ? 'opacity-0' : 'opacity-100'}`}
                         style={{ position: 'absolute', inset: 0 }}
                     >
                         <Image
@@ -161,51 +152,90 @@ const ProductCard = ({ product }) => {
                             alt={product.name || "Product image"}
                             fill
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            className="object-cover object-center w-full h-full transition-transform duration-300 group-hover:scale-105"
+                            className="object-cover object-center w-full h-full transition-transform duration-500 group-hover:scale-110"
                             onError={(e) => {
-                                e.target.src = `https://placehold.co/600x400/e2e8f0/94a3b8?text=${encodeURIComponent(product.name || "Product")}`;
+                                e.target.src = `https://placehold.co/600x400/e2e8f0/94a3b8?text=${encodeURIComponent(product.name || "Image")}`;
                             }}
                         />
                     </div>
+
+                    {/* === ACTION ICONS WITH TOOLTIPS - NEW DESIGN === */}
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-auto flex justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-lg">
+                            
+                            {/* View Details Icon */}
+                            <div className="relative group/icon flex flex-col items-center">
+                                <div className="absolute bottom-full mb-2 flex flex-col items-center opacity-0 group-hover/icon:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                    <span className="px-3 py-1 text-xs text-white bg-black rounded-md shadow-lg whitespace-nowrap">Voir détails</span>
+                                    <div className="w-3 h-3 -mt-1.5 rotate-45 bg-black"></div>
+                                </div>
+                                <button
+                                    onClick={handleViewDetails}
+                                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow hover:bg-gray-100 transition-all"
+                                    aria-label="Voir détails"
+                                >
+                                    <Search className="w-5 h-5 text-gray-700" />
+                                </button>
+                            </div>
+
+                            {/* Add to Cart Icon */}
+                             <div className="relative group/icon flex flex-col items-center">
+                                <div className="absolute bottom-full mb-2 flex flex-col items-center opacity-0 group-hover/icon:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                    <span className="px-3 py-1 text-xs text-white bg-black rounded-md shadow-lg whitespace-nowrap">Ajouter au panier</span>
+                                    <div className="w-3 h-3 -mt-1.5 rotate-45 bg-black"></div>
+                                </div>
+                                <button
+                                    onClick={handleAddToCartClick}
+                                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow hover:bg-gray-100 transition-all"
+                                    aria-label="Ajouter au panier"
+                                >
+                                    <ShoppingCart className="w-5 h-5 text-gray-700" />
+                                </button>
+                            </div>
+
+                            {/* Buy Now Icon */}
+                            <div className="relative group/icon flex flex-col items-center">
+                                <div className="absolute bottom-full mb-2 flex flex-col items-center opacity-0 group-hover/icon:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                    <span className="px-3 py-1 text-xs text-white bg-black rounded-md shadow-lg whitespace-nowrap">Acheter</span>
+                                    <div className="w-3 h-3 -mt-1.5 rotate-45 bg-black"></div>
+                                </div>
+                                <button
+                                    onClick={handleBuyNow}
+                                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow hover:bg-gray-100 transition-all"
+                                    aria-label="Acheter"
+                                >
+                                    <ShoppingBag className="w-5 h-5 text-gray-700" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+
                     {product.offer && (
-                        <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider animate-pulse shadow-lg">
+                        <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shadow-lg">
                             Promo
                         </span>
                     )}
                     {!isAvailable && (
-                        <span className="absolute top-3 right-14 bg-gray-700 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                            Rupture de stock
-                        </span>
+                        <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
+                             <span className="bg-gray-800 text-white text-sm font-bold px-4 py-2 rounded-full uppercase tracking-wider">
+                                Rupture de stock
+                            </span>
+                        </div>
                     )}
                 </div>
+
                 {/* Product Info */}
-                <div className="p-4 flex flex-col flex-grow justify-between">
-                    <div className="mb-2">
-                        <p className="text-xs text-gray-400 mb-1 uppercase tracking-wider">{product.category}</p>
-                        <h3 className="font-semibold text-gray-900 group-hover:text-yellow-700 transition-colors truncate text-lg mb-1">{product.name}</h3>
+                <div className="p-4 flex flex-col flex-grow">
+                    <div className="flex-grow">
+                        <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">{product.category}</p>
+                        <h3 className="font-semibold text-gray-800 group-hover:text-yellow-800 transition-colors truncate text-base mb-2">{product.name}</h3>
                     </div>
-                    <div className="flex items-center justify-center gap-2 mb-2">
+                    <div className="flex items-baseline justify-start gap-2 mt-2">
                         <span className={`font-bold text-lg ${product.oldPrice ? 'text-red-600' : 'text-gray-900'}`}>{product.price?.toLocaleString()} DA</span>
                         {product.oldPrice && (
                             <span className="text-gray-400 line-through text-sm">{product.oldPrice?.toLocaleString()} DA</span>
                         )}
-                    </div>
-                    {/* Stack buttons vertically */}
-                    <div className="flex flex-col gap-2 mt-2">
-                        <Button
-                            onClick={e => { e.stopPropagation(); handleBuyNow(e); }}
-                            variant="primary"
-                            size="sm"
-                            className="w-full bg-yellow-700 hover:bg-yellow-800 text-white flex items-center justify-center gap-2"
-                            iconLeft="shoppingBag"
-                        >Acheter</Button>
-                        <Button
-                            onClick={e => { e.stopPropagation(); handleAddToCartClick(e); }}
-                            variant="secondary"
-                            size="sm"
-                            className="w-full border-yellow-700 text-yellow-700 hover:bg-yellow-50 flex items-center justify-center gap-2"
-                            iconLeft="cart"
-                        >Ajouter au panier</Button>
                     </div>
                 </div>
             </div>
@@ -229,7 +259,7 @@ const ProductCard = ({ product }) => {
 
                             {/* Product Info */}
                             <div className="flex items-center space-x-4 mb-6">
-                                <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
+                                <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                                     <Image
                                         src={images[0]}
                                         alt={product.name}
@@ -240,8 +270,8 @@ const ProductCard = ({ product }) => {
                                 </div>
                                 <div>
                                     <h4 className="font-medium text-gray-900">{product.name}</h4>
-                                    <p className="text-gray-500">{product.category}</p>
-                                    <p className="font-semibold text-gray-900">{product.price?.toLocaleString()} DA</p>
+                                    <p className="text-sm text-gray-500">{product.category}</p>
+                                    <p className="font-semibold text-lg text-gray-900 mt-1">{product.price?.toLocaleString()} DA</p>
                                 </div>
                             </div>
 
@@ -256,10 +286,10 @@ const ProductCard = ({ product }) => {
                                             <button
                                                 key={color}
                                                 onClick={() => setSelectedColor(color)}
-                                                className={`w-10 h-10 rounded-full border-2 transition-all ${
+                                                className={`w-9 h-9 rounded-full border-2 transition-all ${
                                                     selectedColor === color 
-                                                        ? 'border-gray-900 scale-110' 
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                        ? 'border-gray-900 ring-2 ring-offset-2 ring-gray-900' 
+                                                        : 'border-gray-200 hover:border-gray-400'
                                                 }`}
                                                 style={{ backgroundColor: color.toLowerCase() }}
                                                 title={color}
@@ -301,7 +331,7 @@ const ProductCard = ({ product }) => {
                                 <div className="flex items-center space-x-3">
                                     <button
                                         onClick={() => handleQuantityChange(-1)}
-                                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100"
+                                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition disabled:opacity-50"
                                         disabled={quantity <= 1}
                                     >
                                         -
@@ -309,13 +339,13 @@ const ProductCard = ({ product }) => {
                                     <span className="w-12 text-center font-medium">{quantity}</span>
                                     <button
                                         onClick={() => handleQuantityChange(1)}
-                                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100"
+                                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition disabled:opacity-50"
                                         disabled={quantity >= product.stock}
                                     >
                                         +
                                     </button>
                                 </div>
-                                {product.stock < 10 && (
+                                {product.stock > 0 && product.stock < 10 && (
                                     <p className="text-sm text-yellow-600 mt-2">
                                         Il ne reste que {product.stock} en stock.
                                     </p>
@@ -326,23 +356,23 @@ const ProductCard = ({ product }) => {
                             <div className="border-t pt-4 mb-6">
                                 <div className="flex justify-between items-center">
                                     <span className="font-medium text-gray-900">Total:</span>
-                                    <span className="font-bold text-lg text-gray-900">
+                                    <span className="font-bold text-xl text-gray-900">
                                         {(product.price * quantity)?.toLocaleString()} DA
                                     </span>
                                 </div>
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="flex space-x-3">
+                            <div className="flex flex-col sm:flex-row gap-3">
                                 <button
                                     onClick={() => setShowBuyModal(false)}
-                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                                    className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-semibold transition-colors"
                                 >
                                     Annuler
                                 </button>
                                 <button
                                     onClick={handleProceedToCheckout}
-                                    className="flex-1 px-4 py-2 bg-yellow-700 text-white rounded-md hover:bg-yellow-800 transition-colors"
+                                    className="w-full px-4 py-3 bg-yellow-700 text-white rounded-md hover:bg-yellow-800 font-semibold transition-colors"
                                 >
                                     Procéder au paiement
                                 </button>

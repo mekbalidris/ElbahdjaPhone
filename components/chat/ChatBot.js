@@ -64,7 +64,7 @@ const ChatBot = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [showHelper, setShowHelper] = useState(true);
     const messagesEndRef = useRef(null);
-    const [language, setLanguage] = useState('en');
+    const [language, setLanguage] = useState('fr'); // Default to French
 
     // Show welcome toast when component mounts
     useEffect(() => {
@@ -74,9 +74,8 @@ const ChatBot = () => {
             ar: "تحتاج إلى مساعدة؟ انقر على أيقونة الدردشة!"
         };
 
-        // Detect browser language
-        const browserLang = navigator.language.split('-')[0];
-        const detectedLang = browserLang === 'fr' || browserLang === 'ar' ? browserLang : 'en';
+        // Default to French
+        const detectedLang = 'fr';
         
         // Wait for 2 seconds after component mount to show the toast
         const timer = setTimeout(() => {
@@ -200,109 +199,128 @@ const ChatBot = () => {
     };
 
     return (
-        <div className="fixed bottom-5 right-5 z-50 font-sans">
-            {/* Chat Bubble Icon */}
-            <Transition
-                show={!isOpen}
-                as={Fragment}
-                enter="transition-opacity duration-300"
-                enterFrom="opacity-0"
-                enterTo="opacity-100"
-                leave="transition-opacity duration-300"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0"
+        <>
+            {/* Chat Button */}
+            <button
+                onClick={() => setIsOpen(true)}
+                className="fixed bottom-6 right-6 z-50 bg-gray-900 text-white w-12 h-12 p-0 rounded-full shadow-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center"
+                aria-label="Open chat"
             >
-                <button
-                    onClick={() => setIsOpen(true)}
-                    className="text-amber-500 hover:text-amber-600 transition-colors"
-                    aria-label="Open chat"
-                >
-                    <MessageSquare className="w-8 h-8" />
-                </button>
-            </Transition>
+                <MessageSquare size={20} />
+            </button>
 
-            {/* Chat Window */}
-            <Transition
-                show={isOpen}
-                as={Fragment}
-                enter="transition ease-out duration-300"
-                enterFrom="opacity-0 scale-95 translate-y-4"
-                enterTo="opacity-100 scale-100 translate-y-0"
-                leave="transition ease-in duration-200"
-                leaveFrom="opacity-100 scale-100 translate-y-0"
-                leaveTo="opacity-0 scale-95 translate-y-4"
-            >
-                <div className="bg-white rounded-2xl shadow-2xl w-96 h-[550px] flex flex-col border border-gray-200/80 origin-bottom-right">
-                    <header className="bg-purple-600 text-white p-4 rounded-t-2xl flex justify-between items-center flex-shrink-0">
-                        <h3 className="font-bold text-lg">El Bahdja Assistant</h3>
-                        <button onClick={() => setIsOpen(false)} className="p-1 rounded-full hover:bg-white/20 transition-colors" aria-label="Close chat">
-                            <X className="w-5 h-5" />
-                        </button>
-                    </header>
+            {/* Chat Modal */}
+            <Transition show={isOpen} as={Fragment}>
+                <div className="fixed inset-0 z-50 pointer-events-none">
+                    {/* Only allow pointer events on the chat window and overlay */}
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity pointer-events-auto" onClick={() => setIsOpen(false)} />
+                    </Transition.Child>
 
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                        {showHelper && (
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                                <div className="flex items-start gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                        <Info className="w-5 h-5 text-blue-600" />
-                                    </div>
-                                    <div className="flex-1">
-                                        {helperMessages[language].map((line, index) => (
-                                            <p key={index} className={`text-sm ${index === 0 ? 'font-semibold text-blue-800' : 'text-blue-700'}`}>
-                                                {line}
-                                            </p>
-                                        ))}
-                                    </div>
-                                </div>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                        enterTo="opacity-100 translate-y-0 sm:scale-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                        leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    >
+                        <div className="fixed bottom-6 right-6 w-[95vw] max-w-xs sm:max-w-sm md:max-w-md bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all pointer-events-auto flex flex-col" style={{height: '450px'}}>
+                            {/* Header */}
+                            <div className="bg-gray-900 text-white px-4 py-3 flex justify-between items-center">
+                                <h3 className="text-base font-semibold">Assistant COSMOS</h3>
+                                <button
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-gray-300 hover:text-white transition-colors"
+                                >
+                                    <X size={18} />
+                                </button>
                             </div>
-                        )}
-                        {messages.map((message, index) => (
-                            <div key={index} className={`flex items-end gap-2 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                {message.role === 'assistant' && <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0"><MessageSquare className="w-5 h-5 text-purple-600"/></div>}
-                                <div className={`max-w-[80%] rounded-2xl p-3 text-sm ${message.role === 'user' ? 'bg-amber-500 text-white rounded-br-none' : 'bg-gray-100 text-slate-800 rounded-bl-none'}`}>
-                                    {message.content.split('\n').map((line, i) => (
-                                        <p key={i} dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                        {isLoading && (
-                            <div className="flex items-end gap-2 justify-start">
-                                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0"><MessageSquare className="w-5 h-5 text-purple-600"/></div>
-                                <div className="bg-gray-100 rounded-2xl p-3 text-slate-800 rounded-bl-none">
-                                    <div className="flex space-x-1">
-                                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                        <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        <div ref={messagesEndRef} />
-                    </div>
 
-                    <form onSubmit={handleSubmit} className="p-4 border-t bg-white rounded-b-2xl flex-shrink-0">
-                        <div className="flex space-x-2">
-                            <input 
-                                type="text" 
-                                value={input} 
-                                onChange={(e) => setInput(e.target.value)} 
-                                placeholder="Ask a question..." 
-                                className="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500" 
-                            />
-                            <button 
-                                type="submit" 
-                                disabled={isLoading} 
-                                className="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <Send className="w-5 h-5" />
-                            </button>
+                            {/* Messages */}
+                            <div className="flex-1 overflow-y-auto p-3 bg-gray-50">
+                                {showHelper && (
+                                    <div className="mb-4 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+                                        <div className="flex items-center mb-2">
+                                            <Info size={16} className="text-gray-600 mr-2" />
+                                            <span className="text-sm font-medium text-gray-700">Comment puis-je vous aider ?</span>
+                                        </div>
+                                        <div className="text-sm text-gray-600 space-y-1">
+                                            {helperMessages[language].map((message, index) => (
+                                                <p key={index} className={index === 0 ? "font-semibold" : ""}>
+                                                    {message}
+                                                </p>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {messages.map((message, index) => (
+                                    <div
+                                        key={index}
+                                        className={`mb-4 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                    >
+                                        <div
+                                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                                message.role === 'user'
+                                                    ? 'bg-gray-900 text-white'
+                                                    : 'bg-white text-gray-800 border border-gray-200'
+                                            }`}
+                                        >
+                                            <p className="text-sm">{message.content}</p>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {isLoading && (
+                                    <div className="flex justify-start mb-4">
+                                        <div className="bg-white text-gray-800 border border-gray-200 px-4 py-2 rounded-lg">
+                                            <div className="flex space-x-1">
+                                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div ref={messagesEndRef} />
+                            </div>
+
+                            {/* Input */}
+                            <form onSubmit={handleSubmit} className="p-3 bg-white border-t border-gray-200">
+                                <div className="flex space-x-2">
+                                    <input
+                                        type="text"
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        placeholder="Tapez votre message..."
+                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                                        disabled={isLoading}
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={!input.trim() || isLoading}
+                                        className="px-3 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <Send size={15} />
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                    </form>
+                    </Transition.Child>
                 </div>
             </Transition>
-        </div>
+        </>
     );
 };
 

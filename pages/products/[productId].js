@@ -175,10 +175,10 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                                 <button onClick={() => handleQuantityChange(1)} className="p-2 text-gray-600 hover:bg-gray-100 disabled:opacity-50 rounded-r-lg text-lg" disabled={!isAvailable || quantity >= product.stock}>+</button>
                             </div>
                             <Button onClick={handleAddToCart} size="md" className="w-48 bg-yellow-700 hover:bg-yellow-800 text-xs font-semibold flex items-center justify-center gap-2" disabled={!isAvailable}>
-                                <Icon name="shoppingBag" className="w-5 h-5" />
+                                <Icon name="cart" className="w-5 h-5" />
                                 {isAvailable ? 'AJOUTER AU PANIER' : 'Rupture de stock'}
                             </Button>
-                            <Button onClick={() => {/* handle buy now */}} size="md" className="w-[15rem] bg-yellow-900 hover:bg-yellow-800 text-[0.8rem] font-semibold flex items-center justify-center gap-2" disabled={!isAvailable}>
+                            <Button onClick={() => {/* handle buy now */}} size="md" className="w-[15rem] bg-yellow-900 hover:bg-yellow-800 text-[0.75rem] font-semibold flex items-center justify-center gap-2" disabled={!isAvailable}>
                                 <Icon name="arrowRight" className="w-5 h-5" />
                                 COMMANDER MAINTENANT
                             </Button>

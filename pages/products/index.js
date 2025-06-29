@@ -483,7 +483,7 @@ const ProductsPage = ({ handleAddToCart }) => {
                                     .slice(0, 4)
                                     .map(product => (
                                         <li key={product._id}>
-                                            <a href={`/products/${product._id}`} className="flex items-center gap-2 hover:bg-yellow-50 rounded p-1 transition">
+                                            <Link href={`/products/${product._id}`} className="flex items-center gap-2 hover:bg-yellow-50 rounded p-1 transition">
                                                 <img
                                                     src={product.images?.[0] || '/public/images/categories/placeholder.jpg'}
                                                     alt={product.name}
@@ -493,7 +493,7 @@ const ProductsPage = ({ handleAddToCart }) => {
                                                     <div className="text-xs font-semibold text-gray-800 truncate max-w-[100px]">{product.name}</div>
                                                     <div className="text-xs text-yellow-700 font-bold">{product.price?.toLocaleString()} DA</div>
                                                 </div>
-                                            </a>
+                                            </Link>
                                         </li>
                                     ))}
                                 {allProducts.filter(p => typeof p.buy === 'number' || typeof p.sold === 'number' || typeof p.sales === 'number' || p.offer || p.oldPrice).length === 0 && (
