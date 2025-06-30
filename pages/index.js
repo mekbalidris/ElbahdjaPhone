@@ -98,7 +98,6 @@ export async function getServerSideProps() {
             .collection('products')
             .find({})
             .sort({ createdAt: -1 })
-            .limit(12)
             .toArray();
         return {
             props: {

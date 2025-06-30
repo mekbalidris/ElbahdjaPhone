@@ -176,16 +176,17 @@ const ProductsPage = ({ handleAddToCart }) => {
     const uniqueCategories = Array.from(new Set(allProducts.map(p => (p.category || '').toUpperCase()))).filter(Boolean);
     const categoryOptions = [
         { value: 'all', label: 'Tous les produits' },
-        { value: 'SHORT', label: 'Short' },
-        { value: 'ACCESSORIES', label: 'Accessoires' },
-        { value: 'T-SHIRTS', label: 'T-shirts' },
-        { value: 'PANTALONS', label: 'Pantalons' },
-        { value: 'CHAUSSURES', label: 'Chaussures' },
-        { value: 'VESTES', label: 'Vestes' },
-        { value: 'CHAPEAU', label: 'Chapeau' },
-        { value: 'CASQUETTE', label: 'Casquette' },
-        { value: 'HOODIE', label: 'Hoodie' },
-        { value: 'GILET_CEINTURE', label: 'Gilet ceinturé' },
+        { value: 'tshirts', label: 'T-shirts' },
+        { value: 'pantalons', label: 'Pantalons' },
+        { value: 'jeans', label: 'Jeans' },
+        { value: 'chaussures', label: 'Chaussures' },
+        { value: 'vestes', label: 'Vestes' },
+        { value: 'accessoires', label: 'Accessoires' },
+        { value: 'short', label: 'Short' },
+        { value: 'chapeau', label: 'Chapeau' },
+        { value: 'casquette', label: 'Casquette' },
+        { value: 'hoodie', label: 'Hoodie' },
+        { value: 'gilet_ceinture', label: 'Gilet ceinturé' },
     ];
 
     const subCategoryOptions = {

@@ -226,7 +226,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
         const filteredImages = images.filter(img => !!img);
         const payload = { 
             name, 
-            category, 
+            category: category.toLowerCase(),
             brand,
             price: parseFloat(price), 
             oldPrice: oldPrice ? parseFloat(oldPrice) : undefined,
