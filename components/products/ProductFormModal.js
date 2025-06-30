@@ -11,6 +11,7 @@ const CATEGORIES = [
     { value: '', label: 'Choisir une catégorie', disabled: true },
     { value: 'tshirts', label: 'T-shirts' },
     { value: 'pantalons', label: 'Pantalons' },
+    { value: 'jeans', label: 'Jeans' },
     { value: 'chaussures', label: 'Chaussures' },
     { value: 'vestes', label: 'Vestes' },
     { value: 'accessoires', label: 'Accessoires' },
@@ -18,6 +19,7 @@ const CATEGORIES = [
     { value: 'chapeau', label: 'Chapeau' },
     { value: 'casquette', label: 'Casquette' },
     { value: 'hoodie', label: 'Hoodie' },
+    { value: 'gilet_ceinture', label: 'Gilet ceinturé' },
 ];
 
 const BRANDS = [

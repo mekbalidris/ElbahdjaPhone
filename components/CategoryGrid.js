@@ -4,10 +4,15 @@ import { useRouter } from 'next/router';
 const ALL_CATEGORIES = [
   { key: 'tshirts', title: 'T-shirts', filter: 'tshirts' },
   { key: 'pantalons', title: 'Pantalons', filter: 'pantalons' },
+  { key: 'jeans', title: 'Jeans', filter: 'jeans' },
   { key: 'chaussures', title: 'Chaussures', filter: 'chaussures' },
   { key: 'vestes', title: 'Vestes', filter: 'vestes' },
   { key: 'accessoires', title: 'Accessoires', filter: 'accessoires' },
   { key: 'short', title: 'Short', filter: 'short' },
+  { key: 'chapeau', title: 'Chapeau', filter: 'chapeau' },
+  { key: 'casquette', title: 'Casquette', filter: 'casquette' },
+  { key: 'hoodie', title: 'Hoodie', filter: 'hoodie' },
+  { key: 'gilet_ceinture', title: 'Gilet ceinturé', filter: 'gilet_ceinture' },
 ];
 
 const PLACEHOLDER = '/public/images/categories/placeholder.jpg';

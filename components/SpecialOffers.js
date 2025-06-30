@@ -89,6 +89,17 @@ function OfferCard({ pack }) {
 const SpecialOffers = ({ products = [] }) => {
   // Filter products with an offer (oldPrice or offer flag)
   const packs = products.filter(p => p.offer || p.oldPrice);
+  const [page, setPage] = useState(1);
+  const offersPerPage = 4;
+  const totalPages = Math.ceil(packs.length / offersPerPage);
+  const paginatedPacks = packs.slice((page - 1) * offersPerPage, page * offersPerPage);
+
+  const handlePrev = () => setPage(p => Math.max(1, p - 1));
+  const handleNext = () => setPage(p => Math.min(totalPages, p + 1));
+
+  useEffect(() => {
+    if (page > totalPages) setPage(1);
+  }, [packs.length, totalPages]);
 
   return (
     <section className="mb-16">
@@ -98,11 +109,30 @@ const SpecialOffers = ({ products = [] }) => {
         {packs.length === 0 ? (
           <div className="text-gray-500 text-center w-full">Aucune offre spéciale pour le moment.</div>
         ) : (
-          packs.map((pack) => (
+          paginatedPacks.map((pack) => (
             <OfferCard key={pack._id} pack={pack} />
           ))
         )}
       </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-4 gap-4">
+          <button
+            onClick={handlePrev}
+            disabled={page === 1}
+            className="px-4 py-2 bg-gray-200 rounded-lg font-semibold text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+          >
+            Précédent
+          </button>
+          <span className="px-2 py-2 font-semibold">Page {page} / {totalPages}</span>
+          <button
+            onClick={handleNext}
+            disabled={page === totalPages}
+            className="px-4 py-2 bg-gray-200 rounded-lg font-semibold text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+          >
+            Suivant
+          </button>
+        </div>
+      )}
     </section>
   );
 };

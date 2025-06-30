@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import HeroSection from '../components/HeroSection';
 import CategoryGrid from '../components/CategoryGrid';
@@ -7,6 +7,21 @@ import ProductCard from '../components/products/ProductCard';
 import { connectToDatabase } from '../lib/mongodb';
 
 const HomePage = ({ products, error }) => {
+    const [page, setPage] = useState(1);
+    const productsPerPage = 6;
+    const visibleProducts = products ? products.slice(0, page * productsPerPage) : [];
+    const hasMore = products && visibleProducts.length < products.length;
+    const observer = useRef();
+    const lastProductRef = useCallback(node => {
+        if (!hasMore) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new window.IntersectionObserver(entries => {
+            if (entries[0].isIntersecting) {
+                setPage(prev => prev + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [hasMore]);
     return (
         <div className="bg-white">
             {/* Sticky Hero Section - stays at the top until scrolled past */}
@@ -52,8 +67,17 @@ const HomePage = ({ products, error }) => {
                                 <div className="text-center text-red-500 py-8">{error}</div>
                             ) : (
                                 <div className="grid grid-cols-2 gap-4 sm:gap-6 justify-items-center sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                    {products && products.length > 0 ? (
-                                        products.map(product => <ProductCard key={product._id} product={product} />)
+                                    {visibleProducts && visibleProducts.length > 0 ? (
+                                        visibleProducts.map((product, idx) => {
+                                            const isLast = hasMore && idx === visibleProducts.length - 1;
+                                            return (
+                                                <ProductCard
+                                                    key={product._id}
+                                                    product={product}
+                                                    ref={isLast ? lastProductRef : null}
+                                                />
+                                            );
+                                        })
                                     ) : (
                                         <div className="col-span-full text-center text-gray-500">Aucun produit trouvé.</div>
                                     )}

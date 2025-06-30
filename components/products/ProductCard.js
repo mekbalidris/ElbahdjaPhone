@@ -8,7 +8,7 @@ import Button from '../ui/Button';
 import { ShoppingCart, ShoppingBag, Search, Heart } from 'lucide-react';
 import useIsMobile from '../ui/useIsMobile';
 
-const FADE_DURATION = 300; // ms
+const FADE_DURATION = 150; // ms
 
 const clothingSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const shoeSizes = ['39', '40', '41', '42', '43', '44', '45', '46'];
@@ -186,7 +186,7 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
                             alt={product.name || "Product image"}
                             fill
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            className="object-cover object-center w-full h-full transition-transform duration-500 group-hover:scale-110"
+                            className="object-cover object-center w-full h-full transition-transform duration-100 group-hover:scale-110"
                             onError={(e) => {
                                 e.target.src = `https://placehold.co/600x400/e2e8f0/94a3b8?text=${encodeURIComponent(product.name || "Image")}`;
                             }}

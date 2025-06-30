@@ -182,6 +182,7 @@ const ProductsPage = ({ handleAddToCart }) => {
         { value: 'CHAPEAU', label: 'Chapeau' },
         { value: 'CASQUETTE', label: 'Casquette' },
         { value: 'HOODIE', label: 'Hoodie' },
+        { value: 'GILET_CEINTURE', label: 'Gilet ceinturé' },
     ];
 
     const subCategoryOptions = {
