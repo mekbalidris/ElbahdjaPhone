@@ -15,6 +15,9 @@ const CATEGORIES = [
     { value: 'vestes', label: 'Vestes' },
     { value: 'accessoires', label: 'Accessoires' },
     { value: 'short', label: 'Short' },
+    { value: 'chapeau', label: 'Chapeau' },
+    { value: 'casquette', label: 'Casquette' },
+    { value: 'hoodie', label: 'Hoodie' },
 ];
 
 const BRANDS = [
@@ -24,6 +27,8 @@ const BRANDS = [
     { value: 'zara', label: 'Zara' },
     { value: 'cosmos', label: 'Cosmos' },
     { value: 'lacoste', label: 'Lacoste' },
+    { value: 'polo', label: 'Polo' },
+    { value: 'anime', label: 'Anime' },
     { value: 'autre', label: 'Autre' },
 ];
 
@@ -150,9 +155,9 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
         if (oldPrice && parseFloat(oldPrice) <= parseFloat(price)) newErrors.oldPrice = "Old price must be greater than current price.";
         if (!description.trim()) newErrors.description = "Description is required.";
         if (stock === '' || isNaN(parseInt(stock)) || parseInt(stock) < 0 || !Number.isInteger(parseFloat(stock))) newErrors.stock = "Valid stock quantity (whole number, 0 or more) is required.";
-        if (sizes.length === 0) newErrors.sizes = "Veuillez ajouter au moins une taille.";
         if (colors.length === 0) newErrors.colors = "Veuillez ajouter au moins une couleur.";
         if (!genre) newErrors.genre = "Veuillez choisir le genre.";
+        if (sizes.length === 0 && category !== 'chapeau' && category !== 'casquette') newErrors.sizes = "Veuillez ajouter au moins une taille.";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };

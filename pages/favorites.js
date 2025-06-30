@@ -18,7 +18,6 @@ const FavoritesPage = () => {
                 <meta name="description" content="Découvrez vos produits favoris sur COSMOS" />
             </Head>
 
-            <Navbar onCartClick={onCartClick} cartItemCount={cartItemCount} />
 
             <main className="pt-16 min-h-screen bg-gray-50">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -77,7 +76,6 @@ const FavoritesPage = () => {
                 </div>
             </main>
 
-            <Footer />
         </>
     );
 };

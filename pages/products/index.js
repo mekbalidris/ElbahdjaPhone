@@ -179,6 +179,9 @@ const ProductsPage = ({ handleAddToCart }) => {
         { value: 'PANTALONS', label: 'Pantalons' },
         { value: 'CHAUSSURES', label: 'Chaussures' },
         { value: 'VESTES', label: 'Vestes' },
+        { value: 'CHAPEAU', label: 'Chapeau' },
+        { value: 'CASQUETTE', label: 'Casquette' },
+        { value: 'HOODIE', label: 'Hoodie' },
     ];
 
     const subCategoryOptions = {
@@ -382,7 +385,7 @@ const ProductsPage = ({ handleAddToCart }) => {
     const gridOptions = [3, 4, 5];
 
     return (
-        <div className="bg-white min-h-screen">
+        <div className="bg-white min-h-screen mt-5">
             <main className="container mx-auto px-2 sm:px-4 lg:px-6 py-12">
                 <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-800 tracking-tight mb-8">Boutique</h1>
                 <div className="flex flex-col md:flex-row gap-8">

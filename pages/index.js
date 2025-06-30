@@ -51,7 +51,7 @@ const HomePage = ({ products, error }) => {
                             {error ? (
                                 <div className="text-center text-red-500 py-8">{error}</div>
                             ) : (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+                                <div className="grid grid-cols-2 gap-4 sm:gap-6 justify-items-center sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                     {products && products.length > 0 ? (
                                         products.map(product => <ProductCard key={product._id} product={product} />)
                                     ) : (

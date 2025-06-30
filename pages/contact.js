@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { Facebook, Instagram, Mail } from 'lucide-react';
 
 const Contact = () => {
   const { currentUser } = useAuth();
@@ -88,13 +89,14 @@ const Contact = () => {
       {/* Informations de contact */}
       <div className="flex-1 flex flex-col justify-center items-center md:items-start">
         <div className="text-2xl font-serif font-semibold mb-6 text-center md:text-left">Vous pouvez nous contacter sur nos pages</div>
-        <div className="mb-4 text-lg">
-          <div>Facebook : <span className="font-medium">Cosmos Algerie</span></div>
-          <div>Instagram : <span className="font-medium">Cosmos_algerie</span></div>
+        <div className="mb-4 text-lg space-y-2">
+          <div className="flex items-center gap-2"><Facebook className="w-6 h-6 text-blue-600" /> Facebook : <span className="font-medium">Cosmos Algerie</span></div>
+          <div className="flex items-center gap-2"><Instagram className="w-6 h-6 text-pink-600" /> Instagram : <span className="font-medium">Cosmos_algerie</span></div>
         </div>
         <div className="mb-4 text-lg">24/24h et 7/7j</div>
-        <div className="mb-4 text-lg">
-          Adresse mail :<br />
+        <div className="mb-4 text-lg flex items-center gap-2">
+          <Mail className="w-6 h-6 text-gray-700" />
+          <span>Adresse mail :</span>
           <span className="font-medium">Cosmosbyagates@gmail.com</span>
         </div>
       </div>

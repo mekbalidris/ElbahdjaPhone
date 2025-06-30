@@ -6,11 +6,43 @@ import { useFavorites } from '../../context/FavoritesContext';
 import { toast } from 'react-hot-toast';
 import Button from '../ui/Button';
 import { ShoppingCart, ShoppingBag, Search, Heart } from 'lucide-react';
+import useIsMobile from '../ui/useIsMobile';
 
 const FADE_DURATION = 300; // ms
 
 const clothingSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const shoeSizes = ['39', '40', '41', '42', '43', '44', '45', '46'];
+
+// Map French color names to CSS color names or hex codes
+const colorMap = {
+    blanc: '#fff',
+    blancc: '#fff',
+    noir: '#000',
+    rouge: 'red',
+    bleu: 'blue',
+    vert: 'green',
+    jaune: 'yellow',
+    marron: 'brown',
+    gris: 'gray',
+    rose: 'pink',
+    violet: 'purple',
+    orange: 'orange',
+    beige: 'beige',
+    doré: 'gold',
+    dore: 'gold',
+    argent: 'silver',
+    kaki: '#78866b',
+    bordeaux: '#800000',
+    turquoise: '#40e0d0',
+    fuchsia: '#ff00ff',
+    bleuclair: '#add8e6',
+    bleu_foncé: '#001f3f',
+    bleu_fonce: '#001f3f',
+    camel: '#c19a6b',
+    sable: '#f5deb3',
+    anthracite: '#23272a',
+    // Add more as needed
+};
 
 const ProductCard = forwardRef(function ProductCard({ product }, ref) {
     const router = useRouter();
@@ -25,6 +57,7 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
     const [quantity, setQuantity] = useState(1);
     const intervalRef = useRef(null);
     const fadeTimeoutRef = useRef(null);
+    const isMobile = useIsMobile();
     
     const images = product.images && product.images.length > 0 ? product.images : [
         `https://placehold.co/600x400/e2e8f0/94a3b8?text=${encodeURIComponent(product.name || "Product")}`
@@ -239,6 +272,16 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
                         )}
                     </div>
                 </div>
+                {/* Mobile Add to Cart Button */}
+                {isMobile && (
+                    <button
+                        onClick={handleAddToCartClick}
+                        className="w-full bg-yellow-600 text-white font-bold py-2 rounded-b-lg hover:bg-yellow-700 transition-colors text-base"
+                        style={{ marginTop: 'auto' }}
+                    >
+                        Ajouter au panier
+                    </button>
+                )}
             </div>
 
             {/* Buy Modal */}
@@ -283,19 +326,23 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
                                         Couleur <span className="text-red-500">*</span>
                                     </label>
                                     <div className="flex flex-wrap gap-3">
-                                        {product.colors.map(color => (
-                                            <button
-                                                key={color}
-                                                onClick={() => setSelectedColor(color)}
-                                                className={`w-9 h-9 rounded-full border-2 transition-all ${
-                                                    selectedColor === color 
-                                                        ? 'border-gray-900 ring-2 ring-offset-2 ring-gray-900' 
-                                                        : 'border-gray-200 hover:border-gray-400'
-                                                }`}
-                                                style={{ backgroundColor: color.toLowerCase() }}
-                                                title={color}
-                                            />
-                                        ))}
+                                        {product.colors.map(color => {
+                                            const colorKey = color.toLowerCase().replace(/\s|-/g, '');
+                                            const cssColor = colorMap[colorKey] || color;
+                                            return (
+                                                <button
+                                                    key={color}
+                                                    onClick={() => setSelectedColor(color)}
+                                                    className={`w-9 h-9 rounded-full border-2 transition-all ${
+                                                        selectedColor === color 
+                                                            ? 'border-gray-900 ring-2 ring-offset-2 ring-gray-900' 
+                                                            : 'border-gray-200 hover:border-gray-400'
+                                                    }`}
+                                                    style={{ backgroundColor: cssColor }}
+                                                    title={color}
+                                                />
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
