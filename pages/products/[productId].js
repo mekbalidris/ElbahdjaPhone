@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import Button from '../../components/ui/Button';
 import Icon from '../../components/ui/Icon';
@@ -36,6 +36,10 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
     const [isHovering, setIsHovering] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
 
+    useEffect(() => {
+        setActiveImage(product?.images?.[0] || '');
+    }, [product?._id]);
+
     // Find index of current image
     const currentImageIndex = product?.images?.indexOf(activeImage) ?? 0;
     // Handlers for swipe
@@ -54,6 +58,23 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
         onSwipedRight: handleSwipeRight,
         trackMouse: true,
     });
+
+    // Infinite scroll for similar products
+    const [page, setPage] = useState(1);
+    const productsPerPage = 6;
+    const visibleRelated = relatedProducts.slice(0, page * productsPerPage);
+    const hasMore = visibleRelated.length < relatedProducts.length;
+    const observer = useRef();
+    const lastRelatedRef = useCallback(node => {
+        if (!hasMore) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new window.IntersectionObserver(entries => {
+            if (entries[0].isIntersecting) {
+                setPage(prev => prev + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [hasMore]);
 
     if (error) {
         toast.error(error);
@@ -324,15 +345,22 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                 <section className="pt-10 sm:pt-16 mt-10 sm:mt-16 border-t border-gray-200/80">
                     <h2 className="text-xl sm:text-2xl font-bold text-center mb-6 sm:mb-8 text-slate-800">Produits similaires</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-                        {relatedProducts.map((related, index) => (
-                            <div
-                                key={related._id}
-                                className="animate-fadeInUp"
-                                style={{animationDelay: `${index * 60}ms`}}
-                            >
-                                <ProductCard product={related} />
-                            </div>
-                        ))}
+                        {visibleRelated.map((related, idx) => {
+                            const isLast = hasMore && idx === visibleRelated.length - 1;
+                            return (
+                                <div
+                                    key={related._id}
+                                    className="animate-fadeInUp"
+                                    style={{animationDelay: `${idx * 60}ms`}}
+                                    ref={isLast ? lastRelatedRef : null}
+                                >
+                                    <ProductCard product={related} />
+                                </div>
+                            );
+                        })}
+                        {visibleRelated.length === 0 && (
+                            <div className="col-span-full text-center text-gray-500">Aucun produit similaire trouvé.</div>
+                        )}
                     </div>
                 </section>
             </div>
@@ -353,16 +381,18 @@ export async function getServerSideProps(context) {
             return { notFound: true };
         }
 
-        // Fetch related products (e.g., from the same category)
-        const relatedProducts = await db
+        // Fetch similar products first, then fill with others if needed
+        const similar = await db
             .collection('products')
-            .find({ 
-                category: product.category,
-                _id: { $ne: product._id } 
-            })
-            .limit(4)
+            .find({ category: product.category, _id: { $ne: product._id } })
             .toArray();
-        
+        const similarIds = similar.map(p => p._id);
+        const others = await db
+            .collection('products')
+            .find({ _id: { $nin: [product._id, ...similarIds] } })
+            .toArray();
+        const relatedProducts = [...similar, ...others];
+
         return {
             props: {
                 product: JSON.parse(JSON.stringify(product)),
