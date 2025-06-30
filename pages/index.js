@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import HeroSection from '../components/HeroSection';
 import CategoryGrid from '../components/CategoryGrid';
 import SpecialOffers from '../components/SpecialOffers';
@@ -9,16 +10,30 @@ const HomePage = ({ products, error }) => {
     return (
         <div className="bg-white">
             {/* Sticky Hero Section - stays at the top until scrolled past */}
-            <div className="sticky top-0 left-0 w-full h-screen z-0">
-                <div className="w-full h-full bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center">
+            <div className="sticky top-0 left-0 w-full h-screen z-0 relative">
+                {/* Background Image */}
+                <div className="absolute inset-0">
+                    <Image
+                        src="/hero_header.png"
+                        alt="Cosmos Algérie Hero Background"
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                    {/* Overlay for better text readability */}
+                    <div className="absolute inset-0 bg-black bg-opacity-60"></div>
+                </div>
+                
+                {/* Content */}
+                <div className="relative z-10 w-full h-full flex items-center justify-center">
                     <div className="text-center text-white px-4">
-                        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight font-serif mb-4">
+                        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight font-serif mb-4 text-shadow">
                             Cosmos Algérie
                         </h1>
-                        <p className="max-w-2xl mx-auto text-lg mb-2">
+                        <p className="max-w-2xl mx-auto text-lg mb-2 text-shadow">
                             La marque Cosmos est une marque de chaussures 100% algérienne, fabriquée dans un atelier artisanal pour vous offrir une expérience authentique et des produits de qualité garantie.
                         </p>
-                        <p className="max-w-2xl mx-auto text-base opacity-90">
+                        <p className="max-w-2xl mx-auto text-base opacity-90 text-shadow">
                             Découvrez notre collection soigneusement sélectionnée pour vous.
                         </p>
                     </div>
@@ -26,7 +41,7 @@ const HomePage = ({ products, error }) => {
             </div>
 
             {/* Content overlays the hero as you scroll */}
-            <div className="relative z-10 -mt-20">
+            <div className="relative z-10">
                 <div className="bg-white rounded-t-3xl">
                     <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                         <CategoryGrid products={products} />

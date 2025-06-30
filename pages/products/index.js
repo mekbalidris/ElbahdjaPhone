@@ -75,7 +75,7 @@ const ProductsPage = ({ handleAddToCart }) => {
     const [displayedProducts, setDisplayedProducts] = useState([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
-    const [productsPerPage, setProductsPerPage] = useState(15);
+    const [productsPerPage, setProductsPerPage] = useState(6);
     
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
@@ -157,7 +157,8 @@ const ProductsPage = ({ handleAddToCart }) => {
     useEffect(() => {
         const startIndex = 0;
         const endIndex = page * productsPerPage;
-        const newProducts = filteredAndSortedProducts.slice(startIndex, endIndex);
+        // Only show 6 products at a time, and only load 6 more when user scrolls to the end
+        const newProducts = filteredAndSortedProducts.slice(0, endIndex);
         setDisplayedProducts(newProducts);
         setHasMore(endIndex < filteredAndSortedProducts.length);
     }, [page, filteredAndSortedProducts]);
@@ -291,7 +292,6 @@ const ProductsPage = ({ handleAddToCart }) => {
                         }} 
                         options={categoryOptions} 
                     />
-                    
                     {selectedCategory && subCategoryOptions[selectedCategory] && (
                         <StyledSelect 
                             label="Subcategory" 
@@ -313,7 +313,6 @@ const ProductsPage = ({ handleAddToCart }) => {
                     )}
                 </div>
             </div>
-
             <div className="border-t pt-6 space-y-6">
                 <StyledSelect 
                     label="Brands" 
@@ -355,35 +354,19 @@ const ProductsPage = ({ handleAddToCart }) => {
                         onChange={(e) => setShowOnlyAvailable(e.target.checked)} 
                     />
                 </div>
-                <div className="mb-6 flex flex-col md:flex-row md:items-center md:gap-8 gap-4">
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-800 mb-2">Filtrer par tailles (vêtements)</label>
-                        <div className="flex flex-wrap gap-2">
-                            {clothingSizes.map(size => (
-                                <button
-                                    key={size}
-                                    className={`px-3 py-1 rounded border text-sm font-medium ${selectedSize === size ? 'bg-yellow-900 text-white border-yellow-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
-                                    onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
-                                >
-                                    {size}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-800 mb-2">Filtrer par pointures (chaussures)</label>
-                        <div className="flex flex-wrap gap-2">
-                            {shoeSizes.map(size => (
-                                <button
-                                    key={size}
-                                    className={`px-3 py-1 rounded border text-sm font-medium ${selectedSize === size ? 'bg-yellow-900 text-white border-yellow-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
-                                    onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
-                                >
-                                    {size}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                <div className="flex flex-col md:flex-row md:items-center md:gap-8 gap-4">
+                    <StyledSelect
+                        label="Filtrer par tailles (vêtements)"
+                        value={selectedSize && clothingSizes.includes(selectedSize) ? selectedSize : ''}
+                        onChange={val => setSelectedSize(val === '' ? '' : val)}
+                        options={[{ value: '', label: 'Toutes les tailles' }, ...clothingSizes.map(size => ({ value: size, label: size }))]}
+                    />
+                    <StyledSelect
+                        label="Filtrer par pointures (chaussures)"
+                        value={selectedSize && shoeSizes.includes(selectedSize) ? selectedSize : ''}
+                        onChange={val => setSelectedSize(val === '' ? '' : val)}
+                        options={[{ value: '', label: 'Toutes les pointures' }, ...shoeSizes.map(size => ({ value: size, label: size }))]}
+                    />
                 </div>
                 <Button 
                     onClick={resetFilters} 
@@ -403,105 +386,27 @@ const ProductsPage = ({ handleAddToCart }) => {
             <main className="container mx-auto px-2 sm:px-4 lg:px-6 py-12">
                 <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-800 tracking-tight mb-8">Boutique</h1>
                 <div className="flex flex-col md:flex-row gap-8">
-                    {/* Sidebar filters */}
-                    <aside className="w-full md:w-64 flex-shrink-0 mb-8 md:mb-0">
-                        {/* Category filter as select */}
-                        <div className="mb-8">
-                            <label className="block text-base font-bold text-slate-800 mb-3">Catégories</label>
-                            <select
-                                value={selectedCategory}
-                                onChange={e => setSelectedCategory(e.target.value)}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-300 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                            >
-                                {categoryOptions.map(opt => (
-                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                ))}
-                            </select>
-                        </div>
-                        {/* Size filter (collapsible) */}
-                        <details className="mb-6" open>
-                            <summary className="cursor-pointer font-semibold text-slate-800 mb-2">Tailles (vêtements)</summary>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                                {clothingSizes.map(size => (
-                                    <button
-                                        key={size}
-                                        className={`px-3 py-1 rounded border text-sm font-medium ${selectedSize === size ? 'bg-yellow-900 text-white border-yellow-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
-                                        onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
-                                    >
-                                        {size}
-                                    </button>
-                                ))}
-                            </div>
-                        </details>
-                        {/* Pointure filter (collapsible) */}
-                        <details className="mb-6" open>
-                            <summary className="cursor-pointer font-semibold text-slate-800 mb-2">Pointures (chaussures)</summary>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                                {shoeSizes.map(size => (
-                                    <button
-                                        key={size}
-                                        className={`px-3 py-1 rounded border text-sm font-medium ${selectedSize === size ? 'bg-yellow-900 text-white border-yellow-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
-                                        onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
-                                    >
-                                        {size}
-                                    </button>
-                                ))}
-                            </div>
-                        </details>
-                        {/* Price filter */}
-                        <div className="mb-8">
-                            <label className="block text-base font-bold text-slate-800 mb-3">Filtrer par prix</label>
-                            <div className="flex items-center gap-2 mb-2">
-                                <input
-                                    type="number"
-                                    placeholder="Min"
-                                    value={priceRange.min}
-                                    onChange={e => setPriceRange(p => ({ ...p, min: e.target.value }))}
-                                    className="w-20 px-2 py-1 rounded border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                                />
-                                <span className="text-gray-500">–</span>
-                                <input
-                                    type="number"
-                                    placeholder="Max"
-                                    value={priceRange.max}
-                                    onChange={e => setPriceRange(p => ({ ...p, max: e.target.value }))}
-                                    className="w-20 px-2 py-1 rounded border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                                />
-                            </div>
+                    {/* Sidebar filters for desktop */}
+                    {!isMobile && (
+                        <aside className="w-full md:w-64 flex-shrink-0 mb-8 md:mb-0">
+                            <FilterControls />
+                        </aside>
+                    )}
+                    {/* Filter button and drawer for mobile */}
+                    {isMobile && (
+                        <>
                             <button
-                                onClick={() => setPriceRange({ min: '', max: '' })}
-                                className="text-xs text-gray-500 hover:underline mt-1"
-                            >Réinitialiser</button>
-                        </div>
-                        {/* Best sellers section */}
-                        <div className="mb-8">
-                            <label className="block text-base font-bold text-slate-800 mb-3">Meilleures ventes</label>
-                            <ul className="space-y-2">
-                                {allProducts
-                                    .filter(p => typeof p.buy === 'number' || typeof p.sold === 'number' || typeof p.sales === 'number' || p.offer || p.oldPrice)
-                                    .sort((a, b) => (b.buy || b.sold || b.sales || 0) - (a.buy || a.sold || a.sales || 0))
-                                    .slice(0, 4)
-                                    .map(product => (
-                                        <li key={product._id}>
-                                            <Link href={`/products/${product._id}`} className="flex items-center gap-2 hover:bg-yellow-50 rounded p-1 transition">
-                                                <img
-                                                    src={product.images?.[0] || '/public/images/categories/placeholder.jpg'}
-                                                    alt={product.name}
-                                                    className="w-10 h-10 object-cover rounded"
-                                                />
-                                                <div>
-                                                    <div className="text-xs font-semibold text-gray-800 truncate max-w-[100px]">{product.name}</div>
-                                                    <div className="text-xs text-yellow-700 font-bold">{product.price?.toLocaleString()} DA</div>
-                                                </div>
-                                            </Link>
-                                        </li>
-                                    ))}
-                                {allProducts.filter(p => typeof p.buy === 'number' || typeof p.sold === 'number' || typeof p.sales === 'number' || p.offer || p.oldPrice).length === 0 && (
-                                    <li className="text-xs text-gray-400">Aucun produit</li>
-                                )}
-                            </ul>
-                        </div>
-                    </aside>
+                                className="mb-4 flex items-center gap-2 px-4 py-2 bg-yellow-700 text-white rounded-lg font-semibold shadow hover:bg-yellow-800 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                onClick={() => setIsFilterOpen(true)}
+                            >
+                                <Icon name="slider" className="w-5 h-5" />
+                                Filtres
+                            </button>
+                            <FilterDrawer isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)}>
+                                <FilterControls />
+                            </FilterDrawer>
+                        </>
+                    )}
                     {/* Main content: search, sort, grid */}
                     <div className="flex-1">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
@@ -535,9 +440,12 @@ const ProductsPage = ({ handleAddToCart }) => {
                         </div>
                         {/* Product grid */}
                         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6 justify-items-center"> 
-                            {displayedProducts.map((product, idx) => (
-                                <ProductCard key={product._id} product={product} ref={idx === displayedProducts.length - 1 ? lastProductElementRef : null} />
-                            ))}
+                            {displayedProducts.map((product, idx) => {
+                                const isLast = hasMore && idx === displayedProducts.length - 1;
+                                return (
+                                    <ProductCard key={product._id} product={product} ref={isLast ? lastProductElementRef : null} />
+                                );
+                            })}
                         </div>
                         {isLoading && <div className="flex justify-center py-8"><LoadingSpinner /></div>}
                         {!isLoading && displayedProducts.length === 0 && (

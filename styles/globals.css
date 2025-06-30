@@ -97,3 +97,7 @@ html, body, #__next {
   display: flex;
   flex-direction: column;
 }
+
+.text-shadow {
+  text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+}

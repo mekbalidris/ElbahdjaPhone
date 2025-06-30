@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, Fragment } from 'react';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 // Import your actual UI components
 import Icon from '../components/ui/Icon';
@@ -51,6 +52,46 @@ const ProfilePage = () => {
     const [isSendingMessage, setIsSendingMessage] = useState(false);
     const [userMessages, setUserMessages] = useState([]);
     const [isLoadingMessages, setIsLoadingMessages] = useState(true);
+
+    const supportFormRef = useRef(null);
+
+    // Scroll to support form if hash is present, after auth/profile loading
+    useEffect(() => {
+        if (router.asPath.includes('#support-form') && supportFormRef.current) {
+          supportFormRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, [router.asPath]);
+
+    // Listen for hash changes (client-side navigation)
+    useEffect(() => {
+        const handleHashChange = () => {
+            if (window.location.hash === '#support-form' && supportFormRef.current) {
+                setTimeout(() => {
+                    supportFormRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 200);
+            }
+        };
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
+
+    // Robust scroll to support form if hash is present
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.location.hash === '#support-form') {
+            let attempts = 0;
+            const maxAttempts = 20;
+            const scrollInterval = setInterval(() => {
+                const el = document.getElementById('support-form');
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    clearInterval(scrollInterval);
+                } else if (++attempts > maxAttempts) {
+                    clearInterval(scrollInterval);
+                }
+            }, 150);
+            return () => clearInterval(scrollInterval);
+        }
+    }, [authLoading, isLoadingProfile]);
 
     // --- Fetch User Profile from MongoDB Backend via API ---
     useEffect(() => {
@@ -197,6 +238,7 @@ const ProfilePage = () => {
             subject: supportSubject.trim(),
             message: supportMessage.trim(),
             status: 'new',
+            isGuest: false,
         };
 
         fetch(`/api/support/messages?userId=${currentUser.id}`, {
@@ -264,6 +306,17 @@ const ProfilePage = () => {
     return (
         <div className="min-h-screen bg-gray-100 py-8 sm:py-12 px-4 font-sans mt-[2.5rem]">
             <div className="max-w-3xl mx-auto space-y-10">
+                {/* Admin Support Messages Link */}
+                {currentUser && (currentUser.role === 'admin' || currentUser.role === 'seller') && (
+                    <div className="flex justify-end mb-4">
+                        <Link
+                            href="/admin/support-messages"
+                            className="inline-flex items-center px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-lg shadow transition"
+                        >
+                            <Icon name="mail" className="w-5 h-5 mr-2" /> Support Messages (Admin)
+                        </Link>
+                    </div>
+                )}
                 {/* Profile Information Section */}
                 {/* This section is displayed if the user is logged in based on the check above */}
                 <section className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-200/80 animate-fadeInUp">
@@ -308,7 +361,7 @@ const ProfilePage = () => {
 
                 {/* Support Center Section */}
                 {/* This section is displayed if the user is logged in based on the check above */}
-                <section className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-200/80 animate-fadeInUp" style={{animationDelay: '0.2s'}}> 
+                <section ref={supportFormRef} id="support-form" className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-200/80 animate-fadeInUp" style={{animationDelay: '0.2s'}}> 
                     <h2 className={`text-2xl sm:text-3xl font-bold ${brandOrange.text} mb-6 pb-4 border-b border-gray-200 flex items-center`}>
                         <Icon name="mail" className="w-7 h-7 mr-3" /> Contact Support
                     </h2>
@@ -317,7 +370,7 @@ const ProfilePage = () => {
                         <form onSubmit={handleSendMessage} className="space-y-5">
                             <Input label="Subject" name="supportSubject" value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} placeholder="What's your query about?" required />
                             <TextArea label="Your Message" name="supportMessage" value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)} placeholder="Describe your issue or question in detail..." rows={5} required />
-                            <div className="flex justify-end">
+                            <div className="flex justify-end ">
                                 <Button type="submit" variant="secondary" isLoading={isSendingMessage} disabled={isSendingMessage} iconLeft={<Icon name="send" className="w-4 h-4"/>}>
                                     Send Message
                                 </Button>

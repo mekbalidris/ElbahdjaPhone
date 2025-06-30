@@ -10,6 +10,7 @@ import { connectToDatabase } from '../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 import Image from 'next/image';
 import { useFavorites } from '../../context/FavoritesContext';
+import { useSwipeable } from 'react-swipeable';
 
 const clothingSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const shoeSizes = ['39', '40', '41', '42', '43', '44', '45', '46'];
@@ -34,6 +35,25 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
     const [tab, setTab] = useState('description');
     const [isHovering, setIsHovering] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
+
+    // Find index of current image
+    const currentImageIndex = product?.images?.indexOf(activeImage) ?? 0;
+    // Handlers for swipe
+    const handleSwipeLeft = () => {
+        if (currentImageIndex < product.images.length - 1) {
+            setActiveImage(product.images[currentImageIndex + 1]);
+        }
+    };
+    const handleSwipeRight = () => {
+        if (currentImageIndex > 0) {
+            setActiveImage(product.images[currentImageIndex - 1]);
+        }
+    };
+    const swipeHandlers = useSwipeable({
+        onSwipedLeft: handleSwipeLeft,
+        onSwipedRight: handleSwipeRight,
+        trackMouse: true,
+    });
 
     if (error) {
         toast.error(error);
@@ -102,32 +122,75 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
     const handleMouseLeave = () => setIsHovering(false);
 
     return (
-        <div className="bg-white py-12 lg:py-24">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white py-6 sm:py-10 lg:py-24 mt-[2rem]">
+            <div className="container mx-auto px-2 sm:px-4 lg:px-8">
                 {/* Product details main section */}
-                <div className="w-full flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
-                    {/* Left: Image Gallery */}
-                    <div className="flex w-full lg:w-[45%] min-w-[320px] max-w-[520px] mx-auto">
-                        {/* Thumbnails */}
+                <div className="w-full flex flex-col lg:flex-row gap-6 lg:gap-16 items-start">
+                    {/* Mobile: Main image on top, thumbnails below */}
+                    <div className="block lg:hidden w-full">
+                        <div className="w-full flex items-center justify-center mb-3">
+                            <div className="relative w-full max-w-xs aspect-[4/3] bg-white rounded-lg shadow-sm overflow-hidden flex items-center justify-center mx-auto"
+                                 {...swipeHandlers}>
+                                <img
+                                    src={activeImage}
+                                    alt={product.name}
+                                    className="w-full h-full object-contain select-none"
+                                    draggable="false"
+                                />
+                                {/* Optional: left/right arrows for visual hint */}
+                                {currentImageIndex > 0 && (
+                                    <button onClick={handleSwipeRight} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full p-1 shadow text-gray-700">
+                                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                                    </button>
+                                )}
+                                {currentImageIndex < product.images.length - 1 && (
+                                    <button onClick={handleSwipeLeft} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full p-1 shadow text-gray-700">
+                                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                        <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 px-2 pb-2 justify-center">
+                            {product.images?.map((img, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setActiveImage(img)}
+                                    className={`w-14 h-14 bg-white rounded-lg overflow-hidden focus:outline-none ring-2 ring-offset-2 transition-all duration-200 ${activeImage === img ? 'ring-yellow-700' : 'ring-transparent opacity-70 hover:opacity-100'}`}
+                                    style={{ flex: '0 0 auto' }}
+                                >
+                                    <Image
+                                        src={img || `https://placehold.co/100x100/e2e8f0/94a3b8?text=${encodeURIComponent(product.name || "Produit")}`}
+                                        alt={`${product.name} miniature ${index + 1}`}
+                                        width={56}
+                                        height={56}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    {/* Desktop: Side-by-side gallery */}
+                    <div className="hidden lg:flex w-full lg:w-[45%] min-w-[0] max-w-full lg:max-w-[520px] mx-auto">
+                        {/* Thumbnails vertical */}
                         <div className="flex flex-col gap-3 justify-center items-center mr-4">
                             {product.images?.map((img, index) => (
-                                <button 
-                                    key={index} 
-                                    onClick={() => setActiveImage(img)} 
+                                <button
+                                    key={index}
+                                    onClick={() => setActiveImage(img)}
                                     className={`w-16 h-16 bg-white rounded-lg overflow-hidden focus:outline-none ring-2 ring-offset-2 transition-all duration-200 ${activeImage === img ? 'ring-yellow-700' : 'ring-transparent opacity-70 hover:opacity-100'}`}
                                 >
-                                    <Image 
-                                        src={img || `https://placehold.co/100x100/e2e8f0/94a3b8?text=${encodeURIComponent(product.name || "Produit")}`} 
-                                        alt={`${product.name} miniature ${index + 1}`} 
-                                        width={64} 
-                                        height={64} 
+                                    <Image
+                                        src={img || `https://placehold.co/100x100/e2e8f0/94a3b8?text=${encodeURIComponent(product.name || "Produit")}`}
+                                        alt={`${product.name} miniature ${index + 1}`}
+                                        width={64}
+                                        height={64}
                                         className="w-full h-full object-cover"
                                     />
                                 </button>
                             ))}
                         </div>
                         {/* Main Image */}
-                        <div className="relative flex-1 aspect-[4/3] bg-white rounded-lg shadow-sm overflow-hidden group flex items-center justify-center" style={{ minWidth: '0', height: '400px' }}>
+                        <div className="relative flex-1 aspect-[4/3] bg-white rounded-lg shadow-sm overflow-hidden group flex items-center justify-center min-w-0 h-[320px] md:h-[400px]">
                             <img
                                 src={activeImage}
                                 alt={product.name}
@@ -144,47 +207,45 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                         </div>
                     </div>
                     {/* Right: Product Info */}
-                    <div className="flex-1 w-full max-w-2xl mx-auto">
-                        {/* Breadcrumbs (optional) */}
-                        {/* <div className="text-xs text-gray-400 mb-2">Accueil / Catégorie / Produit</div> */}
-                        <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-2">{product.name}</h1>
-                        <div className="flex items-center gap-4 mb-4">
-                            <span className="text-2xl font-bold text-yellow-900">{product.price?.toLocaleString()} د.ج</span>
+                    <div className="flex-1 w-full max-w-full lg:max-w-2xl mx-auto mt-6 lg:mt-0">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-2 break-words">{product.name}</h1>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-4">
+                            <span className="text-xl sm:text-2xl font-bold text-yellow-900">{product.price?.toLocaleString()} د.ج</span>
                             {product.oldPrice && (
                                 <span className="text-lg text-gray-400 line-through">{product.oldPrice?.toLocaleString()} د.ج</span>
                             )}
                         </div>
                         {/* Size selector */}
-                        <div className="mb-4">
-                            <span className="font-medium text-gray-700 mr-2">Pointure :</span>
+                        <div className="mb-4 flex flex-wrap items-center">
+                            <span className="font-medium text-gray-700 mr-2 mb-1">Pointure :</span>
                             {availableSizes.map(size => (
                                 <button 
                                     key={size}
                                     onClick={() => setSelectedSize(size)}
-                                    className={`inline-flex items-center justify-center w-10 h-10 rounded-full border text-base font-semibold mx-1 mb-1 transition-colors ${selectedSize === size ? 'bg-yellow-900 text-white border-yellow-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                                    className={`inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border text-base font-semibold mx-1 mb-1 transition-colors ${selectedSize === size ? 'bg-yellow-900 text-white border-yellow-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
                                 >
                                     {size}
                                 </button>
                             ))}
                         </div>
                         {/* Quantity and buttons */}
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="flex items-center rounded-lg border border-gray-300">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-4">
+                            <div className="flex items-center rounded-lg border border-gray-300 w-fit mx-auto sm:mx-0">
                                 <button onClick={() => handleQuantityChange(-1)} className="p-2 text-gray-600 hover:bg-gray-100 disabled:opacity-50 rounded-l-lg text-lg" disabled={quantity <= 1}>-</button>
                                 <span className="px-4 font-bold text-gray-800 text-base">{quantity}</span>
                                 <button onClick={() => handleQuantityChange(1)} className="p-2 text-gray-600 hover:bg-gray-100 disabled:opacity-50 rounded-r-lg text-lg" disabled={!isAvailable || quantity >= product.stock}>+</button>
                             </div>
-                            <Button onClick={handleAddToCart} size="md" className="w-48 bg-yellow-700 hover:bg-yellow-800 text-xs font-semibold flex items-center justify-center gap-2" disabled={!isAvailable}>
+                            <Button onClick={handleAddToCart} size="md" className="w-full sm:w-48 bg-yellow-700 hover:bg-yellow-800 text-xs font-semibold flex items-center justify-center gap-2" disabled={!isAvailable}>
                                 <Icon name="cart" className="w-5 h-5" />
                                 {isAvailable ? 'AJOUTER AU PANIER' : 'Rupture de stock'}
                             </Button>
-                            <Button onClick={() => {/* handle buy now */}} size="md" className="w-[15rem] bg-yellow-900 hover:bg-yellow-800 text-[0.75rem] font-semibold flex items-center justify-center gap-2" disabled={!isAvailable}>
+                            <Button onClick={() => {/* handle buy now */}} size="md" className="w-full sm:w-[15rem] bg-yellow-900 hover:bg-yellow-800 text-[0.75rem] font-semibold flex items-center justify-center gap-2" disabled={!isAvailable}>
                                 <Icon name="arrowRight" className="w-5 h-5" />
                                 COMMANDER MAINTENANT
                             </Button>
                         </div>
                         {/* Color selector and favorites */}
-                        <div className="flex items-center gap-6 mb-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 mb-4">
                             {product.colors && product.colors.length > 0 && (
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm font-medium text-gray-900">Couleur :</span>
@@ -210,7 +271,7 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                                 <svg xmlns="http://www.w3.org/2000/svg" fill={isProductFavorite ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={isProductFavorite ? 0 : 2} stroke="currentColor" className="w-7 h-7">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 0 1 6.364 0L12 7.636l1.318-1.318a4.5 4.5 0 1 1 6.364 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 0 1 0-6.364z" />
                                 </svg>
-                                <span className="text-base font-medium">{isProductFavorite ? 'Retirer des favoris' : 'Ajouter à mes favoris'}</span>
+                                <span className="text-base font-medium hidden sm:inline">{isProductFavorite ? 'Retirer des favoris' : 'Ajouter à mes favoris'}</span>
                             </button>
                         </div>
                         {isAvailable && product.stock < 10 && (
@@ -219,14 +280,14 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                     </div>
                 </div>
                 {/* Product Info Tabs - full width below */}
-                <div className="mt-10 w-full max-w-5xl mx-auto">
-                    <div className="flex border-b border-gray-200 mb-6">
-                        <button className={`px-6 py-3 font-semibold text-gray-700 ${tab === 'description' ? 'border-b-2 border-yellow-700' : ''}`} onClick={() => setTab('description')}>DESCRIPTION</button>
-                        <button className="px-6 py-3 font-semibold text-gray-700" onClick={() => setTab('infos')}>INFORMATIONS COMPLÉMENTAIRES</button>
-                        <button className="px-6 py-3 font-semibold text-gray-700" onClick={() => setTab('avis')}>AVIS</button>
-                        <button className="px-6 py-3 font-semibold text-gray-700" onClick={() => setTab('livraison')}>LIVRAISON</button>
+                <div className="mt-8 sm:mt-10 w-full max-w-5xl mx-auto">
+                    <div className="flex overflow-x-auto no-scrollbar border-b border-gray-200 mb-6 whitespace-nowrap">
+                        <button className={`px-4 sm:px-6 py-2 sm:py-3 font-semibold text-gray-700 ${tab === 'description' ? 'border-b-2 border-yellow-700' : ''}`} onClick={() => setTab('description')}>DESCRIPTION</button>
+                        <button className="px-4 sm:px-6 py-2 sm:py-3 font-semibold text-gray-700" onClick={() => setTab('infos')}>INFORMATIONS COMPLÉMENTAIRES</button>
+                        <button className="px-4 sm:px-6 py-2 sm:py-3 font-semibold text-gray-700" onClick={() => setTab('avis')}>AVIS</button>
+                        <button className="px-4 sm:px-6 py-2 sm:py-3 font-semibold text-gray-700" onClick={() => setTab('livraison')}>LIVRAISON</button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         {tab === 'description' && (
                             <div>
                                 <h2 className="text-lg font-bold mb-2">Description</h2>
@@ -260,9 +321,9 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                     </div>
                 </div>
                 {/* Related Products Section */}
-                <section className="pt-16 mt-16 border-t border-gray-200/80">
-                    <h2 className="text-2xl font-bold text-center mb-8 text-slate-800">Produits similaires</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+                <section className="pt-10 sm:pt-16 mt-10 sm:mt-16 border-t border-gray-200/80">
+                    <h2 className="text-xl sm:text-2xl font-bold text-center mb-6 sm:mb-8 text-slate-800">Produits similaires</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
                         {relatedProducts.map((related, index) => (
                             <div
                                 key={related._id}

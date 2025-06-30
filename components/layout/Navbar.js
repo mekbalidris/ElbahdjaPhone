@@ -168,6 +168,16 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                         {(currentUser.role === 'admin' || currentUser.role === 'seller') && (
                                             <Menu.Item>
                                                 {({ active }) => (
+                                                    <Link href="/admin/support-messages" className={`${active ? 'bg-gray-100' : ''} flex items-center px-4 py-2 text-sm text-blue-700 font-semibold`}>
+                                                        <User size={16} className="mr-2" />
+                                                        Support Messages
+                                                    </Link>
+                                                )}
+                                            </Menu.Item>
+                                        )}
+                                        {(currentUser.role === 'admin' || currentUser.role === 'seller') && (
+                                            <Menu.Item>
+                                                {({ active }) => (
                                                     <Link href="/dashboard" className={`${active ? 'bg-gray-100' : ''} flex items-center px-4 py-2 text-sm text-gray-700`}>
                                                         <LayoutDashboard size={16} className="mr-2" />
                                                         Dashboard

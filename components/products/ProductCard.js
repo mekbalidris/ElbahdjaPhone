@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useCart } from '../../context/CartContext';
@@ -12,7 +12,7 @@ const FADE_DURATION = 300; // ms
 const clothingSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const shoeSizes = ['39', '40', '41', '42', '43', '44', '45', '46'];
 
-const ProductCard = ({ product }) => {
+const ProductCard = forwardRef(function ProductCard({ product }, ref) {
     const router = useRouter();
     const { addToCart } = useCart();
     const { toggleFavorite, isFavorite } = useFavorites();
@@ -123,6 +123,7 @@ const ProductCard = ({ product }) => {
     return (
         <>
             <div
+                ref={ref}
                 className="group bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200 cursor-pointer flex flex-col transition-all duration-300 hover:shadow-xl relative w-full max-w-[300px]"
                 onClick={handleViewDetails}
                 onMouseEnter={() => setHovered(true)}
@@ -383,6 +384,6 @@ const ProductCard = ({ product }) => {
             )}
         </>
     );
-};
+});
 
 export default ProductCard;
