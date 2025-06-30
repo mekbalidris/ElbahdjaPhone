@@ -303,20 +303,30 @@ const ProfilePage = () => {
         );
     }
 
+    const isAdmin = currentUser?.role === 'seller';
+
     return (
         <div className="min-h-screen bg-gray-100 py-8 sm:py-12 px-4 font-sans mt-[2.5rem]">
             <div className="max-w-3xl mx-auto space-y-10">
                 {/* Admin Support Messages Link */}
                 {currentUser && (currentUser.role === 'admin' || currentUser.role === 'seller') && (
-                    <div className="flex justify-end mb-4">
+                    <div className="flex gap-10 justify-end mb-4">
                         <Link
                             href="/admin/support-messages"
                             className="inline-flex items-center px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-lg shadow transition"
                         >
                             <Icon name="mail" className="w-5 h-5 mr-2" /> Support Messages (Admin)
                         </Link>
+                        {isAdmin && (
+                            <div>
+                              <Link href="/admin/comments-approving" className="inline-block bg-yellow-700 hover:bg-yellow-800 text-white px-4 py-2 rounded font-semibold text-sm shadow">
+                                Comments Approving
+                              </Link>
+                            </div>
+                          )}
                     </div>
                 )}
+                
                 {/* Profile Information Section */}
                 {/* This section is displayed if the user is logged in based on the check above */}
                 <section className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-200/80 animate-fadeInUp">

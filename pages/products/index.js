@@ -137,7 +137,10 @@ const ProductsPage = ({ handleAddToCart }) => {
     const filteredAndSortedProducts = useMemo(() => {
         return allProducts
             .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
-            .filter(p => selectedCategory === 'all' || (p.category && p.category.toUpperCase() === selectedCategory.toUpperCase()))
+            .filter(p => selectedCategory === 'all' || (
+                p.category &&
+                p.category.replace(/-/g, '').toUpperCase() === selectedCategory.replace(/-/g, '').toUpperCase()
+            ))
             .filter(p => selectedBrand === '' || p.brand === selectedBrand)
             .filter(p => !showOnlyAvailable || p.stock > 0)
             .filter(p => priceRange.min === '' || p.price >= parseFloat(priceRange.min))

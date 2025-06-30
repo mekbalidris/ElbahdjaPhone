@@ -35,6 +35,8 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
     const [tab, setTab] = useState('description');
     const [isHovering, setIsHovering] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
+    const [commentText, setCommentText] = useState('');
+    const [commentStatus, setCommentStatus] = useState('');
 
     useEffect(() => {
         setActiveImage(product?.images?.[0] || '');
@@ -142,15 +144,35 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
     const handleMouseEnter = () => setIsHovering(true);
     const handleMouseLeave = () => setIsHovering(false);
 
+    async function handleCommentSubmit(e) {
+        e.preventDefault();
+        setCommentStatus('');
+        try {
+            const res = await fetch(`/api/products?id=${product._id}&comment=1`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: currentUser.id, userName: currentUser.name || currentUser.email, text: commentText }),
+            });
+            if (res.ok) {
+                setCommentText('');
+                setCommentStatus('Votre commentaire a été envoyé et sera visible après validation.');
+            } else {
+                setCommentStatus("Erreur lors de l&apos;envoi du commentaire.");
+            }
+        } catch {
+            setCommentStatus("Erreur lors de l&apos;envoi du commentaire.");
+        }
+    }
+
     return (
-        <div className="bg-white py-6 sm:py-10 lg:py-24 mt-[2rem]">
+        <div className="bg-white py-6 sm:py-10 lg:py-24 xl:mt-[2rem]">
             <div className="container mx-auto px-2 sm:px-4 lg:px-8">
                 {/* Product details main section */}
                 <div className="w-full flex flex-col lg:flex-row gap-6 lg:gap-16 items-start">
                     {/* Mobile: Main image on top, thumbnails below */}
                     <div className="block lg:hidden w-full">
                         <div className="w-full flex items-center justify-center mb-3">
-                            <div className="relative w-full max-w-xs aspect-[4/3] bg-white rounded-lg shadow-sm overflow-hidden flex items-center justify-center mx-auto"
+                            <div className="relative w-full max-w-sm aspect-[5/4] bg-white rounded-lg shadow-sm overflow-hidden flex items-center justify-center mx-auto"
                                  {...swipeHandlers}>
                                 <img
                                     src={activeImage}
@@ -191,7 +213,7 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                         </div>
                     </div>
                     {/* Desktop: Side-by-side gallery */}
-                    <div className="hidden lg:flex w-full lg:w-[45%] min-w-[0] max-w-full lg:max-w-[520px] mx-auto">
+                    <div className="hidden lg:flex w-full lg:w-[45%] min-w-[0] max-w-full lg:max-w-[700px] mx-auto">
                         {/* Thumbnails vertical */}
                         <div className="flex flex-col gap-3 justify-center items-center mr-4">
                             {product.images?.map((img, index) => (
@@ -211,7 +233,7 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                             ))}
                         </div>
                         {/* Main Image */}
-                        <div className="relative flex-1 aspect-[4/3] bg-white rounded-lg shadow-sm overflow-hidden group flex items-center justify-center min-w-0 h-[320px] md:h-[400px]">
+                        <div className="relative flex-1 aspect-[4/3] bg-white rounded-lg shadow-sm overflow-hidden group flex items-center justify-center min-w-0 h-[400px] md:h-[500px]">
                             <img
                                 src={activeImage}
                                 alt={product.name}
@@ -249,22 +271,6 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                                 </button>
                             ))}
                         </div>
-                        {/* Quantity and buttons */}
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-4">
-                            <div className="flex items-center rounded-lg border border-gray-300 w-fit mx-auto sm:mx-0">
-                                <button onClick={() => handleQuantityChange(-1)} className="p-2 text-gray-600 hover:bg-gray-100 disabled:opacity-50 rounded-l-lg text-lg" disabled={quantity <= 1}>-</button>
-                                <span className="px-4 font-bold text-gray-800 text-base">{quantity}</span>
-                                <button onClick={() => handleQuantityChange(1)} className="p-2 text-gray-600 hover:bg-gray-100 disabled:opacity-50 rounded-r-lg text-lg" disabled={!isAvailable || quantity >= product.stock}>+</button>
-                            </div>
-                            <Button onClick={handleAddToCart} size="md" className="w-full sm:w-48 bg-yellow-700 hover:bg-yellow-800 text-xs font-semibold flex items-center justify-center gap-2" disabled={!isAvailable}>
-                                <Icon name="cart" className="w-5 h-5" />
-                                {isAvailable ? 'AJOUTER AU PANIER' : 'Rupture de stock'}
-                            </Button>
-                            <Button onClick={() => {/* handle buy now */}} size="md" className="w-full sm:w-[15rem] bg-yellow-900 hover:bg-yellow-800 text-[0.75rem] font-semibold flex items-center justify-center gap-2" disabled={!isAvailable}>
-                                <Icon name="arrowRight" className="w-5 h-5" />
-                                COMMANDER MAINTENANT
-                            </Button>
-                        </div>
                         {/* Color selector and favorites */}
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 mb-4">
                             {product.colors && product.colors.length > 0 && (
@@ -292,8 +298,25 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                                 <svg xmlns="http://www.w3.org/2000/svg" fill={isProductFavorite ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={isProductFavorite ? 0 : 2} stroke="currentColor" className="w-7 h-7">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 0 1 6.364 0L12 7.636l1.318-1.318a4.5 4.5 0 1 1 6.364 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 0 1 0-6.364z" />
                                 </svg>
-                                <span className="text-base font-medium hidden sm:inline">{isProductFavorite ? 'Retirer des favoris' : 'Ajouter à mes favoris'}</span>
+                                <span className="text-base font-medium">{isProductFavorite ? 'Retirer des favoris' : 'Ajouter à mes favoris'}</span>
                             </button>
+                        </div>
+                        {/* Quantity and buttons - buttons side by side under quantity */}
+                        <div className="flex flex-col gap-2 sm:gap-3 mb-4 lg:mb-0">
+                            <div className="flex items-center rounded-lg border border-gray-300 w-fit mx-auto sm:mx-0 mb-2">
+                                <button onClick={() => handleQuantityChange(-1)} className="p-2 text-gray-600 hover:bg-gray-100 disabled:opacity-50 rounded-l-lg text-lg" disabled={quantity <= 1}>-</button>
+                                <span className="px-4 font-bold text-gray-800 text-base">{quantity}</span>
+                                <button onClick={() => handleQuantityChange(1)} className="p-2 text-gray-600 hover:bg-gray-100 disabled:opacity-50 rounded-r-lg text-lg" disabled={!isAvailable || quantity >= product.stock}>+</button>
+                            </div>
+                            <div className="flex flex-row gap-2 w-full">
+                                <Button onClick={handleAddToCart} size="md" className="w-1/2 sm:w-48 bg-yellow-700 hover:bg-yellow-800 text-xs font-semibold flex items-center justify-center gap-2" disabled={!isAvailable}>
+                                    <Icon name="cart" className="w-5 h-5" />
+                                    {isAvailable ? 'AJOUTER AU PANIER' : 'Rupture de stock'}
+                                </Button>
+                                <Button onClick={() => {/* handle buy now */}} size="md" className="w-1/2 sm:w-[15rem] bg-yellow-900 hover:bg-yellow-800 text-[0.75rem] font-semibold flex items-center justify-center gap-2" disabled={!isAvailable}>
+                                    COMMANDER MAINTENANT
+                                </Button>
+                            </div>
                         </div>
                         {isAvailable && product.stock < 10 && (
                             <p className="text-xs text-yellow-600 pt-2">Dépêchez-vous ! Il ne reste que {product.stock} en stock.</p>
@@ -329,8 +352,39 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                         )}
                         {tab === 'avis' && (
                             <div>
-                                <h2 className="text-lg font-bold mb-2">Avis</h2>
-                                <p>Il n&apos;y a pas encore d&apos;avis.</p>
+                                <h2 className="text-lg font-bold mb-2">Avis des clients</h2>
+                                <div className="mb-4 text-sm text-gray-500">Les commentaires doivent être approuvés par un administrateur avant d'apparaître ici.</div>
+                                {product.comments && product.comments.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {product.comments.map((comment, idx) => (
+                                            <div key={idx} className="bg-gray-50 rounded-lg p-4 shadow-sm">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="font-semibold text-gray-800">{comment.userName}</span>
+                                                    <span className="text-xs text-gray-400">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                                <div className="text-gray-700">{comment.text}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-gray-400 italic mb-4">Aucun avis pour ce produit pour le moment.</div>
+                                )}
+                                {currentUser ? (
+                                    <form className="mt-6 space-y-2" onSubmit={handleCommentSubmit}>
+                                        <textarea
+                                            className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-yellow-700"
+                                            rows={3}
+                                            placeholder="Écrivez votre avis..."
+                                            value={commentText}
+                                            onChange={e => setCommentText(e.target.value)}
+                                            required
+                                        />
+                                        <button type="submit" className="bg-yellow-700 hover:bg-yellow-800 text-white px-4 py-2 rounded font-semibold text-sm">Envoyer</button>
+                                        {commentStatus && <div className="text-xs text-green-600 mt-1">{commentStatus}</div>}
+                                    </form>
+                                ) : (
+                                    <div className="text-sm text-gray-500 mt-4">Connectez-vous pour laisser un avis.</div>
+                                )}
                             </div>
                         )}
                         {tab === 'livraison' && (
@@ -344,7 +398,7 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                 {/* Related Products Section */}
                 <section className="pt-10 sm:pt-16 mt-10 sm:mt-16 border-t border-gray-200/80">
                     <h2 className="text-xl sm:text-2xl font-bold text-center mb-6 sm:mb-8 text-slate-800">Produits similaires</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
                         {visibleRelated.map((related, idx) => {
                             const isLast = hasMore && idx === visibleRelated.length - 1;
                             return (

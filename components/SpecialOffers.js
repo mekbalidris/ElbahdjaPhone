@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import { useSwipeable } from 'react-swipeable';
 
 const FADE_DURATION = 300; // ms
 
@@ -101,36 +102,53 @@ const SpecialOffers = ({ products = [] }) => {
     if (page > totalPages) setPage(1);
   }, [packs.length, totalPages]);
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640;
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => handleNext(),
+    onSwipedRight: () => handlePrev(),
+    trackMouse: false,
+  });
+
   return (
     <section className="mb-16">
       <h2 className="text-3xl font-serif font-bold text-center mb-2">OFFRE EXCEPTIONNELLE</h2>
       <p className="text-center text-gray-600 mb-8">Découvrez nos packs, soigneusement sélectionnés pour vous</p>
-      <div className="flex gap-6 overflow-x-auto pb-4">
-        {packs.length === 0 ? (
-          <div className="text-gray-500 text-center w-full">Aucune offre spéciale pour le moment.</div>
-        ) : (
-          paginatedPacks.map((pack) => (
-            <OfferCard key={pack._id} pack={pack} />
-          ))
+      <div className="relative">
+        <div className="flex gap-6 overflow-x-auto pb-4 justify-center" {...swipeHandlers}>
+          {packs.length === 0 ? (
+            <div className="text-gray-500 text-center w-full">Aucune offre spéciale pour le moment.</div>
+          ) : (
+            paginatedPacks.map((pack) => (
+              <OfferCard key={pack._id} pack={pack} />
+            ))
+          )}
+        </div>
+        {totalPages > 1 && (
+          <>
+            <button
+              onClick={handlePrev}
+              disabled={page === 1}
+              className="absolute left-[-2rem] top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow text-gray-700 z-10"
+              style={{ display: page === 1 ? 'none' : 'block' }}
+              aria-label="Précédent"
+            >
+              <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={page === totalPages}
+              className="absolute right-[-2rem] top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow text-gray-700 z-10"
+              style={{ display: page === totalPages ? 'none' : 'block' }}
+              aria-label="Suivant"
+            >
+              <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </>
         )}
       </div>
       {totalPages > 1 && (
         <div className="flex justify-center mt-4 gap-4">
-          <button
-            onClick={handlePrev}
-            disabled={page === 1}
-            className="px-4 py-2 bg-gray-200 rounded-lg font-semibold text-gray-700 hover:bg-gray-300 disabled:opacity-50"
-          >
-            Précédent
-          </button>
           <span className="px-2 py-2 font-semibold">Page {page} / {totalPages}</span>
-          <button
-            onClick={handleNext}
-            disabled={page === totalPages}
-            className="px-4 py-2 bg-gray-200 rounded-lg font-semibold text-gray-700 hover:bg-gray-300 disabled:opacity-50"
-          >
-            Suivant
-          </button>
         </div>
       )}
     </section>

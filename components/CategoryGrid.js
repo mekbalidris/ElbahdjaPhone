@@ -93,6 +93,8 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
   const [dragStart, setDragStart] = useState(null);
   const [dragMoved, setDragMoved] = useState(false);
 
+  const router = useRouter();
+
   // Helper for click/drag distinction
   const handleCategoryMouseDown = (e) => {
     setDragStart({ x: e.pageX, y: e.pageY });
@@ -106,7 +108,9 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
   };
   const handleCategoryMouseUp = (cat) => (e) => {
     if (!dragMoved) {
-      window.location.href = `/products?category=${encodeURIComponent(cat.filter)}`;
+      // Use uppercase, dash-free category for filtering
+      const normalizedCategory = cat.filter.replace(/-/g, '').toUpperCase();
+      router.push(`/products?category=${encodeURIComponent(normalizedCategory)}`);
     }
     setDragStart(null);
     setDragMoved(false);
@@ -126,7 +130,9 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
   };
   const handleCategoryTouchEnd = (cat) => (e) => {
     if (!dragMoved) {
-      window.location.href = `/products?category=${encodeURIComponent(cat.filter)}`;
+      // Use uppercase, dash-free category for filtering
+      const normalizedCategory = cat.filter.replace(/-/g, '').toUpperCase();
+      router.push(`/products?category=${encodeURIComponent(normalizedCategory)}`);
     }
     setDragStart(null);
     setDragMoved(false);
@@ -147,7 +153,11 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
           style={{ willChange: 'transform' }}
         >
           {duplicatedCategories.map((cat, idx) => {
-            const product = products.find(p => (p.category || '').toLowerCase() === cat.filter);
+            const product = products.find(
+              p =>
+                (p.category || '').replace(/-/g, '').toLowerCase() ===
+                cat.filter.replace(/-/g, '').toLowerCase()
+            );
             const image = product && product.images && product.images.length > 0 ? product.images[0] : null;
             return (
               <div

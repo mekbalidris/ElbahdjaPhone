@@ -83,6 +83,16 @@ const productSchema = new mongoose.Schema({
         maxLength: 50,
         required: false
     },
+    comments: [
+        {
+            _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
+            userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+            userName: { type: String, required: true },
+            text: { type: String, required: true },
+            createdAt: { type: Date, default: Date.now },
+            approved: { type: Boolean, default: false },
+        }
+    ],
     createdAt: {
         type: Date,
         default: Date.now

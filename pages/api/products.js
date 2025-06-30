@@ -25,6 +25,7 @@ export default async function handler(req, res) {
           if (!product) {
             return res.status(404).json({ error: 'Product not found' });
           }
+          product.comments = (product.comments || []).filter(c => c.approved);
           res.status(200).json(product);
         } catch (err) {
           if (err.message.includes('ObjectId')) {
@@ -51,8 +52,26 @@ export default async function handler(req, res) {
       } else {
         // Always return all products for dashboard view
         const products = await collection.find({}).toArray();
+        // Do NOT filter comments here; admin needs to see all
         res.status(200).json(products);
       }
+    } else if (req.method === 'POST' && req.query.comment !== undefined) {
+      const { id } = req.query;
+      const { userId, userName, text } = req.body;
+      if (!userId || !userName || !text) return res.status(400).json({ error: 'Missing fields' });
+      const comment = {
+        _id: new ObjectId(),
+        userId: new ObjectId(userId),
+        userName,
+        text,
+        createdAt: new Date(),
+        approved: false
+      };
+      await collection.updateOne(
+        { _id: new ObjectId(id) },
+        { $push: { comments: comment } }
+      );
+      return res.status(201).json({ success: true });
     } else if (req.method === 'POST') {
       const product = {
         ...req.body,
@@ -139,6 +158,14 @@ export default async function handler(req, res) {
         console.error('Delete error:', err);
         res.status(500).json({ error: 'Failed to delete product' });
       }
+    } else if (req.method === 'PATCH' && req.query.approve !== undefined) {
+      const { id, commentId } = req.query;
+      // TODO: Add admin auth check
+      await collection.updateOne(
+        { _id: new ObjectId(id), 'comments._id': new ObjectId(commentId) },
+        { $set: { 'comments.$.approved': true } }
+      );
+      return res.status(200).json({ success: true });
     } else {
       // Method Not Allowed for other HTTP methods
       res.setHeader('Allow', ['GET', 'POST', 'PATCH', 'DELETE']);

@@ -266,9 +266,13 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
                         <h3 className="font-semibold text-gray-800 group-hover:text-yellow-800 transition-colors truncate text-base mb-2">{product.name}</h3>
                     </div>
                     <div className="flex items-baseline justify-start gap-2 mt-2">
-                        <span className={`font-bold text-lg ${product.oldPrice ? 'text-red-600' : 'text-gray-900'}`}>{product.price?.toLocaleString()} DA</span>
+                        <span className="font-bold text-xl text-red-600 whitespace-nowrap">
+                            {product.price?.toLocaleString()} <span className="text-base">DA</span>
+                        </span>
                         {product.oldPrice && (
-                            <span className="text-gray-400 line-through text-sm">{product.oldPrice?.toLocaleString()} DA</span>
+                            <span className="text-gray-400 line-through text-xs align-top whitespace-nowrap ml-1">
+                                {product.oldPrice?.toLocaleString()} DA
+                            </span>
                         )}
                     </div>
                 </div>
