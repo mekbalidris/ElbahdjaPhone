@@ -85,8 +85,8 @@ function useDragScroll(ref) {
 const CategoryMarquee = ({ categories, direction = 'left', products }) => {
     const scrollRef = useRef(null);
     const [hoveredIdx, setHoveredIdx] = useState(null);
-    // Duplicate categories 4 times for infinite effect
-    const duplicatedCategories = [...categories, ...categories, ...categories, ...categories];
+    // Duplicate categories for infinite effect
+    const duplicatedCategories = [...categories, ...categories];
     const animationClass = direction === 'left'
         ? 'animate-[marquee-left_40s_linear_infinite]'
         : 'animate-[marquee-right_40s_linear_infinite]';
@@ -141,10 +141,8 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
     };
 
     return (
-        <div className="w-full group py-2 relative">
-            {/* Fade overlays */}
-            <div className="pointer-events-none absolute left-0 top-0 h-full w-12 z-10" style={{ background: 'linear-gradient(to right, #fff 80%, transparent)' }} />
-            <div className="pointer-events-none absolute right-0 top-0 h-full w-12 z-10" style={{ background: 'linear-gradient(to left, #fff 80%, transparent)' }} />
+        <div className="w-full group py-2 relative bg-black overflow-hidden">
+            {/* Remove fade overlays */}
             <div
                 ref={scrollRef}
                 className="overflow-x-auto scrollbar-hide"
@@ -152,10 +150,9 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
             >
                 <div
                     className={`flex w-max group-hover:[animation-play-state:paused] ${animationClass} cursor-grab select-none`}
-                    style={{ willChange: 'transform' }}
+                    style={{ willChange: 'transform', minWidth: '100%' }}
                 >
                     {duplicatedCategories.map((cat, idx) => {
-                        // Robust: match both 'tshirts' and 't-shirts' for T-shirts
                         const product = products.find(p => {
                             const catVal = (p.category || '').replace(/-/g, '').toLowerCase();
                             const filterVal = cat.filter.replace(/-/g, '').toLowerCase();
@@ -165,7 +162,7 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
                         return (
                             <div
                                 key={cat.key + '-' + idx}
-                                className="flex-shrink-0 w-48 sm:w-56 px-2 cursor-pointer"
+                                className="flex flex-col items-center w-44 h-44 sm:w-56 sm:h-56 bg-black rounded-xl cursor-pointer mx-2 group"
                                 tabIndex={0}
                                 role="button"
                                 onMouseDown={handleCategoryMouseDown}
@@ -178,25 +175,30 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
                                 onMouseEnter={() => setHoveredIdx(idx)}
                                 onMouseLeave={() => setHoveredIdx(null)}
                             >
-                                <div className="relative overflow-hidden rounded-xl shadow bg-white hover:shadow-lg transition-all">
-                                    <div className="relative w-full aspect-square bg-gray-100 flex items-center justify-center">
-                                        {image ? (
-                                            <img
-                                                src={image}
-                                                alt={cat.title}
-                                                className="object-cover w-full h-full"
-                                            />
-                                        ) : (
-                                            <span className="text-gray-400 text-lg font-bold">{cat.title}</span>
-                                        )}
-                                    </div>
-                                    <div className={`absolute inset-0 flex items-center justify-center bg-black transition-all duration-300 ${hoveredIdx === idx ? 'bg-opacity-40' : 'bg-opacity-0'}`}>
-                                        <span className={`text-white font-bold transition-opacity duration-300 px-4 py-2 bg-orange-600 rounded-md ${hoveredIdx === idx ? 'opacity-100' : 'opacity-0'}`}>
-                                            Voir {cat.title}
-                                        </span>
-                                    </div>
+                                <div className="relative overflow-hidden rounded-xl shadow bg-black hover:shadow-lg transition-all w-full h-full flex items-center justify-center">
+                                    {image ? (
+                                        <img
+                                            src={image}
+                                            alt={cat.title}
+                                            className="object-cover w-full h-full rounded-xl"
+                                        />
+                                    ) : (
+                                        <span className="text-gray-400 text-lg font-bold">{cat.title}</span>
+                                    )}
+                                    {/* Animated button on desktop hover - only show on hovered card */}
+                                    {hoveredIdx === idx && (
+                                        <button
+                                            onClick={e => { e.stopPropagation(); router.push(`/products?category=${encodeURIComponent(cat.filter.replace(/-/g, '').toLowerCase())}`); }}
+                                            className="hidden sm:flex absolute inset-0 items-center justify-center z-20"
+                                            style={{ pointerEvents: 'auto' }}
+                                        >
+                                            <span className="px-8 py-3 bg-white/90 backdrop-blur-md text-black font-bold text-lg rounded-full shadow-lg border-2 border-accent transition-all duration-300 whitespace-nowrap">
+                                                {`Voir les ${cat.title}`}
+                                            </span>
+                                        </button>
+                                    )}
                                 </div>
-                                <h3 className="mt-2 text-base font-semibold text-gray-700 truncate text-center">{cat.title}</h3>
+                                <h3 className="mt-2 text-lg font-semibold text-white truncate text-center">{cat.title}</h3>
                             </div>
                         );
                     })}
@@ -212,7 +214,7 @@ const CategoryGrid = ({ products = [] }) => {
     const row2 = ALL_CATEGORIES.slice(half);
     return (
         <section className="mb-16">
-            <h2 className="text-3xl font-serif font-bold text-center mb-6">Catégories</h2>
+            <h2 className="text-3xl font-serif font-bold text-center mb-6 text-accent">Catégories</h2>
             <CategoryMarquee categories={row1} direction="left" products={products} />
             <CategoryMarquee categories={row2} direction="right" products={products} />
             <style jsx global>{`

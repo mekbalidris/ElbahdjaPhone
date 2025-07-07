@@ -14,8 +14,8 @@ const FavoritesPage = () => {
     return (
         <>
             <Head>
-                <title>Mes Favoris - COSMOS</title>
-                <meta name="description" content="Découvrez vos produits favoris sur COSMOS" />
+                <title>Mes Favoris - Arena Fashion</title>
+                <meta name="description" content="Découvrez vos produits favoris sur Arena Fashion" />
             </Head>
 
 

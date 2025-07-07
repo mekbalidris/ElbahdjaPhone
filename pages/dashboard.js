@@ -492,7 +492,7 @@ const SellerDashboardPage = () => {
                             {paginatedProducts.map(product => (
                                 <li key={product._id}>
                                     <div className="px-4 py-4 sm:px-6">
-                                        <div className="flex items-center justify-between">
+                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                             <div className="flex items-center">
                                                 <img
                                                     src={product.images?.[0] || product.imageUrl || 'https://placehold.co/80x80/gray/ffffff?text=N/A'}
@@ -500,14 +500,12 @@ const SellerDashboardPage = () => {
                                                     className="h-12 w-12 rounded-md object-cover"
                                                 />
                                                 <div className="ml-4">
-                                                    <h3 className="text-lg font-medium text-gray-900">{product.name}</h3>
+                                                    <h3 className="text-lg font-medium text-gray-900 break-words max-w-[150px] sm:max-w-none">{product.name}</h3>
                                                     <p className="text-sm text-gray-500">{product.category}</p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center space-x-4">
-                                                <p className="text-lg font-semibold text-blue-600">
-                                                    {typeof product.price === 'number' ? product.price : 'N/A'} DA
-                                                </p>
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 sm:mt-0">
+                                                <p className="text-lg font-semibold text-blue-600 whitespace-nowrap">{typeof product.price === 'number' ? product.price : 'N/A'} DA</p>
                                                 <div className="flex items-center space-x-2">
                                                     <Button
                                                         variant="ghost"

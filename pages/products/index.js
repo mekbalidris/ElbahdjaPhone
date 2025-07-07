@@ -16,7 +16,7 @@ const LoadingSpinner = () => <div className="animate-spin rounded-full h-12 w-12
 
 const StyledSelect = ({ value, onChange, options, label }) => (
     <div>
-        {label && <label className="text-sm font-semibold text-slate-800 block mb-2">{label}</label>}
+        {label && <label className="text-sm font-semibold text-white block mb-2">Main Category</label>}
         <div className="relative">
             <select value={value} onChange={e => onChange(e.target.value)} className={`w-full appearance-none bg-white border border-slate-300 rounded-xl py-2.5 pl-4 pr-10 text-sm focus:outline-none focus:border-amber-500 focus:ring-1 ${brandOrange.ring}`}>
                 {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
@@ -66,7 +66,7 @@ function useIsMobile() {
 const clothingSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '34', '36', '38', '40', '42', '44', '46'];
 const shoeSizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46'];
 
-const ProductsPage = ({ handleAddToCart }) => {
+const ProductsPage = ({ handleAddToCart, setGlobalLoading }) => {
     const router = useRouter();
     
     const [allProducts, setAllProducts] = useState([]);
@@ -335,7 +335,7 @@ const ProductsPage = ({ handleAddToCart }) => {
                     options={sortOptions} 
                 />
                 <div>
-                    <label className="block text-sm font-semibold text-slate-800 mb-2">Price Range</label>
+                    <label className="text-sm font-semibold text-white block mb-2">Price Range</label>
                     <div className="flex items-center gap-2">
                         <Input 
                             type="number" 
@@ -390,9 +390,9 @@ const ProductsPage = ({ handleAddToCart }) => {
     const gridOptions = [3, 4, 5];
 
     return (
-        <div className="bg-white min-h-screen mt-5">
+        <div className="bg-primary min-h-screen mt-5">
             <main className="container mx-auto px-2 sm:px-4 lg:px-6 py-12">
-                <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-800 tracking-tight mb-8">Boutique</h1>
+                <h1 className="text-4xl md:text-5xl font-serif font-bold text-accent tracking-tight mb-8">Boutique</h1>
                 <div className="flex flex-col md:flex-row gap-8">
                     {/* Sidebar filters for desktop */}
                     {!isMobile && (
@@ -451,7 +451,12 @@ const ProductsPage = ({ handleAddToCart }) => {
                             {displayedProducts.map((product, idx) => {
                                 const isLast = hasMore && idx === displayedProducts.length - 1;
                                 return (
-                                    <ProductCard key={product._id} product={product} ref={isLast ? lastProductElementRef : null} />
+                                    <ProductCard
+                                        key={product._id}
+                                        product={product}
+                                        setGlobalLoading={setGlobalLoading}
+                                        ref={isLast ? lastProductElementRef : undefined}
+                                    />
                                 );
                             })}
                         </div>

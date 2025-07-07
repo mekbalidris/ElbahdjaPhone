@@ -11,9 +11,9 @@ const NavLink = ({ href, children }) => {
     const isActive = router.pathname === href || router.pathname.startsWith(`${href}/`);
     return (
         <Link href={href}>
-            <span className={`inline-block relative py-2 text-sm font-medium transition-colors duration-200 ease-in-out cursor-pointer ${isActive ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>
+            <span className={`inline-block relative py-2 text-sm font-medium transition-colors duration-200 ease-in-out cursor-pointer ${isActive ? 'text-white' : 'text-gray-400 hover:text-white'}`}>
                 {children}
-                <span className={`absolute bottom-0 left-0 block h-0.5 bg-gray-900 transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+                <span className={`absolute bottom-0 left-0 block h-0.5 bg-accent transition-all duration-300 ${isActive ? 'w-full' : 'w-0'} group-hover:w-full`}></span>
             </span>
         </Link>
     );
@@ -72,12 +72,12 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
     ];
 
     return (
-        <header className={`fixed top-0 z-40 w-full bg-white/80 backdrop-blur-sm shadow-sm transition-transform duration-300 ${showNavbar ? 'translate-y-0' : '-translate-y-full'}`}>
+        <header className={`fixed top-0 z-40 w-full bg-black/60 backdrop-blur-md shadow-sm transition-transform duration-300 ${showNavbar ? 'translate-y-0' : '-translate-y-full'}`}>
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Mobile Menu Button */}
                     <div className="lg:hidden">
-                        <button onClick={() => setMobileMenuOpen(true)} className="text-gray-600 hover:text-gray-900">
+                        <button onClick={() => setMobileMenuOpen(true)} className="text-white p-2 rounded-md bg-transparent">
                             <MenuIcon size={24} />
                         </button>
                     </div>
@@ -85,7 +85,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                     {/* Logo */}
                     <div className="flex-shrink-0">
                         <Link href="/">
-                            <span className="text-2xl font-bold text-gray-900 cursor-pointer">COSMOS</span>
+                            <img src="/logo.png" alt="Arena Fashion Logo" className="h-14 w-auto" />
                         </Link>
                     </div>
 
@@ -97,36 +97,36 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                     </nav>
 
                     {/* Icons */}
-                    <div className="flex items-center space-x-4">
+                    <div className="relative flex items-center gap-4">
                         {/* Search Icon and Input */}
                         <div className="relative">
                             <button
                                 onClick={() => setShowSearch((v) => !v)}
-                                className={`text-gray-600 hover:text-yellow-700 transition-colors duration-200 p-2 rounded-full ${showSearch ? 'bg-yellow-100' : ''}`}
+                                className={`text-white hover:text-accent transition-colors duration-200 p-2 rounded-full bg-transparent`}
                                 title="Rechercher un produit"
                             >
-                                <SearchIcon className="w-6 h-6" />
+                                <SearchIcon className="w-6 h-6 text-white" />
                             </button>
                             <form
                                 onSubmit={handleSearchSubmit}
-                                className={`absolute right-0 top-10 bg-white shadow-lg rounded-lg flex items-center transition-all duration-300 ${showSearch ? 'opacity-100 pointer-events-auto translate-y-0' : 'opacity-0 pointer-events-none -translate-y-2'} z-50`}
+                                className={`absolute right-0 top-10 bg-black/90 shadow-lg rounded-lg flex items-center transition-all duration-300 ${showSearch ? 'opacity-100 pointer-events-auto translate-y-0' : 'opacity-0 pointer-events-none -translate-y-2'} z-50`}
                                 style={{ minWidth: 220 }}
                             >
                                 <input
                                     type="text"
-                                    className="px-4 py-2 rounded-l-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm"
+                                    className="px-4 py-2 rounded-l-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent text-sm bg-black text-white placeholder:text-gray-400"
                                     placeholder="Rechercher un produit..."
                                     value={searchTerm}
                                     onChange={e => setSearchTerm(e.target.value)}
                                     autoFocus={showSearch}
                                 />
-                                <button type="submit" className="px-3 py-2 bg-yellow-700 text-white rounded-r-lg hover:bg-yellow-800 transition">Rechercher</button>
+                                <button type="submit" className="px-3 py-2 bg-accent text-black rounded-r-lg hover:bg-primary transition">Rechercher</button>
                             </form>
                         </div>
                         {/* Favorites Heart Icon */}
-                        <button 
+                        <button
                             onClick={handleFavoritesClick}
-                            className="relative text-gray-600 hover:text-red-600 transition-colors duration-200"
+                            className="relative text-gray-300 hover:text-red-500 transition-colors duration-200 bg-transparent p-0 rounded-full focus:outline-none focus:ring-2 focus:ring-accent hover:bg-accent"
                             title="Mes favoris"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
@@ -138,7 +138,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                 </span>
                             )}
                         </button>
-                        <button onClick={onCartClick} className="relative text-gray-600 hover:text-gray-900">
+                        <button onClick={onCartClick} className="relative text-gray-300 hover:text-accent transition-colors duration-200 bg-transparent p-0 rounded-full focus:outline-none focus:ring-2 focus:ring-accent hover:bg-accent">
                             <ShoppingCart size={24} />
                             {cartItemCount > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-xs font-medium text-white">
@@ -188,7 +188,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                         {(currentUser.role === 'admin' || currentUser.role === 'seller') && (
                                             <Menu.Item>
                                                 {({ active }) => (
-                                                    <Link href="/dashboard" className={`${active ? 'bg-gray-100' : ''} flex items-center px-4 py-2 text-sm text-gray-700`}>
+                                                    <Link href="/dashboard" className={`${active ? 'bg-gray-100' : ''} flex items-center px-4 py-2 text-sm text-white`}>
                                                         <LayoutDashboard size={16} className="mr-2" />
                                                         Dashboard
                                                     </Link>
@@ -196,18 +196,21 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                             </Menu.Item>
                                         )}
                                         <Menu.Item>
-                                            {({ active }) => (
-                                                <Link href="/profile" className={`${active ? 'bg-gray-100' : ''} flex items-center px-4 py-2 text-sm text-gray-700`}>
-                                                    <User size={16} className="mr-2" />
-                                                    My Profile
-                                                </Link>
-                                            )}
+                                            {({ active }) => {
+                                                const isActive = router.pathname === '/profile';
+                                                return (
+                                                    <Link href="/profile" className={`${isActive ? 'bg-accent text-black' : active ? 'bg-gray-100' : ''} flex items-center px-4 py-2 text-sm font-semibold`}>
+                                                        <User size={16} className="mr-2" />
+                                                        Mon profil
+                                                    </Link>
+                                                );
+                                            }}
                                         </Menu.Item>
                                         <Menu.Item>
                                             {({ active }) => (
-                                                <button onClick={handleLogout} className={`${active ? 'bg-gray-100' : ''} w-full text-left flex items-center px-4 py-2 text-sm text-gray-700`}>
-                                                    <LogOut size={16} className="mr-2" />
-                                                    Sign Out
+                                                <button onClick={handleLogout} className={`w-full text-left flex items-center px-4 py-2 text-sm font-semibold rounded-md bg-red-600 text-black ${active ? 'ring-2 ring-red-800' : ''}`}>
+                                                    <LogOut size={16} className="mr-2 text-black" />
+                                                    Se déconnecter
                                                 </button>
                                             )}
                                         </Menu.Item>
@@ -250,36 +253,57 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                             leaveFrom="translate-x-0"
                             leaveTo="-translate-x-full"
                         >
-                            <Dialog.Panel className="relative mr-auto flex h-full w-full max-w-xs flex-col overflow-y-auto bg-white py-4 pb-12 shadow-xl">
+                            <Dialog.Panel className="relative mr-auto flex h-full w-full max-w-xs flex-col overflow-y-auto bg-black py-4 pb-12 shadow-xl">
                                 <div className="flex items-center justify-between px-4">
                                      <Link href="/">
-                                        <span className="text-2xl font-bold text-gray-900 cursor-pointer">COSMOS</span>
+                                        <span className="text-2xl font-bold text-white cursor-pointer">Arena Fashion</span>
                                     </Link>
                                     <button
                                         type="button"
-                                        className="-m-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400"
+                                        className="-m-2 inline-flex items-center justify-center rounded-md p-2 text-white"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
                                         <X size={24} />
                                     </button>
                                 </div>
 
-                                <nav className="mt-8 px-4 space-y-4">
-                                    {navLinks.map(link => (
-                                         <Link href={link.href} key={link.name}>
-                                            <span onClick={() => setMobileMenuOpen(false)} className="block py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md">
-                                                {link.name}
-                                            </span>
-                                        </Link>
-                                    ))}
-                                    <button 
+                                <nav className="mt-6 flex flex-col gap-4 px-4">
+                                    {navLinks.map(link => {
+                                        const isActive = router.pathname === link.href || router.pathname.startsWith(`${link.href}/`);
+                                        return (
+                                            <Link href={link.href} key={link.name}>
+                                                <span
+                                                    onClick={() => setMobileMenuOpen(false)}
+                                                    className={`block py-2 text-lg font-medium rounded-md ${isActive ? 'bg-accent text-black' : 'text-white hover:text-accent hover:bg-black'}`}
+                                                >
+                                                    {link.name}
+                                                </span>
+                                            </Link>
+                                        );
+                                    })}
+                                    <button
                                         onClick={() => {
                                             handleFavoritesClick();
                                             setMobileMenuOpen(false);
                                         }}
-                                        className="w-full text-left block py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+                                        className={`w-full text-left block py-2 text-lg font-medium rounded-md ${router.pathname === '/favorites' ? 'bg-accent text-black' : 'text-white hover:text-accent hover:bg-black'}`}
                                     >
                                         Mes favoris {favoritesCount > 0 && `(${favoritesCount})`}
+                                    </button>
+                                    <Link href="/profile">
+                                        <span
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className={`block py-2 text-lg font-medium rounded-md ${router.pathname === '/profile' ? 'bg-accent text-black' : 'text-white hover:text-accent hover:bg-black'}`}
+                                        >
+                                            Mon profil
+                                        </span>
+                                    </Link>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full text-left block py-2 text-lg font-medium rounded-md bg-red-600 text-black flex items-center gap-2 mt-4"
+                                    >
+                                        <LogOut size={20} className="text-black" />
+                                        Se déconnecter
                                     </button>
                                 </nav>
                             </Dialog.Panel>

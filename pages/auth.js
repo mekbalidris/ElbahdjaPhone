@@ -78,7 +78,7 @@ const AuthPage = () => {
         <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 mt-[2rem]">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="flex justify-center mb-4">
-                    <img src="/logo.png" alt="Logo" className="h-12 w-auto" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/150x48/FFA500/FFFFFF?text=Logo&font=roboto';}}/>
+                    <img src="/logo.png" alt="Arena Fashion Logo" className="h-12 w-auto" onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/150x48/FFD700/000000?text=Arena+Fashion&font=roboto';}}/>
                 </div>
                 <h2 className="mt-2 text-center text-lg font-semibold text-slate-700">
                     {isLogin ? 'Welcome Back!' : 'Create your Account'}

@@ -167,7 +167,7 @@ const ChatBot = () => {
 
     const helperMessages = {
         en: [
-            "👋 Welcome to COSMOS Assistant!",
+            "👋 Welcome to Arena Fashion Assistant!",
             "I can help you with:",
             "• Product information and prices",
             "• Available clothing categories and brands",
@@ -177,7 +177,7 @@ const ChatBot = () => {
             "Feel free to ask me anything about our clothing store!"
         ],
         fr: [
-            "👋 Bienvenue chez l'Assistant COSMOS !",
+            "👋 Bienvenue chez l'Assistant Arena Fashion !",
             "Je peux vous aider avec :",
             "• Informations et prix des produits",
             "• Catégories de vêtements et marques disponibles",
@@ -187,7 +187,7 @@ const ChatBot = () => {
             "N'hésitez pas à me poser des questions sur notre boutique de vêtements !"
         ],
         ar: [
-            "👋 مرحباً بك في مساعد كوزموس!",
+            "�� مرحباً بك في مساعد أرينا فاشن!",
             "يمكنني مساعدتك في:",
             "• معلومات وأسعار المنتجات",
             "• فئات الملابس والعلامات التجارية المتاحة",
@@ -237,7 +237,7 @@ const ChatBot = () => {
                         <div className="fixed bottom-6 right-6 w-[95vw] max-w-xs sm:max-w-sm md:max-w-md bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all pointer-events-auto flex flex-col" style={{height: '450px'}}>
                             {/* Header */}
                             <div className="bg-gray-900 text-white px-4 py-3 flex justify-between items-center">
-                                <h3 className="text-base font-semibold">Assistant COSMOS</h3>
+                                <h3 className="text-base font-semibold">Assistant Arena Fashion</h3>
                                 <button
                                     onClick={() => setIsOpen(false)}
                                     className="text-gray-300 hover:text-white transition-colors"

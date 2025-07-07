@@ -85,12 +85,24 @@
 
 /* Basic font & layout */
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: #f9fafb;
+  background: #000;
+  color: #fff;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
 }
 
-html, body, #__next {
-  height: 100%;
+html, body {
+  width: 100vw;
+  min-width: 0;
+  max-width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+#root, #__next {
+  width: 100vw;
+  min-width: 0;
+  max-width: 100vw;
 }
 
 #__next {
@@ -100,4 +112,73 @@ html, body, #__next {
 
 .text-shadow {
   text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+}
+
+/* Arena Fashion Theme: Black, White, Gold */
+:root {
+  --arena-black: #000;
+  --arena-white: #fff;
+  --arena-gold: #FFD700;
+  --arena-gold-dark: #BFA100;
+}
+
+.bg-primary {
+  background-color: var(--arena-black) !important;
+}
+.text-primary {
+  color: var(--arena-gold) !important;
+}
+.bg-accent {
+  background-color: var(--arena-gold) !important;
+}
+.text-accent {
+  color: var(--arena-gold) !important;
+}
+
+/* Remove old color classes if present, or override them */
+.bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200 {
+  background: var(--arena-black) !important;
+  color: var(--arena-white) !important;
+}
+.text-gray-800, .text-gray-900, .text-gray-600, .text-gray-500 {
+  color: var(--arena-white) !important;
+}
+
+/* Accent for buttons, links, etc. */
+button, .btn, a {
+  transition: background 0.2s, color 0.2s;
+}
+button, .btn-primary, .btn-accent {
+  background: var(--arena-gold);
+  color: var(--arena-black);
+  border: none;
+}
+button:hover, .btn-primary:hover, .btn-accent:hover {
+  background: var(--arena-gold-dark);
+  color: var(--arena-white);
+}
+
+input, textarea, select {
+  background: var(--arena-black);
+  color: var(--arena-white);
+  border: 1px solid var(--arena-gold);
+}
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid var(--arena-gold);
+}
+
+/* Gold highlights for headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--arena-gold);
+  font-family: 'Playfair Display', serif;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  background: var(--arena-black);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--arena-gold);
+  border-radius: 4px;
 }

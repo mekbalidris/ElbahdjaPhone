@@ -27,7 +27,7 @@ const BRANDS = [
     { value: 'nike', label: 'Nike' },
     { value: 'adidas', label: 'Adidas' },
     { value: 'zara', label: 'Zara' },
-    { value: 'cosmos', label: 'Cosmos' },
+    { value: 'arena-fashion', label: 'Arena Fashion' },
     { value: 'lacoste', label: 'Lacoste' },
     { value: 'polo', label: 'Polo' },
     { value: 'anime', label: 'Anime' },
@@ -265,7 +265,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
                             <Input label="Old Price (DA) 'optional'" name="oldPrice" type="number" value={oldPrice} onChange={e => setOldPrice(e.target.value)} placeholder="e.g., 999.99" error={errors.oldPrice} />
                             <Input label={<span>Stock (0 for Out of Stock) <span className="text-red-500">*</span></span>} name="stock" type="number" value={stock} onChange={e => setStock(e.target.value)} placeholder="e.g., 50" required error={errors.stock} />
                             <div className="col-span-2">
-                                <label className="block text-gray-700 font-medium mb-1">Tailles disponibles <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-white mb-2">Tailles disponibles <span className="text-red-500">*</span></label>
                                 <div className="flex gap-2 mb-2">
                                     {(category === 'chaussures' ? SHOE_SIZES : CLOTHING_SIZES).map(size => (
                                         <button
@@ -281,7 +281,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
                                 {errors.sizes && <div className="text-red-500 text-xs mt-1">{errors.sizes}</div>}
                             </div>
                             <div className="col-span-2">
-                                <label className="block text-gray-700 font-medium mb-1">Couleurs disponibles <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-white mb-2">Couleurs disponibles <span className="text-red-500">*</span></label>
                                 <div className="flex gap-2 mb-2 flex-wrap">
                                     {COLOR_OPTIONS.map((color) => (
                                         <button

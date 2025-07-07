@@ -44,7 +44,7 @@ const colorMap = {
     // Add more as needed
 };
 
-const ProductCard = forwardRef(function ProductCard({ product }, ref) {
+const ProductCard = forwardRef(function ProductCard({ product, setGlobalLoading }, ref) {
     const router = useRouter();
     const { addToCart } = useCart();
     const { toggleFavorite, isFavorite } = useFavorites();
@@ -100,14 +100,19 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
         router.push(`/products/${product._id}`);
     };
 
-    const handleAddToCartClick = (e) => {
+    const handleAddToCartClick = async (e) => {
         e.stopPropagation();
         if (!isAvailable) {
             toast.error('Ce produit est en rupture de stock.');
             return;
         }
-        toast('Veuillez sélectionner la taille et la couleur sur la page du produit.');
-        router.push(`/products/${product._id}`);
+        if (setGlobalLoading) setGlobalLoading(true);
+        try {
+            toast('Veuillez sélectionner la taille et la couleur sur la page du produit.');
+            await Promise.resolve(router.push(`/products/${product._id}`));
+        } finally {
+            if (setGlobalLoading) setGlobalLoading(false);
+        }
     };
 
     const handleBuyNow = (e) => {
@@ -119,9 +124,14 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
         setShowBuyModal(true);
     };
 
-    const handleAddToFavorites = (e) => {
+    const handleAddToFavorites = async (e) => {
         e.stopPropagation();
-        toggleFavorite(product);
+        if (setGlobalLoading) setGlobalLoading(true);
+        try {
+            await Promise.resolve(toggleFavorite(product));
+        } finally {
+            if (setGlobalLoading) setGlobalLoading(false);
+        }
     };
     
     const handleQuantityChange = (change) => {
@@ -157,28 +167,14 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
         <>
             <div
                 ref={ref}
-                className="group bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200 cursor-pointer flex flex-col transition-all duration-300 hover:shadow-xl relative w-full max-w-[300px]"
+                className="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200 cursor-pointer flex flex-col transition-all duration-300 hover:shadow-xl relative w-full max-w-[300px] group"
                 onClick={handleViewDetails}
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
             >
                 {/* Product Image Container */}
                 <div className="relative w-full h-[20rem] overflow-hidden bg-gray-100">
-                    {/* Favorite Button (Heart Icon) */}
-                    <button
-                        onClick={handleAddToFavorites}
-                        className={`absolute top-3 right-3 z-20 flex items-center justify-center w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm shadow-md transition-all duration-300 ${
-                            isProductFavorite 
-                                ? 'text-red-500' 
-                                : 'text-gray-500 hover:text-red-500 hover:scale-110'
-                        }`}
-                        title={isProductFavorite ? "Retirer de mes favoris" : "Ajouter à mes favoris"}
-                    >
-                        <Heart className="w-5 h-5" fill={isProductFavorite ? "currentColor" : "none"} />
-                    </button>
-
-                    <div
-                        className={`w-full h-full transition-opacity duration-${FADE_DURATION} ${isFading ? 'opacity-0' : 'opacity-100'}`}
+                    <div className={`w-full h-full transition-opacity duration-${FADE_DURATION} ${isFading ? 'opacity-0' : 'opacity-100'}`}
                         style={{ position: 'absolute', inset: 0 }}
                     >
                         <Image
@@ -186,17 +182,15 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
                             alt={product.name || "Product image"}
                             fill
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            className="object-cover object-center w-full h-full transition-transform duration-100 group-hover:scale-110"
+                            className="object-cover object-center w-full h-full transition-transform duration-200 sm:group-hover:scale-105"
                             onError={(e) => {
                                 e.target.src = `https://placehold.co/600x400/e2e8f0/94a3b8?text=${encodeURIComponent(product.name || "Image")}`;
                             }}
                         />
                     </div>
-
-                    {/* === ACTION ICONS WITH TOOLTIPS - NEW DESIGN === */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-auto flex justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-lg">
-                            
+                    {/* Desktop hover action icons */}
+                    <div className="hidden sm:flex absolute bottom-4 left-1/2 -translate-x-1/2 w-auto justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="flex items-center gap-2 bg-black/80 backdrop-blur-sm p-2 rounded-full shadow-lg">
                             {/* View Details Icon */}
                             <div className="relative group/icon flex flex-col items-center">
                                 <div className="absolute bottom-full mb-2 flex flex-col items-center opacity-0 group-hover/icon:opacity-100 transition-opacity duration-300 pointer-events-none">
@@ -204,67 +198,60 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
                                     <div className="w-3 h-3 -mt-1.5 rotate-45 bg-black"></div>
                                 </div>
                                 <button
-                                    onClick={handleViewDetails}
-                                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow hover:bg-gray-100 transition-all"
+                                    onClick={e => { e.stopPropagation(); handleViewDetails(); }}
+                                    className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent hover:bg-accent transition-colors duration-200"
                                     aria-label="Voir détails"
                                 >
-                                    <Search className="w-5 h-5 text-gray-700" />
+                                    <Search className="w-5 h-5 text-white" />
                                 </button>
                             </div>
-
-                            {/* Add to Cart Icon */}
-                             <div className="relative group/icon flex flex-col items-center">
+                            {/* Favorite Icon */}
+                            <div className="relative group/icon flex flex-col items-center">
+                                <div className="absolute bottom-full mb-2 flex flex-col items-center opacity-0 group-hover/icon:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                    <span className="px-3 py-1 text-xs text-white bg-black rounded-md shadow-lg whitespace-nowrap">Favori</span>
+                                    <div className="w-3 h-3 -mt-1.5 rotate-45 bg-black"></div>
+                                </div>
+                                <button
+                                    onClick={handleAddToFavorites}
+                                    className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 ${isProductFavorite ? 'bg-accent' : 'bg-transparent'} hover:bg-accent`}
+                                    aria-label={isProductFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                                >
+                                    <Heart className="w-5 h-5 text-red-500" fill={isProductFavorite ? 'currentColor' : 'none'} />
+                                </button>
+                            </div>
+                            {/* Cart Icon */}
+                            <div className="relative group/icon flex flex-col items-center">
                                 <div className="absolute bottom-full mb-2 flex flex-col items-center opacity-0 group-hover/icon:opacity-100 transition-opacity duration-300 pointer-events-none">
                                     <span className="px-3 py-1 text-xs text-white bg-black rounded-md shadow-lg whitespace-nowrap">Ajouter au panier</span>
                                     <div className="w-3 h-3 -mt-1.5 rotate-45 bg-black"></div>
                                 </div>
                                 <button
                                     onClick={handleAddToCartClick}
-                                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow hover:bg-gray-100 transition-all"
+                                    className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent hover:bg-accent transition-colors duration-200"
                                     aria-label="Ajouter au panier"
                                 >
-                                    <ShoppingCart className="w-5 h-5 text-gray-700" />
-                                </button>
-                            </div>
-
-                            {/* Buy Now Icon */}
-                            <div className="relative group/icon flex flex-col items-center">
-                                <div className="absolute bottom-full mb-2 flex flex-col items-center opacity-0 group-hover/icon:opacity-100 transition-opacity duration-300 pointer-events-none">
-                                    <span className="px-3 py-1 text-xs text-white bg-black rounded-md shadow-lg whitespace-nowrap">Acheter</span>
-                                    <div className="w-3 h-3 -mt-1.5 rotate-45 bg-black"></div>
-                                </div>
-                                <button
-                                    onClick={handleBuyNow}
-                                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow hover:bg-gray-100 transition-all"
-                                    aria-label="Acheter"
-                                >
-                                    <ShoppingBag className="w-5 h-5 text-gray-700" />
+                                    <ShoppingCart className="w-5 h-5 text-white" />
                                 </button>
                             </div>
                         </div>
                     </div>
-
-
                     {product.offer && (
-                        <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shadow-lg">
+                        <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shadow-lg animate-bounce">
                             Promo
                         </span>
                     )}
                     {!isAvailable && (
                         <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
-                             <span className="bg-gray-800 text-white text-sm font-bold px-4 py-2 rounded-full uppercase tracking-wider">
+                            <span className="bg-gray-800 text-white text-sm font-bold px-4 py-2 rounded-full uppercase tracking-wider">
                                 Rupture de stock
                             </span>
                         </div>
                     )}
                 </div>
-
                 {/* Product Info */}
                 <div className="p-4 flex flex-col flex-grow">
-                    <div className="flex-grow">
-                        <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">{product.category}</p>
-                        <h3 className="font-semibold text-gray-800 group-hover:text-yellow-800 transition-colors truncate text-base mb-2">{product.name}</h3>
-                    </div>
+                    <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">{product.category}</p>
+                    <h3 className="font-semibold text-gray-800 truncate text-base mb-2">{product.name}</h3>
                     <div className="flex items-baseline justify-start gap-2 mt-2">
                         <span className="font-bold text-xl text-red-600 whitespace-nowrap">
                             {product.price?.toLocaleString()} <span className="text-base">DA</span>
@@ -276,16 +263,6 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
                         )}
                     </div>
                 </div>
-                {/* Mobile Add to Cart Button */}
-                {isMobile && (
-                    <button
-                        onClick={handleAddToCartClick}
-                        className="w-full bg-yellow-600 text-white font-bold py-2 rounded-b-lg hover:bg-yellow-700 transition-colors text-base"
-                        style={{ marginTop: 'auto' }}
-                    >
-                        Ajouter au panier
-                    </button>
-                )}
             </div>
 
             {/* Buy Modal */}

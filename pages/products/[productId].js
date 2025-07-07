@@ -251,72 +251,71 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                     </div>
                     {/* Right: Product Info */}
                     <div className="flex-1 w-full max-w-full lg:max-w-2xl mx-auto mt-6 lg:mt-0">
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-2 break-words">{product.name}</h1>
+                        <h1 className="text-4xl font-bold text-white mb-2">{product.name}</h1>
                         <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-4">
-                            <span className="text-xl sm:text-2xl font-bold text-yellow-900">{product.price?.toLocaleString()} د.ج</span>
+                            <span className="text-2xl font-bold text-accent mr-4">{product.price?.toLocaleString()} DA</span>
                             {product.oldPrice && (
-                                <span className="text-lg text-gray-400 line-through">{product.oldPrice?.toLocaleString()} د.ج</span>
+                                <span className="text-lg text-gray-400 line-through">{product.oldPrice?.toLocaleString()} DA</span>
                             )}
                         </div>
                         {/* Size selector */}
-                        <div className="mb-4 flex flex-wrap items-center">
-                            <span className="font-medium text-gray-700 mr-2 mb-1">Pointure :</span>
+                        <div className="mb-4 flex flex-wrap items-center gap-2">
+                            <label className="block text-lg font-semibold text-white mb-2">{isShoe ? 'Pointure' : 'Taille'} :</label>
                             {availableSizes.map(size => (
                                 <button 
                                     key={size}
                                     onClick={() => setSelectedSize(size)}
-                                    className={`inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border text-base font-semibold mx-1 mb-1 transition-colors ${selectedSize === size ? 'bg-yellow-900 text-white border-yellow-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                                    className={`w-10 h-10 flex items-center justify-center rounded-full border text-base font-semibold mx-1 mb-1 transition-colors border-white
+                                        ${selectedSize === size ? 'bg-grey-700 text-white border-gray-900' : 'bg-gray-200 text-gray-900 border-white hover:bg-gray-400'}`}
                                 >
                                     {size}
                                 </button>
                             ))}
                         </div>
-                        {/* Color selector and favorites */}
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 mb-4">
-                            {product.colors && product.colors.length > 0 && (
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm font-medium text-gray-900">Couleur :</span>
-                                    <div className="flex gap-2">
-                                        {product.colors.map(color => (
-                                            <button 
-                                                key={color}
-                                                onClick={() => setSelectedColor(color)}
-                                                className={`w-7 h-7 rounded-full border-2 transition-all ${selectedColor === color ? 'border-yellow-900 scale-110' : 'border-gray-200'}`}
-                                                style={{ backgroundColor: color.toLowerCase() }}
-                                                aria-label={`Sélectionner la couleur ${color}`}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                            {/* Favorites heart icon button */}
-                            <button
-                                onClick={() => toggleFavorite(product)}
-                                className={`flex items-center gap-2 cursor-pointer px-2 py-1 rounded transition-all duration-200 ${isProductFavorite ? 'text-red-600' : 'text-gray-400 hover:text-red-600'}`}
-                                title={isProductFavorite ? "Retirer de mes favoris" : "Ajouter à mes favoris"}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill={isProductFavorite ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={isProductFavorite ? 0 : 2} stroke="currentColor" className="w-7 h-7">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 0 1 6.364 0L12 7.636l1.318-1.318a4.5 4.5 0 1 1 6.364 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 0 1 0-6.364z" />
-                                </svg>
-                                <span className="text-base font-medium">{isProductFavorite ? 'Retirer des favoris' : 'Ajouter à mes favoris'}</span>
-                            </button>
-                        </div>
-                        {/* Quantity and buttons - buttons side by side under quantity */}
-                        <div className="flex flex-col gap-2 sm:gap-3 mb-4 lg:mb-0">
+                        {/* Color selector as dropdown */}
+                        {product.colors && product.colors.length > 0 && (
+                            <div className="flex items-center gap-2 mb-4">
+                                <label className="block text-lg font-semibold text-white mb-2">Couleur :</label>
+                                <select
+                                    value={selectedColor || ''}
+                                    onChange={e => setSelectedColor(e.target.value)}
+                                    className="bg-gray-900 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-accent border border-gray-700"
+                                >
+                                    <option value="" disabled>Choisir une couleur</option>
+                                    {product.colors.map(color => (
+                                        <option key={color} value={color}>{color}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {/* Counter and favorites row */}
+                        <div className="flex items-center gap-3 mb-4">
                             <div className="flex items-center rounded-lg border border-gray-300 w-fit mx-auto sm:mx-0 mb-2">
                                 <button onClick={() => handleQuantityChange(-1)} className="p-2 text-gray-600 hover:bg-gray-100 disabled:opacity-50 rounded-l-lg text-lg" disabled={quantity <= 1}>-</button>
                                 <span className="px-4 font-bold text-gray-800 text-base">{quantity}</span>
                                 <button onClick={() => handleQuantityChange(1)} className="p-2 text-gray-600 hover:bg-gray-100 disabled:opacity-50 rounded-r-lg text-lg" disabled={!isAvailable || quantity >= product.stock}>+</button>
                             </div>
-                            <div className="flex flex-row gap-2 w-full">
-                                <Button onClick={handleAddToCart} size="md" className="w-1/2 sm:w-48 bg-yellow-700 hover:bg-yellow-800 text-xs font-semibold flex items-center justify-center gap-2" disabled={!isAvailable}>
-                                    <Icon name="cart" className="w-5 h-5" />
-                                    {isAvailable ? 'AJOUTER AU PANIER' : 'Rupture de stock'}
-                                </Button>
-                                <Button onClick={() => {/* handle buy now */}} size="md" className="w-1/2 sm:w-[15rem] bg-yellow-900 hover:bg-yellow-800 text-[0.75rem] font-semibold flex items-center justify-center gap-2" disabled={!isAvailable}>
-                                    COMMANDER MAINTENANT
-                                </Button>
-                            </div>
+                            <button
+                                onClick={() => toggleFavorite(product)}
+                                className="flex items-center gap-2 cursor-pointer px-4 py-2 rounded-full transition-all duration-200 bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-accent whitespace-nowrap"
+                                title={isProductFavorite ? "Retirer de mes favoris" : "Ajouter à mes favoris"}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill={isProductFavorite ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={isProductFavorite ? 0 : 2} stroke="currentColor" className="w-6 h-6 text-white">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 0 1 6.364 0L12 7.636l1.318-1.318a4.5 4.5 0 1 1 6.364 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 0 1 0-6.364z" />
+                                </svg>
+                                <span className="text-base font-medium text-white">{isProductFavorite ? 'Retirer des favoris' : 'Ajouter à mes favoris'}</span>
+                            </button>
+                        </div>
+                        {/* Restore buy and add to cart buttons */}
+                        <div className="flex flex-row gap-2 w-full mb-4">
+                            <Button onClick={handleAddToCart} size="md" className="w-1/2 sm:w-48 bg-yellow-700 hover:bg-yellow-800 text-xs font-semibold flex items-center justify-center gap-2 text-black" disabled={!isAvailable}>
+                                <Icon name="cart" className="w-5 h-5" />
+                                {isAvailable ? 'AJOUTER AU PANIER' : 'Rupture de stock'}
+                            </Button>
+                            <Button onClick={() => {/* handle buy now */}} size="md" className="w-1/2 sm:w-[15rem] bg-yellow-900 hover:bg-yellow-800 text-[0.75rem] font-semibold flex items-center justify-center gap-2 text-white" disabled={!isAvailable}>
+                                COMMANDER MAINTENANT
+                            </Button>
                         </div>
                         {isAvailable && product.stock < 10 && (
                             <p className="text-xs text-yellow-600 pt-2">Dépêchez-vous ! Il ne reste que {product.stock} en stock.</p>
@@ -326,22 +325,54 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                 {/* Product Info Tabs - full width below */}
                 <div className="mt-8 sm:mt-10 w-full max-w-5xl mx-auto">
                     <div className="flex overflow-x-auto no-scrollbar border-b border-gray-200 mb-6 whitespace-nowrap">
-                        <button className={`px-4 sm:px-6 py-2 sm:py-3 font-semibold text-gray-700 ${tab === 'description' ? 'border-b-2 border-yellow-700' : ''}`} onClick={() => setTab('description')}>DESCRIPTION</button>
-                        <button className="px-4 sm:px-6 py-2 sm:py-3 font-semibold text-gray-700" onClick={() => setTab('infos')}>INFORMATIONS COMPLÉMENTAIRES</button>
-                        <button className="px-4 sm:px-6 py-2 sm:py-3 font-semibold text-gray-700" onClick={() => setTab('avis')}>AVIS</button>
-                        <button className="px-4 sm:px-6 py-2 sm:py-3 font-semibold text-gray-700" onClick={() => setTab('livraison')}>LIVRAISON</button>
+                        <button
+                            className={`px-4 sm:px-6 py-4 font-semibold transition-all duration-200
+                                ${tab === 'description' ? 'bg-accent text-black' : 'bg-gray-800 text-white hover:bg-gray-700'}
+                                border-none outline-none focus:ring-2 focus:ring-accent`}
+                            onClick={() => setTab('description')}
+                            type="button"
+                        >
+                            DESCRIPTION
+                        </button>
+                        <button
+                            className={`px-4 sm:px-6 py-4 font-semibold transition-all duration-200
+                                ${tab === 'infos' ? 'bg-accent text-black' : 'bg-gray-800 text-white hover:bg-gray-700'}
+                                border-none outline-none focus:ring-2 focus:ring-accent`}
+                            onClick={() => setTab('infos')}
+                            type="button"
+                        >
+                            INFORMATIONS COMPLÉMENTAIRES
+                        </button>
+                        <button
+                            className={`px-4 sm:px-6 py-4 font-semibold transition-all duration-200
+                                ${tab === 'avis' ? 'bg-accent text-black' : 'bg-gray-800 text-white hover:bg-gray-700'}
+                                border-none outline-none focus:ring-2 focus:ring-accent`}
+                            onClick={() => setTab('avis')}
+                            type="button"
+                        >
+                            AVIS
+                        </button>
+                        <button
+                            className={`px-4 sm:px-6 py-4 font-semibold transition-all duration-200
+                                ${tab === 'livraison' ? 'bg-accent text-black' : 'bg-gray-800 text-white hover:bg-gray-700'}
+                                border-none outline-none focus:ring-2 focus:ring-accent`}
+                            onClick={() => setTab('livraison')}
+                            type="button"
+                        >
+                            LIVRAISON
+                        </button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         {tab === 'description' && (
                             <div>
                                 <h2 className="text-lg font-bold mb-2">Description</h2>
-                                <div className="prose text-gray-700" dangerouslySetInnerHTML={{ __html: product.description?.replace(/\n/g, '<br />') }} />
+                                <div className="prose text-white" dangerouslySetInnerHTML={{ __html: product.description?.replace(/\n/g, '<br />') }} />
                             </div>
                         )}
                         {tab === 'infos' && (
                             <div>
                                 <h2 className="text-lg font-bold mb-2">Informations complémentaires</h2>
-                                <ul className="text-gray-700 space-y-2">
+                                <ul className="text-white space-y-2">
                                     {product.brand && <li><b>Marque:</b> {product.brand}</li>}
                                     {product.genre && <li><b>Genre:</b> {product.genre}</li>}
                                     {product.matiere && <li><b>Matière:</b> {product.matiere}</li>}
@@ -380,7 +411,7 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                                             required
                                         />
                                         <button type="submit" className="bg-yellow-700 hover:bg-yellow-800 text-white px-4 py-2 rounded font-semibold text-sm">Envoyer</button>
-                                        {commentStatus && <div className="text-xs text-green-600 mt-1">{commentStatus}</div>}
+                                        {commentStatus && <div className="text-xs text-green-600 mt-1">{commentStatus.replace(/'/g, "&apos;")}</div>}
                                     </form>
                                 ) : (
                                     <div className="text-sm text-gray-500 mt-4">Connectez-vous pour laisser un avis.</div>
@@ -397,7 +428,7 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                 </div>
                 {/* Related Products Section */}
                 <section className="pt-10 sm:pt-16 mt-10 sm:mt-16 border-t border-gray-200/80">
-                    <h2 className="text-xl sm:text-2xl font-bold text-center mb-6 sm:mb-8 text-slate-800">Produits similaires</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold text-center mb-6 sm:mb-8 text-white">Produits similaires</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
                         {visibleRelated.map((related, idx) => {
                             const isLast = hasMore && idx === visibleRelated.length - 1;
@@ -413,7 +444,7 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                             );
                         })}
                         {visibleRelated.length === 0 && (
-                            <div className="col-span-full text-center text-gray-500">Aucun produit similaire trouvé.</div>
+                            <div className="col-span-full text-center text-white">Aucun produit similaire trouvé.</div>
                         )}
                     </div>
                 </section>

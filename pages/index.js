@@ -23,40 +23,35 @@ const HomePage = ({ products, error }) => {
         if (node) observer.current.observe(node);
     }, [hasMore]);
     return (
-        <div className="bg-white">
-            {/* Sticky Hero Section - stays at the top until scrolled past */}
-            <div className="sticky top-0 left-0 w-full h-screen z-0 relative">
-                {/* Background Image */}
+        <div className="bg-primary">
+            {/* Hero Section as background, not sticky */}
+            <div className="relative h-screen w-full z-0">
                 <div className="absolute inset-0">
                     <Image
                         src="/hero_header.png"
-                        alt="Cosmos Algérie Hero Background"
+                        alt="Arena Fashion Algérie Hero Background"
                         fill
                         className="object-cover"
                         priority
                     />
-                    {/* Overlay for better text readability */}
-                    <div className="absolute inset-0 bg-black bg-opacity-60"></div>
+                    <div className="absolute inset-0 bg-black bg-opacity-80"></div>
                 </div>
-                
-                {/* Content */}
                 <div className="relative z-10 w-full h-full flex items-center justify-center">
-                    <div className="text-center text-white px-4">
-                        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight font-serif mb-4 text-shadow">
-                            Cosmos Algérie
+                    <div className="text-center text-accent px-4">
+                        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight font-serif mb-4 text-accent text-shadow">
+                            Arena Fashion Algérie
                         </h1>
-                        <p className="max-w-2xl mx-auto text-lg mb-2 text-shadow">
-                            La marque Cosmos est une marque de chaussures 100% algérienne, fabriquée dans un atelier artisanal pour vous offrir une expérience authentique et des produits de qualité garantie.
+                        <p className="max-w-2xl mx-auto text-lg mb-2 text-primary text-shadow">
+                            Arena Fashion est une marque de vêtements et accessoires 100% algérienne, conçue pour offrir une expérience authentique et des produits de qualité garantie.
                         </p>
-                        <p className="max-w-2xl mx-auto text-base opacity-90 text-shadow">
+                        <p className="max-w-2xl mx-auto text-base opacity-90 text-accent text-shadow">
                             Découvrez notre collection soigneusement sélectionnée pour vous.
                         </p>
                     </div>
                 </div>
             </div>
-
-            {/* Content overlays the hero as you scroll */}
-            <div className="relative z-10">
+            {/* Main content overlaps hero and covers it as you scroll */}
+            <div className="relative z-10 -mt-24 sm:-mt-32">
                 <div className="bg-white rounded-t-3xl">
                     <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                         <CategoryGrid products={products} />
