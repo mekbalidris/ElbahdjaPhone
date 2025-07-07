@@ -158,6 +158,21 @@ button:hover, .btn-primary:hover, .btn-accent:hover {
   color: var(--arena-white);
 }
 
+button.rounded-full.border-2 {
+  background: #fff !important;
+  border-color: #6b7280 !important; /* Tailwind gray-500 */
+  color: #111 !important;
+}
+button.rounded-full.border-2.bg-gray-900 {
+  background: #111 !important;
+  border-color: var(--arena-gold) !important;
+  color: #fff !important;
+}
+
+button.font-medium.text-red-600, button.font-medium.text-red-600:hover {
+  background: transparent !important;
+}
+
 input, textarea, select {
   background: var(--arena-black);
   color: var(--arena-white);

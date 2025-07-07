@@ -56,7 +56,7 @@ const CartModal = ({ isOpen, onClose }) => {
                                                 <div className="ml-3 flex h-7 items-center">
                                                     <button
                                                         type="button"
-                                                        className="-m-2 p-2 text-gray-400 hover:text-gray-500"
+                                                        className="-m-2 p-2 text-white hover:text-gray-500"
                                                         onClick={onClose}
                                                     >
                                                         <span className="sr-only">Close panel</span>
@@ -90,19 +90,20 @@ const CartModal = ({ isOpen, onClose }) => {
 
                                                                     <div className="ml-4 flex flex-1 flex-col">
                                                                         <div>
-                                                                            <div className="flex justify-between text-base font-medium text-gray-900">
+                                                                            <div className="flex justify-between text-base font-medium text-white">
                                                                                 <h3>
                                                                                     <button
-                                                                                        className="text-left hover:underline"
+                                                                                        className="text-left text-white font-bold hover:underline focus:outline-none bg-transparent"
                                                                                         onClick={() => { onClose(); router.push(`/products/${item._id}`); }}
                                                                                         aria-label={`Voir ${item.name}`}
+                                                                                        style={{ background: 'none' }}
                                                                                     >
                                                                                         {item.name}
                                                                                     </button>
                                                                                 </h3>
                                                                                 <p className="ml-4">{item.price.toLocaleString()} DZD</p>
                                                                             </div>
-                                                                            <p className="mt-1 text-sm text-gray-500">
+                                                                            <p className="mt-1 text-sm text-white">
                                                                                 {item.color && <span>{item.color}</span>}
                                                                                 {item.size && item.color && <span className="mx-1">/</span>}
                                                                                 {item.size && <span>{item.size}</span>}
@@ -111,7 +112,7 @@ const CartModal = ({ isOpen, onClose }) => {
                                                                         <div className="flex flex-1 items-end justify-between text-sm">
                                                                             <div className="flex items-center border border-gray-200 rounded">
                                                                                 <button onClick={() => updateQuantity(item._id, item.quantity - 1, item.size, item.color)} className="p-1.5" disabled={item.quantity <= 1}><Minus size={14}/></button>
-                                                                                <p className="px-2 text-gray-700">Qty {item.quantity}</p>
+                                                                                <p className="px-2 text-white">Qty {item.quantity}</p>
                                                                                 <button onClick={() => updateQuantity(item._id, item.quantity + 1, item.size, item.color)} className="p-1.5"><Plus size={14}/></button>
                                                                             </div>
 
@@ -166,8 +167,9 @@ const CartModal = ({ isOpen, onClose }) => {
                                                         or{' '}
                                                         <button
                                                             type="button"
-                                                            className="font-medium text-gray-700 hover:text-gray-800"
+                                                            className="font-medium text-white hover:text-accent bg-transparent"
                                                             onClick={onClose}
+                                                            style={{ background: 'none' }}
                                                         >
                                                             Continue Shopping
                                                             <span aria-hidden="true"> &rarr;</span>

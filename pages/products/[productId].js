@@ -265,8 +265,8 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                                 <button 
                                     key={size}
                                     onClick={() => setSelectedSize(size)}
-                                    className={`w-10 h-10 flex items-center justify-center rounded-full border text-base font-semibold mx-1 mb-1 transition-colors border-white
-                                        ${selectedSize === size ? 'bg-grey-700 text-white border-gray-900' : 'bg-gray-200 text-gray-900 border-white hover:bg-gray-400'}`}
+                                    className={`w-10 h-10 flex items-center justify-center rounded-full border-2 text-base font-semibold mx-1 mb-1 transition-colors
+                                        ${selectedSize === size ? 'bg-gray-900 text-white border-accent' : 'bg-white text-gray-900 border-gray-500 hover:bg-gray-200'}`}
                                 >
                                     {size}
                                 </button>
