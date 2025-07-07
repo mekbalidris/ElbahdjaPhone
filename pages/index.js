@@ -24,8 +24,8 @@ const HomePage = ({ products, error }) => {
     }, [hasMore]);
     return (
         <div className="bg-primary">
-            {/* Hero Section as background, not sticky */}
-            <div className="relative h-screen w-full z-0">
+            {/* Hero Section fixed to viewport */}
+            <div className="fixed top-0 left-0 w-full h-screen z-0">
                 <div className="absolute inset-0">
                     <Image
                         src="/hero_header.png"
@@ -50,8 +50,8 @@ const HomePage = ({ products, error }) => {
                     </div>
                 </div>
             </div>
-            {/* Main content overlaps hero and covers it as you scroll */}
-            <div className="relative z-10 -mt-24 sm:-mt-32">
+            {/* Main content scrolls above hero */}
+            <div className="relative z-10 mt-[100vh]">
                 <div className="bg-white rounded-t-3xl">
                     <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                         <CategoryGrid products={products} />

@@ -192,7 +192,9 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
                                             className="hidden sm:flex absolute inset-0 items-center justify-center z-20"
                                             style={{ pointerEvents: 'auto' }}
                                         >
-                                            <span className="px-8 py-3 bg-white/90 backdrop-blur-md text-black font-bold text-lg rounded-full shadow-lg border-2 border-accent transition-all duration-300 whitespace-nowrap">
+                                            <span className="px-4 py-2 bg-white/30 backdrop-blur-md text-white font-semibold text-base rounded-full shadow-lg border border-accent transition-all duration-300 whitespace-nowrap"
+                                                style={{ boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)' }}
+                                            >
                                                 {`Voir les ${cat.title}`}
                                             </span>
                                         </button>

@@ -40,7 +40,7 @@ const FallbackButton = ({ children, onClick, variant = 'primary', size = 'md', c
 };
 const FallbackInput = React.forwardRef(({ type = 'text', placeholder, value, onChange, name, label, required = false, className = '', error, iconLeft }, ref) => (
     <div className="mb-4 w-full">
-        {label && <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-orange-500">*</span>}</label>}
+        {label && <label htmlFor={name} className="block text-sm font-medium text-white mb-1">{label} {required && <span className="text-orange-500">*</span>}</label>}
         <div className="relative">
             {iconLeft && <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><MinimalIcon name={iconLeft} className="text-gray-400 w-5 h-5" /></div>}
             <input ref={ref} type={type} id={name} name={name} placeholder={placeholder} value={value} onChange={onChange} required={required} className={`w-full px-3 py-2.5 border ${error ? 'border-orange-500' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 ${error ? 'focus:ring-orange-500' : 'focus:ring-blue-500'} focus:border-transparent ${iconLeft ? 'pl-10' : ''} ${className}`} />
@@ -50,7 +50,7 @@ const FallbackInput = React.forwardRef(({ type = 'text', placeholder, value, onC
 ));
 const FallbackSelect = React.forwardRef(({ options, value, onChange, name, label, required = false, className = '', error }, ref) => (
     <div className="mb-4 w-full">
-        {label && <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-orange-500">*</span>}</label>}
+        {label && <label htmlFor={name} className="block text-sm font-medium text-white mb-1">{label} {required && <span className="text-orange-500">*</span>}</label>}
         <select ref={ref} id={name} name={name} value={value} onChange={onChange} required={required} className={`w-full px-3 py-2.5 border ${error ? 'border-orange-500' : 'border-gray-300'} bg-white rounded-lg shadow-sm focus:outline-none focus:ring-2 ${error ? 'focus:ring-orange-500' : 'focus:ring-blue-500'} focus:border-transparent ${className}`}>
             {options.map(option => (<option key={option.value} value={option.value} disabled={option.disabled}>{option.label}</option>))}
         </select>
@@ -59,7 +59,7 @@ const FallbackSelect = React.forwardRef(({ options, value, onChange, name, label
 ));
 const FallbackTextArea = React.forwardRef(({ placeholder, value, onChange, name, label, rows = 3, className = '', error }, ref) => (
     <div className="mb-4 w-full">
-        {label && <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>}
+        {label && <label htmlFor={name} className="block text-sm font-medium text-white mb-1">{label}</label>}
         <textarea ref={ref} name={name} placeholder={placeholder} value={value} onChange={onChange} rows={rows} className={`w-full px-3 py-2.5 border ${error ? 'border-orange-500' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 ${error ? 'focus:ring-orange-500' : 'focus:ring-blue-500'} focus:border-transparent ${className}`} />
         {error && <p className="mt-1 text-xs text-orange-600">{error}</p>}
     </div>
@@ -137,7 +137,7 @@ const FIXED_SHIPPING_COST = 500.00; // Set shipping cost to 500 DA
 const CheckoutSection = ({ title, iconName, children }) => {
     return (
         <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200/80">
-            <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center">
+            <h2 className="text-xl font-bold text-white mb-6 flex items-center">
                 <ActualIcon name={iconName} className="w-6 h-6 text-amber-500 mr-2" />
                 {title}
             </h2>
@@ -190,14 +190,14 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
                     />
                 </div>
                 <div className="flex-grow">
-                    <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
-                    <p className="text-sm text-gray-500">{item.price} DA</p>
+                    <h4 className="text-sm font-medium text-white">{item.name}</h4>
+                    <p className="text-sm text-white">{item.price} DA</p>
                     
                     {/* Show selected options */}
                     <div className="flex flex-wrap gap-2 mt-2">
                         {item.color && (
                             <div className="flex items-center space-x-1">
-                                <span className="text-xs text-gray-500">Couleur:</span>
+                                <span className="text-xs text-white">Couleur:</span>
                                 <div 
                                     className="w-4 h-4 rounded-full border border-gray-300"
                                     style={{ backgroundColor: item.color.toLowerCase() }}
@@ -208,8 +208,8 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
                         )}
                         {item.size && (
                             <div className="flex items-center space-x-1">
-                                <span className="text-xs text-gray-500">Taille:</span>
-                                <span className="text-xs text-gray-700 font-medium">{item.size}</span>
+                                <span className="text-xs text-white">Taille:</span>
+                                <span className="text-xs text-white font-medium">{item.size}</span>
                             </div>
                         )}
                     </div>
@@ -218,7 +218,7 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
                     {(item.colors?.length > 0 || item.sizes?.length > 0) && (
                         <button
                             onClick={() => setShowOptions(!showOptions)}
-                            className="text-xs text-blue-600 hover:text-blue-700 mt-2 flex items-center space-x-1"
+                            className="text-xs text-white hover:underline bg-transparent"
                         >
                             <Edit2 className="w-3 h-3" />
                             <span>Modifier les options</span>
@@ -231,7 +231,7 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
                             {/* Color Selection */}
                             {item.colors && item.colors.length > 0 && (
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-2">
+                                    <label className="block text-xs font-medium text-white mb-2">
                                         Couleur <span className="text-red-500">*</span>
                                     </label>
                                     <div className="flex flex-wrap gap-2">
@@ -255,7 +255,7 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
                             {/* Size Selection */}
                             {item.sizes && item.sizes.length > 0 && (
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-2">
+                                    <label className="block text-xs font-medium text-white mb-2">
                                         Taille <span className="text-red-500">*</span>
                                     </label>
                                     <div className="flex flex-wrap gap-1">
@@ -265,8 +265,8 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
                                                 onClick={() => setSelectedSize(size)}
                                                 className={`px-2 py-1 text-xs border rounded transition-colors ${
                                                     selectedSize === size 
-                                                        ? 'bg-gray-900 text-white border-gray-900' 
-                                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+                                                        ? 'text-whitebg-gray-900 text-white border-gray-900' 
+                                                        : 'bg-white text-white border-gray-300 hover:bg-gray-100'
                                                 }`}
                                             >
                                                 {size}
@@ -280,7 +280,7 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
                             <div className="flex space-x-2 pt-2">
                                 <button
                                     onClick={() => setShowOptions(false)}
-                                    className="text-xs px-3 py-1 border border-gray-300 text-gray-700 rounded hover:bg-gray-100"
+                                    className="text-xs px-3 py-1 border border-gray-300 text-white rounded hover:bg-gray-100"
                                 >
                                     Annuler
                                 </button>
@@ -299,24 +299,24 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
                             onClick={() => handleQuantityChange(-1)}
                             className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
                         >
-                            <Minus className="h-4 w-4 text-gray-500" />
+                            <Minus className="h-4 w-4 text-black" />
                         </button>
                         <span className="text-sm font-medium w-8 text-center">{item.quantity || 1}</span>
                         <button
                             onClick={() => handleQuantityChange(1)}
                             className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
                         >
-                            <Plus className="h-4 w-4 text-gray-500" />
+                            <Plus className="h-4 w-4 text-black" />
                         </button>
                     </div>
                 </div>
                 <div className="flex flex-col items-end space-y-2">
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-white">
                         {((item.price * (item.quantity || 1)))} DA
                     </p>
                     <button
                         onClick={() => onRemove(item._id, item.size, item.color)}
-                        className="text-orange-500 hover:text-orange-600"
+                        className="text-red-600 hover:text-red-500 bg-transparent"
                     >
                         <Trash2 className="h-5 w-5" />
                     </button>
@@ -510,24 +510,25 @@ const CheckoutPage = () => {
                                 placeholder="Enter your full name"
                             />
                             <ActualInput
-                                label="Email Address"
+                                label="Email Address (optionnel)"
                                 name="email"
                                 type="email"
                                 value={contactInfo.email}
                                 onChange={handleInputChange(setContactInfo, 'email')}
                                 error={formErrors.email}
-                                required
+                                required={false}
                                 iconLeft="mail"
                                 placeholder="Enter your email address"
                             />
                             <ActualInput
-                                label="Numéro de téléphone (optionnel)"
+                                label="Numéro de téléphone"
                                 name="phone"
                                 type="tel"
                                 value={contactInfo.phone}
                                 onChange={handleInputChange(setContactInfo, 'phone')}
                                 error={formErrors.phone}
                                 placeholder="ex: 0555 12 34 56"
+                                required
                             />
                             <h3 className="text-md font-semibold text-slate-700 pt-5 mt-5 border-t border-gray-200">
                                 Shipping Address
@@ -600,23 +601,23 @@ const CheckoutPage = () => {
                                 </div>
                                 <div className="space-y-2 text-sm text-slate-700 pt-4 mt-4 border-t border-gray-200">
                                     <div className="flex justify-between">
-                                        <span>Subtotal</span>
-                                        <span className="font-medium">{subtotal} DA</span>
+                                        <span className="font-medium text-white">Subtotal</span>
+                                        <span className="font-medium text-white">{subtotal} DA</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span>Shipping</span>
-                                        <span className="font-medium">{shippingCost} DA</span>
+                                        <span className="font-medium text-white">Shipping</span>
+                                        <span className="font-medium text-white">{shippingCost} DA</span>
                                     </div>
                                 </div>
                                 <div className="flex justify-between text-lg font-bold text-slate-900 pt-3 mt-3 border-t-2 border-slate-300">
-                                    <span>Total</span>
-                                    <span>{total} DA</span>
+                                    <span className="font-bold text-white">Total</span>
+                                    <span className="text-white">{total} DA</span>
                                 </div>
-                                <div className="mt-6 p-4 bg-amber-50 rounded-lg text-amber-900 flex items-center space-x-3">
+                                <div className="mt-6 p-4 bg-amber-50 rounded-lg text-black flex items-center space-x-3">
                                     <ActualIcon name="package" className="w-8 h-8 text-amber-500 shrink-0" />
                                     <div>
-                                        <p className="font-semibold">Payment on Delivery</p>
-                                        <p className="text-xs">
+                                        <p className="font-semibold text-black">Payment on Delivery</p>
+                                        <p className="text-xs text-black">
                                             Pay with cash upon delivery of your order.
                                         </p>
                                     </div>
