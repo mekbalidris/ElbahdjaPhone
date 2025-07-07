@@ -111,7 +111,7 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
     };
     const handleCategoryMouseUp = (cat) => (e) => {
         if (!dragMoved) {
-            // Use lowercase, dash-free category for filtering to match the products page
+            // Only navigate if not dragged
             const normalizedCategory = cat.filter.replace(/-/g, '').toLowerCase();
             router.push(`/products?category=${encodeURIComponent(normalizedCategory)}`);
         }
@@ -159,6 +159,12 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
                             return catVal === filterVal;
                         });
                         const image = product && product.images && product.images.length > 0 ? product.images[0] : null;
+                        const isChaussures = cat.key === 'chaussures';
+                        const categoryImage = (isChaussures && (!image || image.includes('yellow') || image.includes('gold')))
+                            ? '/images/categories/gadgets.jpg'
+                            : (image || null);
+                        // Only show hover effect if not dragging/sliding
+                        const showHover = hoveredIdx === idx && !dragMoved;
                         return (
                             <div
                                 key={cat.key + '-' + idx}
@@ -176,28 +182,32 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
                                 onMouseLeave={() => setHoveredIdx(null)}
                             >
                                 <div className="relative overflow-hidden rounded-xl shadow bg-black hover:shadow-lg transition-all w-full h-full flex items-center justify-center">
-                                    {image ? (
+                                    {categoryImage ? (
                                         <img
-                                            src={image}
+                                            src={categoryImage}
                                             alt={cat.title}
                                             className="object-cover w-full h-full rounded-xl"
+                                            onError={e => { e.target.src = '/images/categories/gadgets.jpg'; }}
                                         />
                                     ) : (
                                         <span className="text-gray-400 text-lg font-bold">{cat.title}</span>
                                     )}
-                                    {/* Animated button on desktop hover - only show on hovered card */}
-                                    {hoveredIdx === idx && (
-                                        <button
-                                            onClick={e => { e.stopPropagation(); router.push(`/products?category=${encodeURIComponent(cat.filter.replace(/-/g, '').toLowerCase())}`); }}
-                                            className="hidden sm:flex absolute inset-0 items-center justify-center z-20"
-                                            style={{ pointerEvents: 'auto' }}
-                                        >
-                                            <span className="px-4 py-2 bg-white/30 backdrop-blur-md text-white font-semibold text-base rounded-full shadow-lg border border-accent transition-all duration-300 whitespace-nowrap"
-                                                style={{ boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)' }}
+                                    {/* Show blur and button only on hovered card and not while dragging */}
+                                    {showHover && (
+                                        <>
+                                            <div className="absolute inset-0 z-20 backdrop-blur-sm transition-all duration-200"></div>
+                                            <button
+                                                onClick={e => { e.stopPropagation(); router.push(`/products?category=${encodeURIComponent(cat.filter.replace(/-/g, '').toLowerCase())}`); }}
+                                                className="hidden sm:flex absolute inset-0 items-center justify-center z-30"
+                                                style={{ pointerEvents: 'auto' }}
                                             >
-                                                {`Voir les ${cat.title}`}
-                                            </span>
-                                        </button>
+                                                <span className="px-4 py-2 bg-black/80 text-white font-semibold text-base rounded-full shadow-lg border border-accent transition-all duration-200 whitespace-nowrap"
+                                                    style={{ boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)' }}
+                                                >
+                                                    {`Voir les ${cat.title}`}
+                                                </span>
+                                            </button>
+                                        </>
                                     )}
                                 </div>
                                 <h3 className="mt-2 text-lg font-semibold text-white truncate text-center">{cat.title}</h3>

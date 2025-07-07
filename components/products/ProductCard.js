@@ -167,7 +167,7 @@ const ProductCard = forwardRef(function ProductCard({ product, setGlobalLoading 
         <>
             <div
                 ref={ref}
-                className="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200 cursor-pointer flex flex-col transition-all duration-300 hover:shadow-xl relative w-full max-w-[300px] group"
+                className="bg-white rounded-lg overflow-hidden shadow-sm  cursor-pointer flex flex-col transition-all duration-300 hover:shadow-xl relative w-full max-w-[300px] group"
                 onClick={handleViewDetails}
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
@@ -236,7 +236,7 @@ const ProductCard = forwardRef(function ProductCard({ product, setGlobalLoading 
                         </div>
                     </div>
                     {product.offer && (
-                        <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shadow-lg animate-bounce">
+                        <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shadow-lg animate-fadeSimple">
                             Promo
                         </span>
                     )}

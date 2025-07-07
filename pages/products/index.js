@@ -285,7 +285,7 @@ const ProductsPage = ({ handleAddToCart, setGlobalLoading }) => {
     const FilterControls = () => (
         <div className="space-y-6">
             <div>
-                <h3 className="text-md font-semibold text-slate-800 mb-3">Categories</h3>
+                <h3 className="text-md font-semibold text-yellow-700 mb-3">Categories</h3>
                 <div className="space-y-4">
                     <StyledSelect 
                         label="Main Category" 
@@ -379,7 +379,7 @@ const ProductsPage = ({ handleAddToCart, setGlobalLoading }) => {
                 <Button 
                     onClick={resetFilters} 
                     variant="outline" 
-                    className="w-full !border-slate-300 !text-slate-600 hover:!bg-slate-100"
+                    className="w-full !border-slate-300 !text-white hover:!bg-yellow-700"
                 >
                     Clear Filters
                 </Button>
