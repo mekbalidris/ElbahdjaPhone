@@ -283,37 +283,38 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
                                 onTouchStart={handleCategoryTouchStart}
                                 onTouchMove={handleCategoryTouchMove}
                                 onTouchEnd={handleCategoryTouchEnd(cat)}
-                                                                 onKeyPress={e => { 
-                                     if (e.key === 'Enter') {
-                                         let query = '';
-                                         if (cat.key === 'iphones') {
-                                             query = 'category=phones&brand=apple';
-                                         } else if (cat.key === 'xiaomi') {
-                                             query = 'category=phones&brand=xiaomi';
-                                         } else if (cat.key === 'samsung') {
-                                             query = 'category=phones&brand=samsung';
-                                         } else if (cat.key === 'anti-choc') {
-                                             query = 'category=accessories&type=anti-choc';
-                                         } else if (cat.key === 'headphones') {
-                                             query = 'category=accessories&type=headphones';
-                                         } else if (cat.key === 'cases') {
-                                             query = 'category=accessories&type=cases';
-                                         } else {
-                                             query = `category=${encodeURIComponent(cat.filter)}`;
-                                         }
-                                         router.push(`/products?${query}`);
-                                     }
-                                 }}
+                                onKeyPress={e => { 
+                                    if (e.key === 'Enter') {
+                                        let query = '';
+                                        if (cat.key === 'iphones') {
+                                            query = 'category=phones&brand=apple';
+                                        } else if (cat.key === 'xiaomi') {
+                                            query = 'category=phones&brand=xiaomi';
+                                        } else if (cat.key === 'samsung') {
+                                            query = 'category=phones&brand=samsung';
+                                        } else if (cat.key === 'anti-choc') {
+                                            query = 'category=accessories&type=anti-choc';
+                                        } else if (cat.key === 'headphones') {
+                                            query = 'category=accessories&type=headphones';
+                                        } else if (cat.key === 'cases') {
+                                            query = 'category=accessories&type=cases';
+                                        } else {
+                                            query = `category=${encodeURIComponent(cat.filter)}`;
+                                        }
+                                        router.push(`/products?${query}`);
+                                    }
+                                }}
                                 onMouseEnter={() => setHoveredIdx(idx)}
                                 onMouseLeave={() => setHoveredIdx(null)}
                                 style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                             >
                                 <div className="relative overflow-hidden rounded-xl shadow-sm bg-white hover:shadow-md transition-all w-full h-full flex items-center justify-center">
                                     {categoryImage ? (
-                                        <img
+                                        <Image
                                             src={categoryImage}
                                             alt={cat.title}
-                                            className="object-cover w-full h-full rounded-xl"
+                                            fill
+                                            className="object-cover rounded-xl"
                                             onError={e => { e.target.src = '/images/categories/gadgets.jpg'; }}
                                         />
                                     ) : (
@@ -323,27 +324,27 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
                                     {showHover && (
                                         <>
                                             <div className="absolute inset-0 z-20 backdrop-blur-sm transition-all duration-200 bg-primary-500/20"></div>
-                                                                                         <button
-                                                 onClick={e => { 
-                                                     e.stopPropagation(); 
-                                                     let query = '';
-                                                     if (cat.key === 'iphones') {
-                                                         query = 'category=phones&brand=apple';
-                                                     } else if (cat.key === 'xiaomi') {
-                                                         query = 'category=phones&brand=xiaomi';
-                                                     } else if (cat.key === 'samsung') {
-                                                         query = 'category=phones&brand=samsung';
-                                                     } else if (cat.key === 'anti-choc') {
-                                                         query = 'category=accessories&type=anti-choc';
-                                                     } else if (cat.key === 'headphones') {
-                                                         query = 'category=accessories&type=headphones';
-                                                     } else if (cat.key === 'cases') {
-                                                         query = 'category=accessories&type=cases';
-                                                     } else {
-                                                         query = `category=${encodeURIComponent(cat.filter)}`;
-                                                     }
-                                                     router.push(`/products?${query}`);
-                                                 }}
+                                            <button
+                                                onClick={e => { 
+                                                    e.stopPropagation(); 
+                                                    let query = '';
+                                                    if (cat.key === 'iphones') {
+                                                        query = 'category=phones&brand=apple';
+                                                    } else if (cat.key === 'xiaomi') {
+                                                        query = 'category=phones&brand=xiaomi';
+                                                    } else if (cat.key === 'samsung') {
+                                                        query = 'category=phones&brand=samsung';
+                                                    } else if (cat.key === 'anti-choc') {
+                                                        query = 'category=accessories&type=anti-choc';
+                                                    } else if (cat.key === 'headphones') {
+                                                        query = 'category=accessories&type=headphones';
+                                                    } else if (cat.key === 'cases') {
+                                                        query = 'category=accessories&type=cases';
+                                                    } else {
+                                                        query = `category=${encodeURIComponent(cat.filter)}`;
+                                                    }
+                                                    router.push(`/products?${query}`);
+                                                }}
                                                 className="hidden sm:flex absolute inset-0 items-center justify-center z-30"
                                                 style={{ pointerEvents: 'auto' }}
                                             >

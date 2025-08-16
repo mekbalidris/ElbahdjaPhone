@@ -3,7 +3,6 @@ const nextConfig = {
     images: {
         remotePatterns: [],
         unoptimized: true,
-        ignoreDuringBuilds: true,
     },
 };
 

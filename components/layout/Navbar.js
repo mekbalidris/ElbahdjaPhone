@@ -1,5 +1,6 @@
 import React, { useState, Fragment, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoritesContext';
@@ -93,9 +94,11 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                             <Link href="/" className="flex items-center gap-3">
                                 {/* Logo */}
                                 <div className="rounded-lg overflow-hidden">
-                                    <img 
+                                    <Image 
                                         src="/logo.png" 
                                         alt="Elbahdja Phone Logo" 
+                                        width={24}
+                                        height={40}
                                         className="w-6 h-10"
                                         onError={(e) => {
                                             e.target.style.display = 'none';
@@ -283,9 +286,11 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                 <div className="flex items-center justify-between px-4">
                                                                            <Link href="/" className="flex items-center gap-3">
                                           <div className="w-8 h-8 rounded-lg overflow-hidden">
-                                              <img 
+                                              <Image 
                                                   src="/logo.png" 
                                                   alt="Elbahdja Phone Logo" 
+                                                  width={32}
+                                                  height={32}
                                                   className="w-full h-full object-cover"
                                                   onError={(e) => {
                                                       e.target.style.display = 'none';

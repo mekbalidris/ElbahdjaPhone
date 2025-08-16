@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Modal from '../ui/Modal';
 import Input from '../ui/Input';
 import TextArea from '../ui/TextArea';
@@ -412,7 +413,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
                                 <div key={idx} className="flex flex-col items-center bg-gray-50 rounded-lg p-3 border border-dashed border-gray-300 relative group">
                                     {imagePreviews[idx] ? (
                                         <>
-                                            <img src={imagePreviews[idx]} alt={`Preview ${idx + 1}`} className="w-28 h-28 object-cover rounded shadow mb-2 border border-gray-200" />
+                                            <Image src={imagePreviews[idx]} alt={`Preview ${idx + 1}`} width={112} height={112} className="w-28 h-28 object-cover rounded shadow mb-2 border border-gray-200" />
                                             <button type="button" onClick={() => handleRemoveImage(idx)} className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-red-100 transition">
                                                 <Icon name="x" className="w-5 h-5 text-red-500" />
                                             </button>

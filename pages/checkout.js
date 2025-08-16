@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
+import Image from 'next/image';
 import { useRouter } from 'next/router'; // Assuming this is in a Next.js project
 import { useAuth } from '../context/AuthContext'; // Adjust path as needed
 import Button from '../components/ui/Button'; // Adjust path as needed
@@ -172,11 +173,12 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
     return (
         <div className="py-4 border-b border-gray-200">
             <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0 w-20 h-20">
-                    <img
+                <div className="flex-shrink-0 w-20 h-20 relative">
+                    <Image
                         src={item.images?.[0] || item.imageUrl || 'https://placehold.co/200x200'}
                         alt={item.name}
-                        className="w-full h-full object-cover rounded-lg"
+                        fill
+                        className="object-cover rounded-lg"
                     />
                 </div>
                 <div className="flex-grow">

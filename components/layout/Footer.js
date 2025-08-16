@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Truck, Headset, CreditCard, Facebook, Instagram } from 'lucide-react';
 
 const Footer = () => {
@@ -60,7 +61,7 @@ const Footer = () => {
                         </div>
                         <div className="flex flex-col items-center gap-2">
                             <div className="font-semibold mb-2">Système de livraison :</div>
-                            <img src="/yalidine-logo.png" alt="Yalidine Express" className="h-8" />
+                            <Image src="/yalidine-logo.png" alt="Yalidine Express" width={120} height={32} className="h-8" />
                         </div>
                     </div>
                 </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Icon from '../ui/Icon';
@@ -183,11 +184,14 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate, onDelete })
                         {order.items?.map((item, index) => (
                             <div key={index} className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
                                 <div className="flex items-center">
-                                    <img
-                                        src={item.imageUrl || '/placeholder.png'}
-                                        alt={item.name}
-                                        className="w-12 h-12 rounded-md object-cover"
-                                    />
+                                    <div className="relative w-12 h-12">
+                                        <Image
+                                            src={item.imageUrl || '/placeholder.png'}
+                                            alt={item.name}
+                                            fill
+                                            className="rounded-md object-cover"
+                                        />
+                                    </div>
                                     <div className="ml-4">
                                         <h4 className="text-sm font-medium text-gray-900">{item.name || 'Unnamed Item'}</h4>
                                         <p className="text-sm text-gray-500">Quantity: {item.quantity || 0}</p>

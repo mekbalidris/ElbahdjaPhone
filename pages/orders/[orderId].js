@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 import { useAuth } from '../../context/AuthContext';
 import Icon from '../../components/ui/Icon';
 import Button from '../../components/ui/Button';
@@ -126,7 +127,9 @@ const OrderDetailPage = () => {
                          <ul className="divide-y divide-gray-800 border-t border-b border-gray-800">
                              {order.items?.map((item, index) => (
                                  <li key={index} className="flex py-4">
-                                     <img src={item.imageUrl || '/placeholder.png'} alt={item.name} className="h-20 w-20 object-cover rounded-lg mr-4" />
+                                     <div className="relative h-20 w-20 mr-4">
+                                         <Image src={item.imageUrl || '/placeholder.png'} alt={item.name} fill className="object-cover rounded-lg" />
+                                     </div>
                                      <div className="flex-1 flex flex-col justify-center">
                                          <p className="text-sm font-medium text-white">{item.name || 'Unnamed Item'}</p>
                                          {item.attributes && <p className="text-xs text-accent">{item.attributes}</p>}

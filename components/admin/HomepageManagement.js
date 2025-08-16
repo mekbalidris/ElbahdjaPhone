@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Upload, Play, X, Save, Loader } from 'lucide-react';
 
 const HomepageManagement = () => {
@@ -197,9 +198,11 @@ const HomepageManagement = () => {
           </label>
           {showcaseData.thumbnailUrl ? (
             <div className="relative inline-block">
-              <img
+              <Image
                 src={showcaseData.thumbnailUrl}
                 alt="Thumbnail"
+                width={192}
+                height={128}
                 className="w-48 h-32 object-cover rounded-lg border border-gray-200"
               />
               <button

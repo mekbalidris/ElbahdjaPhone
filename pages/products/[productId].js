@@ -175,10 +175,11 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                         <div className="w-full flex items-center justify-center mb-3">
                             <div className="relative w-full max-w-sm aspect-[5/4] bg-white rounded-lg shadow-sm overflow-hidden flex items-center justify-center mx-auto"
                                  {...swipeHandlers}>
-                                <img
+                                <Image
                                     src={activeImage}
                                     alt={product.name}
-                                    className="w-full h-full object-contain select-none"
+                                    fill
+                                    className="object-contain select-none"
                                     draggable="false"
                                 />
                                 {/* Optional: left/right arrows for visual hint */}
@@ -235,10 +236,11 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                         </div>
                         {/* Main Image */}
                         <div className="relative flex-1 aspect-[4/3] bg-white rounded-lg shadow-sm overflow-hidden group flex items-center justify-center min-w-0 h-[400px] md:h-[500px]">
-                            <img
+                            <Image
                                 src={activeImage}
                                 alt={product.name}
-                                className="w-full h-full object-contain transition-transform duration-300"
+                                fill
+                                className="object-contain transition-transform duration-300"
                                 style={{
                                     transform: isHovering ? 'scale(2.2)' : 'scale(1)',
                                     transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,

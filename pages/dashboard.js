@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
+import Image from 'next/image';
 import Button from '../components/ui/Button';
 import Icon from '../components/ui/Icon';
 import ProductFormModal from '../components/products/ProductFormModal';
@@ -494,11 +495,14 @@ const SellerDashboardPage = () => {
                                     <div className="px-4 py-4 sm:px-6">
                                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                             <div className="flex items-center">
-                                                <img
-                                                    src={product.images?.[0] || product.imageUrl || 'https://placehold.co/80x80/gray/ffffff?text=N/A'}
-                                                    alt={product.name}
-                                                    className="h-12 w-12 rounded-md object-cover"
-                                                />
+                                                <div className="relative h-12 w-12">
+                                                    <Image
+                                                        src={product.images?.[0] || product.imageUrl || 'https://placehold.co/80x80/gray/ffffff?text=N/A'}
+                                                        alt={product.name}
+                                                        fill
+                                                        className="rounded-md object-cover"
+                                                    />
+                                                </div>
                                                 <div className="ml-4">
                                                     <h3 className="text-lg font-medium text-gray-900 break-words max-w-[150px] sm:max-w-none">
                                                         <a 
