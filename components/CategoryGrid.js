@@ -4,7 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Icon from './ui/Icon';
 
-const PLACEHOLDER = '/public/images/categories/placeholder.jpg';
+const PLACEHOLDER = '/images/categories/placeholder.jpg';
+
 
 function useDragScroll(ref) {
     React.useEffect(() => {
@@ -199,6 +200,7 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
      };
 
     return (
+        
         <div className="w-full group py-2 relative bg-gradient-to-r from-primary-50 to-accent-50 overflow-hidden rounded-xl">
             {/* Remove fade overlays */}
             <div
