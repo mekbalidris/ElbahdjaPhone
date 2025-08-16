@@ -272,17 +272,16 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
                         const showHover = hoveredIdx === idx && !dragMoved;
                         return (
                             <div
-                                key={cat.key + '-' + idx}
-                                className="flex flex-col items-center w-44 h-44 sm:w-56 sm:h-56 bg-white rounded-xl cursor-pointer mx-2 group border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300"
-                                style={{ scrollSnapAlign: 'start' }}
-                                tabIndex={0}
-                                role="button"
-                                onMouseDown={handleCategoryMouseDown}
-                                onMouseMove={handleCategoryMouseMove}
-                                onMouseUp={handleCategoryMouseUp(cat)}
-                                onTouchStart={handleCategoryTouchStart}
-                                onTouchMove={handleCategoryTouchMove}
-                                onTouchEnd={handleCategoryTouchEnd(cat)}
+                            key={cat.key + '-' + idx}
+                            className="flex flex-col items-center w-44 h-44 sm:w-56 sm:h-56 bg-white rounded-xl cursor-pointer mx-2 group border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300"
+                            tabIndex={0}
+                            role="button"
+                            onMouseDown={handleCategoryMouseDown}
+                            onMouseMove={handleCategoryMouseMove}
+                            onMouseUp={handleCategoryMouseUp(cat)}
+                            onTouchStart={handleCategoryTouchStart}
+                            onTouchMove={handleCategoryTouchMove}
+                            onTouchEnd={handleCategoryTouchEnd(cat)}
                                 onKeyPress={e => { 
                                     if (e.key === 'Enter') {
                                         let query = '';
@@ -306,7 +305,12 @@ const CategoryMarquee = ({ categories, direction = 'left', products }) => {
                                 }}
                                 onMouseEnter={() => setHoveredIdx(idx)}
                                 onMouseLeave={() => setHoveredIdx(null)}
-                                style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                                style={{ 
+                                    scrollSnapAlign: 'start',
+                                    userSelect: 'none', 
+                                    WebkitUserSelect: 'none' 
+                                }}
+                                
                             >
                                 <div className="relative overflow-hidden rounded-xl shadow-sm bg-white hover:shadow-md transition-all w-full h-full flex items-center justify-center">
                                     {categoryImage ? (
