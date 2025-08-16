@@ -63,8 +63,8 @@ function useIsMobile() {
   return isMobile;
 }
 
-const clothingSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '34', '36', '38', '40', '42', '44', '46'];
-const shoeSizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46'];
+const phoneStorageSizes = ['64GB', '128GB', '256GB', '512GB', '1TB'];
+const laptopStorageSizes = ['256GB', '512GB', '1TB', '2TB'];
 
 const ProductsPage = ({ handleAddToCart, setGlobalLoading }) => {
     const router = useRouter();
@@ -137,10 +137,7 @@ const ProductsPage = ({ handleAddToCart, setGlobalLoading }) => {
     const filteredAndSortedProducts = useMemo(() => {
         return allProducts
             .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
-            .filter(p => selectedCategory === 'all' || (
-                p.category &&
-                p.category.replace(/-/g, '').toUpperCase() === selectedCategory.replace(/-/g, '').toUpperCase()
-            ))
+            .filter(p => selectedCategory === 'all' || p.category === selectedCategory)
             .filter(p => selectedBrand === '' || p.brand === selectedBrand)
             .filter(p => !showOnlyAvailable || p.stock > 0)
             .filter(p => priceRange.min === '' || p.price >= parseFloat(priceRange.min))
@@ -171,56 +168,67 @@ const ProductsPage = ({ handleAddToCart, setGlobalLoading }) => {
         setPage(1);
     }, [searchTerm, selectedCategory, selectedBrand, sortBy, priceRange, showOnlyAvailable]);
 
-    const availableBrands = useMemo(() => ([{ value: '', label: 'All Brands' }, ...Array.from(new Set(allProducts.filter(p => selectedCategory === 'all' || p.category === selectedCategory).map(p => p.brand).filter(Boolean))).map(brand => ({ value: brand, label: brand }))]), [allProducts, selectedCategory]);
+    const availableBrands = useMemo(() => {
+        const brands = [{ value: '', label: 'All Brands' }];
+        const categoryProducts = selectedCategory === 'all' 
+            ? allProducts 
+            : allProducts.filter(p => p.category === selectedCategory);
+        
+        const uniqueBrands = Array.from(new Set(
+            categoryProducts
+                .map(p => p.brand)
+                .filter(Boolean)
+        ));
+        
+        return [...brands, ...uniqueBrands.map(brand => ({ value: brand, label: brand }))];
+    }, [allProducts, selectedCategory]);
     // Dynamically generate category options from products
     const uniqueCategories = Array.from(new Set(allProducts.map(p => (p.category || '').toUpperCase()))).filter(Boolean);
     const categoryOptions = [
         { value: 'all', label: 'Tous les produits' },
-        { value: 'tshirts', label: 'T-shirts' },
-        { value: 'pantalons', label: 'Pantalons' },
-        { value: 'jeans', label: 'Jeans' },
-        { value: 'chaussures', label: 'Chaussures' },
-        { value: 'vestes', label: 'Vestes' },
-        { value: 'accessoires', label: 'Accessoires' },
-        { value: 'short', label: 'Short' },
-        { value: 'chapeau', label: 'Chapeau' },
-        { value: 'casquette', label: 'Casquette' },
-        { value: 'hoodie', label: 'Hoodie' },
-        { value: 'gilet_ceinture', label: 'Gilet ceinturé' },
+        { value: 'phones', label: 'Smartphones' },
+        { value: 'laptops', label: 'Ordinateurs portables' },
+        { value: 'accessories', label: 'Accessoires' },
+        { value: 'watch', label: 'Montres connectées' },
     ];
 
     const subCategoryOptions = {
-        men: [
-            { value: 'shirts', label: 'Shirts' },
-            { value: 'pants', label: 'Pants' },
-            { value: 'jackets', label: 'Jackets' },
-            { value: 't-shirts', label: 'T-Shirts' },
-            { value: 'suits', label: 'Suits' },
-            { value: 'underwear', label: 'Underwear' }
+        phones: [
+            { value: 'apple', label: 'Apple' },
+            { value: 'samsung', label: 'Samsung' },
+            { value: 'xiaomi', label: 'Xiaomi' },
+            { value: 'huawei', label: 'Huawei' },
+            { value: 'oppo', label: 'Oppo' },
+            { value: 'vivo', label: 'Vivo' },
+            { value: 'oneplus', label: 'OnePlus' },
+            { value: 'google', label: 'Google' },
+            { value: 'other', label: 'Autres' }
         ],
-        women: [
-            { value: 'dresses', label: 'Dresses' },
-            { value: 'tops', label: 'Tops' },
-            { value: 'skirts', label: 'Skirts' },
-            { value: 'pants', label: 'Pants' },
-            { value: 'jackets', label: 'Jackets' },
-            { value: 'lingerie', label: 'Lingerie' }
-        ],
-        shoes: [
-            { value: 'sneakers', label: 'Sneakers' },
-            { value: 'formal', label: 'Formal Shoes' },
-            { value: 'casual', label: 'Casual Shoes' },
-            { value: 'boots', label: 'Boots' },
-            { value: 'sandals', label: 'Sandals' },
-            { value: 'sports', label: 'Sports Shoes' }
+        laptops: [
+            { value: 'apple', label: 'Apple' },
+            { value: 'dell', label: 'Dell' },
+            { value: 'hp', label: 'HP' },
+            { value: 'lenovo', label: 'Lenovo' },
+            { value: 'asus', label: 'ASUS' },
+            { value: 'acer', label: 'Acer' },
+            { value: 'msi', label: 'MSI' },
+            { value: 'razer', label: 'Razer' },
+            { value: 'other', label: 'Autres' }
         ],
         accessories: [
-            { value: 'belts', label: 'Belts' },
-            { value: 'scarves', label: 'Scarves' },
-            { value: 'hats', label: 'Hats' },
-            { value: 'sunglasses', label: 'Sunglasses' },
-            { value: 'gloves', label: 'Gloves' },
-            { value: 'socks', label: 'Socks' }
+            { value: 'apple', label: 'Apple' },
+            { value: 'samsung', label: 'Samsung' },
+            { value: 'sony', label: 'Sony' },
+            { value: 'jbl', label: 'JBL' },
+            { value: 'logitech', label: 'Logitech' },
+            { value: 'anker', label: 'Anker' },
+            { value: 'belkin', label: 'Belkin' },
+            { value: 'other', label: 'Autres' }
+        ],
+        watch: [
+            { value: 'apple', label: 'Apple' },
+            { value: 'samsung', label: 'Samsung' },
+            { value: 'other', label: 'Autres' }
         ]
     };
 
@@ -363,18 +371,22 @@ const ProductsPage = ({ handleAddToCart, setGlobalLoading }) => {
                     />
                 </div>
                 <div className="flex flex-col md:flex-row md:items-center md:gap-8 gap-4">
-                    <StyledSelect
-                        label="Filtrer par tailles (vêtements)"
-                        value={selectedSize && clothingSizes.includes(selectedSize) ? selectedSize : ''}
-                        onChange={val => setSelectedSize(val === '' ? '' : val)}
-                        options={[{ value: '', label: 'Toutes les tailles' }, ...clothingSizes.map(size => ({ value: size, label: size }))]}
-                    />
-                    <StyledSelect
-                        label="Filtrer par pointures (chaussures)"
-                        value={selectedSize && shoeSizes.includes(selectedSize) ? selectedSize : ''}
-                        onChange={val => setSelectedSize(val === '' ? '' : val)}
-                        options={[{ value: '', label: 'Toutes les pointures' }, ...shoeSizes.map(size => ({ value: size, label: size }))]}
-                    />
+                    {selectedCategory === 'phones' && (
+                        <StyledSelect
+                            label="Filtrer par capacité (smartphones)"
+                            value={selectedSize && phoneStorageSizes.includes(selectedSize) ? selectedSize : ''}
+                            onChange={val => setSelectedSize(val === '' ? '' : val)}
+                            options={[{ value: '', label: 'Toutes les capacités' }, ...phoneStorageSizes.map(size => ({ value: size, label: size }))]}
+                        />
+                    )}
+                    {selectedCategory === 'laptops' && (
+                        <StyledSelect
+                            label="Filtrer par stockage (ordinateurs)"
+                            value={selectedSize && laptopStorageSizes.includes(selectedSize) ? selectedSize : ''}
+                            onChange={val => setSelectedSize(val === '' ? '' : val)}
+                            options={[{ value: '', label: 'Tous les stockages' }, ...laptopStorageSizes.map(size => ({ value: size, label: size }))]}
+                        />
+                    )}
                 </div>
                 <Button 
                     onClick={resetFilters} 
@@ -390,7 +402,7 @@ const ProductsPage = ({ handleAddToCart, setGlobalLoading }) => {
     const gridOptions = [3, 4, 5];
 
     return (
-        <div className="bg-primary min-h-screen mt-5">
+        <div className="bg-primary min-h-screen mt-16">
             <main className="container mx-auto px-2 sm:px-4 lg:px-6 py-12">
                 <h1 className="text-4xl md:text-5xl font-serif font-bold text-accent tracking-tight mb-8">Boutique</h1>
                 <div className="flex flex-col md:flex-row gap-8">

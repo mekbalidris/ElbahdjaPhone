@@ -40,7 +40,7 @@ const FallbackButton = ({ children, onClick, variant = 'primary', size = 'md', c
 };
 const FallbackInput = React.forwardRef(({ type = 'text', placeholder, value, onChange, name, label, required = false, className = '', error, iconLeft }, ref) => (
     <div className="mb-4 w-full">
-        {label && <label htmlFor={name} className="block text-sm font-medium text-white mb-1">{label} {required && <span className="text-orange-500">*</span>}</label>}
+        {label && <label htmlFor={name} className="block text-sm font-medium text-gray-800 mb-1">{label} {required && <span className="text-orange-500">*</span>}</label>}
         <div className="relative">
             {iconLeft && <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><MinimalIcon name={iconLeft} className="text-gray-400 w-5 h-5" /></div>}
             <input ref={ref} type={type} id={name} name={name} placeholder={placeholder} value={value} onChange={onChange} required={required} className={`w-full px-3 py-2.5 border ${error ? 'border-orange-500' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 ${error ? 'focus:ring-orange-500' : 'focus:ring-blue-500'} focus:border-transparent ${iconLeft ? 'pl-10' : ''} ${className}`} />
@@ -50,7 +50,7 @@ const FallbackInput = React.forwardRef(({ type = 'text', placeholder, value, onC
 ));
 const FallbackSelect = React.forwardRef(({ options, value, onChange, name, label, required = false, className = '', error }, ref) => (
     <div className="mb-4 w-full">
-        {label && <label htmlFor={name} className="block text-sm font-medium text-white mb-1">{label} {required && <span className="text-orange-500">*</span>}</label>}
+        {label && <label htmlFor={name} className="block text-sm font-medium text-gray-800 mb-1">{label} {required && <span className="text-orange-500">*</span>}</label>}
         <select ref={ref} id={name} name={name} value={value} onChange={onChange} required={required} className={`w-full px-3 py-2.5 border ${error ? 'border-orange-500' : 'border-gray-300'} bg-white rounded-lg shadow-sm focus:outline-none focus:ring-2 ${error ? 'focus:ring-orange-500' : 'focus:ring-blue-500'} focus:border-transparent ${className}`}>
             {options.map(option => (<option key={option.value} value={option.value} disabled={option.disabled}>{option.label}</option>))}
         </select>
@@ -59,7 +59,7 @@ const FallbackSelect = React.forwardRef(({ options, value, onChange, name, label
 ));
 const FallbackTextArea = React.forwardRef(({ placeholder, value, onChange, name, label, rows = 3, className = '', error }, ref) => (
     <div className="mb-4 w-full">
-        {label && <label htmlFor={name} className="block text-sm font-medium text-white mb-1">{label}</label>}
+        {label && <label htmlFor={name} className="block text-sm font-medium text-gray-800 mb-1">{label}</label>}
         <textarea ref={ref} name={name} placeholder={placeholder} value={value} onChange={onChange} rows={rows} className={`w-full px-3 py-2.5 border ${error ? 'border-orange-500' : 'border-gray-300'} rounded-lg shadow-sm focus:outline-none focus:ring-2 ${error ? 'focus:ring-orange-500' : 'focus:ring-blue-500'} focus:border-transparent ${className}`} />
         {error && <p className="mt-1 text-xs text-orange-600">{error}</p>}
     </div>
@@ -73,8 +73,7 @@ const ActualTextArea = TextArea || FallbackTextArea;
 const ActualIcon = Icon || MinimalIcon;
 // --- End Fallback UI Components ---
 
-const clothingSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-const shoeSizes = ['39', '40', '41', '42', '43', '44', '45', '46'];
+
 
 const algerianWilayas = [
     { value: '', label: 'Select Wilaya', disabled: true },
@@ -137,7 +136,7 @@ const FIXED_SHIPPING_COST = 500.00; // Set shipping cost to 500 DA
 const CheckoutSection = ({ title, iconName, children }) => {
     return (
         <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200/80">
-            <h2 className="text-xl font-bold text-white mb-6 flex items-center">
+            <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
                 <ActualIcon name={iconName} className="w-6 h-6 text-amber-500 mr-2" />
                 {title}
             </h2>
@@ -150,12 +149,7 @@ const CheckoutSection = ({ title, iconName, children }) => {
 
 const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions }) => {
     const [showOptions, setShowOptions] = useState(false);
-    const [selectedSize, setSelectedSize] = useState(item.size || '');
     const [selectedColor, setSelectedColor] = useState(item.color || '');
-    
-    // Determine if product is clothing or shoes
-    const isShoe = item.category?.toLowerCase().includes('chaussure') || item.category?.toLowerCase().includes('shoes');
-    const availableSizes = item.sizes && item.sizes.length > 0 ? item.sizes : (isShoe ? shoeSizes : clothingSizes);
 
     const handleQuantityChange = (change) => {
         const newQuantity = (item.quantity || 1) + change;
@@ -169,12 +163,8 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
             toast.error('Veuillez sélectionner une couleur.');
             return;
         }
-        if (item.sizes?.length > 0 && !selectedSize) {
-            toast.error('Veuillez sélectionner une taille.');
-            return;
-        }
         
-        onUpdateOptions(item._id, selectedSize, selectedColor, item.size, item.color);
+        onUpdateOptions(item._id, null, selectedColor, null, item.color);
         setShowOptions(false);
         toast.success('Options mises à jour !');
     };
@@ -190,14 +180,14 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
                     />
                 </div>
                 <div className="flex-grow">
-                    <h4 className="text-sm font-medium text-white">{item.name}</h4>
-                    <p className="text-sm text-white">{item.price} DA</p>
+                    <h4 className="text-sm font-medium text-gray-800">{item.name}</h4>
+                    <p className="text-sm text-gray-600">{item.price} DA</p>
                     
                     {/* Show selected options */}
                     <div className="flex flex-wrap gap-2 mt-2">
                         {item.color && (
                             <div className="flex items-center space-x-1">
-                                <span className="text-xs text-white">Couleur:</span>
+                                <span className="text-xs text-gray-600">Couleur:</span>
                                 <div 
                                     className="w-4 h-4 rounded-full border border-gray-300"
                                     style={{ backgroundColor: item.color.toLowerCase() }}
@@ -206,19 +196,13 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
                                 <span className="text-xs text-gray-700">{item.color}</span>
                             </div>
                         )}
-                        {item.size && (
-                            <div className="flex items-center space-x-1">
-                                <span className="text-xs text-white">Taille:</span>
-                                <span className="text-xs text-white font-medium">{item.size}</span>
-                            </div>
-                        )}
                     </div>
 
                     {/* Options toggle button */}
-                    {(item.colors?.length > 0 || item.sizes?.length > 0) && (
+                    {item.colors?.length > 0 && (
                         <button
                             onClick={() => setShowOptions(!showOptions)}
-                            className="text-xs text-white hover:underline bg-transparent"
+                            className="text-xs text-blue-600 hover:underline bg-transparent"
                         >
                             <Edit2 className="w-3 h-3" />
                             <span>Modifier les options</span>
@@ -231,7 +215,7 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
                             {/* Color Selection */}
                             {item.colors && item.colors.length > 0 && (
                                 <div>
-                                    <label className="block text-xs font-medium text-white mb-2">
+                                    <label className="block text-xs font-medium text-gray-800 mb-2">
                                         Couleur <span className="text-red-500">*</span>
                                     </label>
                                     <div className="flex flex-wrap gap-2">
@@ -252,35 +236,11 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
                                 </div>
                             )}
 
-                            {/* Size Selection */}
-                            {item.sizes && item.sizes.length > 0 && (
-                                <div>
-                                    <label className="block text-xs font-medium text-white mb-2">
-                                        Taille <span className="text-red-500">*</span>
-                                    </label>
-                                    <div className="flex flex-wrap gap-1">
-                                        {availableSizes.map(size => (
-                                            <button
-                                                key={size}
-                                                onClick={() => setSelectedSize(size)}
-                                                className={`px-2 py-1 text-xs border rounded transition-colors ${
-                                                    selectedSize === size 
-                                                        ? 'text-whitebg-gray-900 text-white border-gray-900' 
-                                                        : 'bg-white text-white border-gray-300 hover:bg-gray-100'
-                                                }`}
-                                            >
-                                                {size}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
                             {/* Update button */}
                             <div className="flex space-x-2 pt-2">
                                 <button
                                     onClick={() => setShowOptions(false)}
-                                    className="text-xs px-3 py-1 border border-gray-300 text-white rounded hover:bg-gray-100"
+                                    className="text-xs px-3 py-1 border border-gray-300 text-gray-700 rounded hover:bg-gray-100"
                                 >
                                     Annuler
                                 </button>
@@ -301,7 +261,7 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
                         >
                             <Minus className="h-4 w-4 text-black" />
                         </button>
-                        <span className="text-sm font-medium w-8 text-center">{item.quantity || 1}</span>
+                        <span className="text-sm font-medium w-8 text-center text-gray-800">{item.quantity || 1}</span>
                         <button
                             onClick={() => handleQuantityChange(1)}
                             className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
@@ -311,7 +271,7 @@ const OrderSummaryItem = ({ item, onUpdateQuantity, onRemove, onUpdateOptions })
                     </div>
                 </div>
                 <div className="flex flex-col items-end space-y-2">
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-sm font-medium text-gray-800">
                         {((item.price * (item.quantity || 1)))} DA
                     </p>
                     <button
@@ -601,17 +561,17 @@ const CheckoutPage = () => {
                                 </div>
                                 <div className="space-y-2 text-sm text-slate-700 pt-4 mt-4 border-t border-gray-200">
                                     <div className="flex justify-between">
-                                        <span className="font-medium text-white">Subtotal</span>
-                                        <span className="font-medium text-white">{subtotal} DA</span>
+                                        <span className="font-medium text-gray-800">Subtotal</span>
+                                        <span className="font-medium text-gray-800">{subtotal} DA</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="font-medium text-white">Shipping</span>
-                                        <span className="font-medium text-white">{shippingCost} DA</span>
+                                        <span className="font-medium text-gray-800">Shipping</span>
+                                        <span className="font-medium text-gray-800">{shippingCost} DA</span>
                                     </div>
                                 </div>
                                 <div className="flex justify-between text-lg font-bold text-slate-900 pt-3 mt-3 border-t-2 border-slate-300">
-                                    <span className="font-bold text-white">Total</span>
-                                    <span className="text-white">{total} DA</span>
+                                    <span className="font-bold text-gray-800">Total</span>
+                                    <span className="text-gray-800">{total} DA</span>
                                 </div>
                                 <div className="mt-6 p-4 bg-amber-50 rounded-lg text-black flex items-center space-x-3">
                                     <ActualIcon name="package" className="w-8 h-8 text-amber-500 shrink-0" />

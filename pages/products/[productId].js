@@ -12,8 +12,7 @@ import Image from 'next/image';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useSwipeable } from 'react-swipeable';
 
-const clothingSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-const shoeSizes = ['39', '40', '41', '42', '43', '44', '45', '46'];
+// Phone/tech related specifications
 
 const ZOOM_LENS_SIZE = 120;
 const ZOOM_IMAGE_WIDTH = 800;
@@ -96,8 +95,10 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
     }
 
     const isAvailable = product.stock > 0;
-    const isShoe = product.category?.toLowerCase().includes('chaussure') || product.category?.toLowerCase().includes('shoes');
-    const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : (isShoe ? shoeSizes : clothingSizes);
+    const isPhone = product.category?.toLowerCase() === 'phones';
+    const isLaptop = product.category?.toLowerCase() === 'laptops';
+    const isAccessory = product.category?.toLowerCase() === 'accessories';
+    const isWatch = product.category?.toLowerCase() === 'watch';
 
     const isProductFavorite = isFavorite(product._id);
 
@@ -119,7 +120,7 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
             return;
         }
         if (product.sizes?.length > 0 && !selectedSize) {
-            toast.error("Please select a size.");
+            toast.error("Please select a storage size.");
             return;
         }
         if (product.colors?.length > 0 && !selectedColor) {
@@ -165,7 +166,7 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
     }
 
     return (
-        <div className="bg-white py-6 sm:py-10 lg:py-24 xl:mt-[2rem]">
+        <div className="bg-white py-6 sm:py-10 lg:py-24">
             <div className="container mx-auto px-2 sm:px-4 lg:px-8">
                 {/* Product details main section */}
                 <div className="w-full flex flex-col lg:flex-row gap-6 lg:gap-16 items-start">
@@ -258,34 +259,38 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                                 <span className="text-lg text-gray-400 line-through">{product.oldPrice?.toLocaleString()} DA</span>
                             )}
                         </div>
-                        {/* Size selector */}
-                        <div className="mb-4 flex flex-wrap items-center gap-2">
-                            <label className="block text-lg font-semibold text-white mb-2">{isShoe ? 'Pointure' : 'Taille'} :</label>
-                            {availableSizes.map(size => (
-                                <button 
-                                    key={size}
-                                    onClick={() => setSelectedSize(size)}
-                                    className={`w-10 h-10 flex items-center justify-center rounded-full border-2 text-base font-semibold mx-1 mb-1 transition-colors
-                                        ${selectedSize === size ? 'bg-gray-900 text-white border-accent' : 'bg-white text-gray-900 border-gray-500 hover:bg-gray-200'}`}
-                                >
-                                    {size}
-                                </button>
-                            ))}
-                        </div>
-                        {/* Color selector as dropdown */}
-                        {product.colors && product.colors.length > 0 && (
-                            <div className="flex items-center gap-2 mb-4">
+                        {/* Storage/Capacity selector - show for all products that have sizes */}
+                        {(product.sizes && product.sizes.length > 0) && (
+                            <div className="mb-4 flex flex-wrap items-center gap-2">
+                                <label className="block text-lg font-semibold text-white mb-2">Capacité :</label>
+                                {product.sizes.map(size => (
+                                    <button 
+                                        key={size}
+                                        onClick={() => setSelectedSize(size)}
+                                        className={`px-4 py-2 flex items-center justify-center rounded-lg border-2 text-base font-semibold mx-1 mb-1 transition-colors
+                                            ${selectedSize === size ? 'bg-primary-500 text-white border-primary-600' : 'bg-white text-neutral-800 border-gray-300 hover:bg-gray-50'}`}
+                                    >
+                                        {size}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        {/* Color selector - show for all products that have colors */}
+                        {(product.colors && product.colors.length > 0) && (
+                            <div className="mb-4">
                                 <label className="block text-lg font-semibold text-white mb-2">Couleur :</label>
-                                <select
-                                    value={selectedColor || ''}
-                                    onChange={e => setSelectedColor(e.target.value)}
-                                    className="bg-gray-900 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-accent border border-gray-700"
-                                >
-                                    <option value="" disabled>Choisir une couleur</option>
+                                <div className="flex flex-wrap gap-2">
                                     {product.colors.map(color => (
-                                        <option key={color} value={color}>{color}</option>
+                                        <button
+                                            key={color}
+                                            onClick={() => setSelectedColor(color)}
+                                            className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-colors
+                                                ${selectedColor === color ? 'bg-primary-500 text-white border-primary-600' : 'bg-white text-neutral-800 border-gray-300 hover:bg-gray-50'}`}
+                                        >
+                                            {color}
+                                        </button>
                                     ))}
-                                </select>
+                                </div>
                             </div>
                         )}
 
@@ -366,13 +371,13 @@ const ProductDetailPage = ({ product, relatedProducts, error }) => {
                         {tab === 'description' && (
                             <div>
                                 <h2 className="text-lg font-bold mb-2">Description</h2>
-                                <div className="prose text-white" dangerouslySetInnerHTML={{ __html: product.description?.replace(/\n/g, '<br />') }} />
+                                <div className="prose text-black" dangerouslySetInnerHTML={{ __html: product.description?.replace(/\n/g, '<br />') }} />
                             </div>
                         )}
                         {tab === 'infos' && (
                             <div>
                                 <h2 className="text-lg font-bold mb-2">Informations complémentaires</h2>
-                                <ul className="text-white space-y-2">
+                                <ul className="text-black space-y-2">
                                     {product.brand && <li><b>Marque:</b> {product.brand}</li>}
                                     {product.genre && <li><b>Genre:</b> {product.genre}</li>}
                                     {product.matiere && <li><b>Matière:</b> {product.matiere}</li>}

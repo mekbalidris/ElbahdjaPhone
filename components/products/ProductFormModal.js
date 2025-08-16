@@ -8,91 +8,63 @@ import { toast } from 'react-hot-toast';
 import Icon from '../ui/Icon';
 
 const CATEGORIES = [
-    { value: '', label: 'Choisir une catégorie', disabled: true },
-    { value: 'tshirts', label: 'T-shirts' },
-    { value: 'pantalons', label: 'Pantalons' },
-    { value: 'jeans', label: 'Jeans' },
-    { value: 'chaussures', label: 'Chaussures' },
-    { value: 'vestes', label: 'Vestes' },
-    { value: 'accessoires', label: 'Accessoires' },
-    { value: 'short', label: 'Short' },
-    { value: 'chapeau', label: 'Chapeau' },
-    { value: 'casquette', label: 'Casquette' },
-    { value: 'hoodie', label: 'Hoodie' },
-    { value: 'gilet_ceinture', label: 'Gilet ceinturé' },
+    { value: 'phones', label: 'Phones' },
+    { value: 'laptops', label: 'Laptops' },
+    { value: 'accessories', label: 'Accessories' },
+    { value: 'watch', label: 'Watches' },
 ];
 
-const BRANDS = [
-    { value: '', label: 'Choisir une marque', disabled: true },
-    { value: 'nike', label: 'Nike' },
-    { value: 'adidas', label: 'Adidas' },
-    { value: 'zara', label: 'Zara' },
-    { value: 'arena-fashion', label: 'Arena Fashion' },
-    { value: 'lacoste', label: 'Lacoste' },
-    { value: 'polo', label: 'Polo' },
-    { value: 'anime', label: 'Anime' },
-    { value: 'autre', label: 'Autre' },
-];
-
-const CLOTHING_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-const SHOE_SIZES = ['39', '40', '41', '42', '43', '44', '45', '46'];
-
-const GENRES = [
-    { value: '', label: 'Choisir le genre', disabled: true },
-    { value: 'homme', label: 'Homme' },
-    { value: 'femme', label: 'Femme' },
-    { value: 'unisexe', label: 'Unisexe' },
-];
-const MATIERES = [
-    { value: '', label: 'Choisir la matière', disabled: true },
-    { value: 'coton', label: 'Coton' },
-    { value: 'laine', label: 'Laine' },
-    { value: 'polyester', label: 'Polyester' },
-    { value: 'cuir', label: 'Cuir' },
-    { value: 'autre', label: 'Autre' },
-];
-const COUPES = [
-    { value: '', label: 'Choisir la coupe', disabled: true },
-    { value: 'slim', label: 'Slim' },
-    { value: 'regular', label: 'Regular' },
-    { value: 'oversize', label: 'Oversize' },
-];
-const SAISONS = [
-    { value: '', label: 'Choisir la saison', disabled: true },
-    { value: 'all', label: 'Toutes saisons' },
-    { value: 'printemps', label: 'Printemps' },
-    { value: 'ete', label: 'Été' },
-    { value: 'automne', label: 'Automne' },
-    { value: 'hiver', label: 'Hiver' },
-];
-
-const COLOR_OPTIONS = [
-    'Noir', 'Blanc', 'Bleu', 'Rouge', 'Vert', 'Jaune', 'Gris', 'Marron', 'Violet', 'Orange', 'Rose', 'Beige', 'Kaki', 'Bordeaux', 'Turquoise', 'Doré', 'Argent'
-];
-
-const COLOR_MAP = {
-    'Noir': 'black',
-    'Blanc': 'white',
-    'Bleu': 'blue',
-    'Rouge': 'red',
-    'Vert': 'green',
-    'Jaune': 'yellow',
-    'Gris': 'gray',
-    'Marron': 'brown',
-    'Violet': 'violet',
-    'Orange': 'orange',
-    'Rose': 'pink',
-    'Beige': 'beige',
-    'Kaki': 'olive',
-    'Bordeaux': '#800000',
-    'Turquoise': 'turquoise',
-    'Doré': 'gold',
-    'Argent': 'silver',
+const BRANDS = {
+    phones: [
+        { value: '', label: 'Choose a brand', disabled: true },
+        { value: 'apple', label: 'Apple' },
+        { value: 'samsung', label: 'Samsung' },
+        { value: 'xiaomi', label: 'Xiaomi' },
+        { value: 'huawei', label: 'Huawei' },
+        { value: 'oppo', label: 'Oppo' },
+        { value: 'vivo', label: 'Vivo' },
+        { value: 'oneplus', label: 'OnePlus' },
+        { value: 'google', label: 'Google' },
+        { value: 'other', label: 'Other' },
+    ],
+    laptops: [
+        { value: '', label: 'Choose a brand', disabled: true },
+        { value: 'apple', label: 'Apple' },
+        { value: 'dell', label: 'Dell' },
+        { value: 'hp', label: 'HP' },
+        { value: 'lenovo', label: 'Lenovo' },
+        { value: 'asus', label: 'ASUS' },
+        { value: 'acer', label: 'Acer' },
+        { value: 'msi', label: 'MSI' },
+        { value: 'razer', label: 'Razer' },
+        { value: 'other', label: 'Other' },
+    ],
+    accessories: [
+        { value: '', label: 'Choose a brand', disabled: true },
+        { value: 'apple', label: 'Apple' },
+        { value: 'samsung', label: 'Samsung' },
+        { value: 'sony', label: 'Sony' },
+        { value: 'jbl', label: 'JBL' },
+        { value: 'logitech', label: 'Logitech' },
+        { value: 'anker', label: 'Anker' },
+        { value: 'belkin', label: 'Belkin' },
+        { value: 'other', label: 'Other' },
+    ],
+    watch: [
+        { value: '', label: 'Choose a brand', disabled: true },
+        { value: 'apple', label: 'Apple' },
+        { value: 'samsung', label: 'Samsung' },
+        { value: 'other', label: 'Other' },
+    ],
 };
+
+// Predefined options for colors and storage sizes
+const PREDEFINED_COLORS = ['Noir', 'Blanc', 'Or', 'Argent', 'Bleu', 'Vert', 'Rouge', 'Rose', 'Violet', 'Gris'];
+const PREDEFINED_SIZES = ['64GB', '128GB', '256GB', '512GB', '1TB', '2TB'];
 
 const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
     const [name, setName] = useState('');
-    const [category, setCategory] = useState('');
+    const [category, setCategory] = useState('phones');
     const [brand, setBrand] = useState('');
     const [price, setPrice] = useState('');
     const [oldPrice, setOldPrice] = useState('');
@@ -101,19 +73,17 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
     const [errors, setErrors] = useState({});
     const [images, setImages] = useState([null, null, null, null]);
     const [imagePreviews, setImagePreviews] = useState([null, null, null, null]);
-    const [sizes, setSizes] = useState([]);
+    
+    // New state for colors and sizes
     const [colors, setColors] = useState([]);
-    const [colorInput, setColorInput] = useState('');
-    const [sizeInput, setSizeInput] = useState('');
-    const [genre, setGenre] = useState('');
-    const [matiere, setMatiere] = useState('');
-    const [coupe, setCoupe] = useState('');
-    const [saison, setSaison] = useState('');
+    const [sizes, setSizes] = useState([]);
+    const [newColor, setNewColor] = useState('');
+    const [newSize, setNewSize] = useState('');
 
     useEffect(() => {
         if (product) {
             setName(product.name);
-            setCategory(product.category || '');
+            setCategory(product.category);
             setBrand(product.brand || '');
             setPrice(String(product.price));
             setOldPrice(String(product.oldPrice || ''));
@@ -121,15 +91,11 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
             setStock(String(product.stock));
             setImages(product.images || [null, null, null, null]);
             setImagePreviews(product.images || [null, null, null, null]);
-            setSizes(product.sizes || []);
             setColors(product.colors || []);
-            setGenre(product.genre || '');
-            setMatiere(product.matiere || '');
-            setCoupe(product.coupe || '');
-            setSaison(product.saison || '');
+            setSizes(product.sizes || []);
         } else {
             setName('');
-            setCategory('');
+            setCategory('phones');
             setBrand('');
             setPrice('');
             setOldPrice('');
@@ -137,12 +103,8 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
             setStock('');
             setImages([null, null, null, null]);
             setImagePreviews([null, null, null, null]);
-            setSizes([]);
             setColors([]);
-            setGenre('');
-            setMatiere('');
-            setCoupe('');
-            setSaison('');
+            setSizes([]);
         }
         setErrors({});
     }, [product, isOpen]);
@@ -157,11 +119,44 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
         if (oldPrice && parseFloat(oldPrice) <= parseFloat(price)) newErrors.oldPrice = "Old price must be greater than current price.";
         if (!description.trim()) newErrors.description = "Description is required.";
         if (stock === '' || isNaN(parseInt(stock)) || parseInt(stock) < 0 || !Number.isInteger(parseFloat(stock))) newErrors.stock = "Valid stock quantity (whole number, 0 or more) is required.";
-        if (colors.length === 0) newErrors.colors = "Veuillez ajouter au moins une couleur.";
-        if (!genre) newErrors.genre = "Veuillez choisir le genre.";
-        if (sizes.length === 0 && category !== 'chapeau' && category !== 'casquette') newErrors.sizes = "Veuillez ajouter au moins une taille.";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
+    };
+
+    // Color management functions
+    const addColor = () => {
+        if (newColor.trim() && !colors.includes(newColor.trim())) {
+            setColors([...colors, newColor.trim()]);
+            setNewColor('');
+        }
+    };
+
+    const removeColor = (colorToRemove) => {
+        setColors(colors.filter(color => color !== colorToRemove));
+    };
+
+    const addPredefinedColor = (color) => {
+        if (!colors.includes(color)) {
+            setColors([...colors, color]);
+        }
+    };
+
+    // Size management functions
+    const addSize = () => {
+        if (newSize.trim() && !sizes.includes(newSize.trim())) {
+            setSizes([...sizes, newSize.trim()]);
+            setNewSize('');
+        }
+    };
+
+    const removeSize = (sizeToRemove) => {
+        setSizes(sizes.filter(size => size !== sizeToRemove));
+    };
+
+    const addPredefinedSize = (size) => {
+        if (!sizes.includes(size)) {
+            setSizes([...sizes, size]);
+        }
     };
 
     const compressImage = (base64String, maxWidth = 800) => {
@@ -226,20 +221,16 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
         const filteredImages = images.filter(img => !!img);
         const payload = { 
             name, 
-            category: category.toLowerCase(),
+            category, 
             brand,
             price: parseFloat(price), 
             oldPrice: oldPrice ? parseFloat(oldPrice) : undefined,
             description, 
             stock: parseInt(stock), 
             images: filteredImages,
-            sizes,
-            colors,
-            offer: !!oldPrice,
-            genre,
-            matiere,
-            coupe,
-            saison
+            colors: colors.length > 0 ? colors : undefined,
+            sizes: sizes.length > 0 ? sizes : undefined,
+            offer: !!oldPrice // Automatically set offer to true if oldPrice is provided
         };
         if (product && product.id) payload.id = product.id;
         onSubmit(payload);
@@ -254,63 +245,163 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
                             <Icon name="package" className="w-6 h-6 mr-2 text-blue-500" /> Product Details
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Input label={<span>Product Name <span className="text-red-500">*</span></span>} name="name" value={name} onChange={e => setName(e.target.value)} placeholder="e.g., Adidas T-shirt" required error={errors.name} />
-                            <Select label={<span>Category <span className="text-red-500">*</span></span>} name="category" options={CATEGORIES} value={category} onChange={e => setCategory(e.target.value)} required error={errors.category} />
-                            <Select label={<span>Brand <span className="text-red-500">*</span></span>} name="brand" options={BRANDS} value={brand} onChange={e => setBrand(e.target.value)} required error={errors.brand} />
-                            <Select label={<span>Genre <span className="text-red-500">*</span></span>} name="genre" options={GENRES} value={genre} onChange={e => setGenre(e.target.value)} required error={errors.genre} />
-                            <Select label="Matière" name="matiere" options={MATIERES} value={matiere} onChange={e => setMatiere(e.target.value)} error={errors.matiere} />
-                            <Select label="Coupe" name="coupe" options={COUPES} value={coupe} onChange={e => setCoupe(e.target.value)} error={errors.coupe} />
-                            <Select label="Saison" name="saison" options={SAISONS} value={saison} onChange={e => setSaison(e.target.value)} error={errors.saison} />
-                            <Input label={<span>Current Price (DA) <span className="text-red-500">*</span></span>} name="price" type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g., 799.99" required error={errors.price} />
+                            <Input label="Product Name" name="name" value={name} onChange={e => setName(e.target.value)} placeholder="e.g., Galaxy Nova X" required error={errors.name} />
+                            <Select label="Category" name="category" options={CATEGORIES} value={category} onChange={e => setCategory(e.target.value)} required error={errors.category} />
+                            <Select label="Brand" name="brand" options={BRANDS[category] || []} value={brand} onChange={e => setBrand(e.target.value)} required error={errors.brand} />
+                            <Input label="Current Price (DA)" name="price" type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g., 799.99" required error={errors.price} />
                             <Input label="Old Price (DA) 'optional'" name="oldPrice" type="number" value={oldPrice} onChange={e => setOldPrice(e.target.value)} placeholder="e.g., 999.99" error={errors.oldPrice} />
-                            <Input label={<span>Stock (0 for Out of Stock) <span className="text-red-500">*</span></span>} name="stock" type="number" value={stock} onChange={e => setStock(e.target.value)} placeholder="e.g., 50" required error={errors.stock} />
-                            <div className="col-span-2">
-                                <label className="block text-sm font-medium text-white mb-2">Tailles disponibles <span className="text-red-500">*</span></label>
-                                <div className="flex gap-2 mb-2">
-                                    {(category === 'chaussures' ? SHOE_SIZES : CLOTHING_SIZES).map(size => (
-                                        <button
-                                            type="button"
-                                            key={size}
-                                            className={`px-3 py-1 rounded border text-sm ${sizes.includes(size) ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
-                                            onClick={() => setSizes(sizes.includes(size) ? sizes.filter(s => s !== size) : [...sizes, size])}
-                                        >
-                                            {size}
-                                        </button>
-                                    ))}
-                                </div>
-                                {errors.sizes && <div className="text-red-500 text-xs mt-1">{errors.sizes}</div>}
-                            </div>
-                            <div className="col-span-2">
-                                <label className="block text-sm font-medium text-white mb-2">Couleurs disponibles <span className="text-red-500">*</span></label>
-                                <div className="flex gap-2 mb-2 flex-wrap">
-                                    {COLOR_OPTIONS.map((color) => (
-                                        <button
-                                            type="button"
-                                            key={color}
-                                            className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-yellow-500 mr-1 mb-1 ${colors.includes(color) ? 'border-gray-900 scale-110 ring-2 ring-yellow-500' : 'border-gray-300'}`}
-                                            style={{ background: color === 'Multicolore' ? COLOR_MAP[color] : undefined, backgroundColor: color !== 'Multicolore' ? COLOR_MAP[color] : undefined }}
-                                            title={color}
-                                            onClick={() => {
-                                                if (colors.includes(color)) {
-                                                    setColors(colors.filter((c) => c !== color));
-                                                } else {
-                                                    setColors([...colors, color]);
-                                                }
-                                            }}
-                                        >
-                                            {colors.includes(color) && (
-                                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                </svg>
-                                            )}
-                                            <span className="sr-only">{color}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                                {errors.colors && <div className="text-red-500 text-xs mt-1">{errors.colors}</div>}
-                            </div>
+                            <Input label="Stock (0 for Out of Stock)" name="stock" type="number" value={stock} onChange={e => setStock(e.target.value)} placeholder="e.g., 50" required error={errors.stock} />
                         </div>
                     </div>
+
+                    {/* Colors Section */}
+                    <div className="mb-4">
+                        <h2 className="text-xl font-bold text-gray-800 mb-2 flex items-center">
+                            <Icon name="palette" className="w-6 h-6 mr-2 text-purple-500" /> Colors (Optional)
+                        </h2>
+                        <p className="text-gray-500 text-sm mb-3">Add available colors for this product. Users will be able to select from these options.</p>
+                        
+                        {/* Predefined colors */}
+                        <div className="mb-3">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Quick Add Colors:</label>
+                            <div className="flex flex-wrap gap-2">
+                                {PREDEFINED_COLORS.map(color => (
+                                    <button
+                                        key={color}
+                                        type="button"
+                                        onClick={() => addPredefinedColor(color)}
+                                        disabled={colors.includes(color)}
+                                        className={`px-3 py-1 text-sm rounded-full border transition-colors ${
+                                            colors.includes(color)
+                                                ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        {color}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Custom color input */}
+                        <div className="flex gap-2 mb-3">
+                            <Input
+                                label="Add Custom Color"
+                                value={newColor}
+                                onChange={e => setNewColor(e.target.value)}
+                                placeholder="e.g., Midnight Blue"
+                                onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), addColor())}
+                            />
+                            <Button
+                                type="button"
+                                onClick={addColor}
+                                variant="secondary"
+                                className="mt-6 h-10"
+                                disabled={!newColor.trim()}
+                            >
+                                Add
+                            </Button>
+                        </div>
+
+                        {/* Selected colors */}
+                        {colors.length > 0 && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Selected Colors:</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {colors.map(color => (
+                                        <div
+                                            key={color}
+                                            className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                                        >
+                                            <span>{color}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => removeColor(color)}
+                                                className="ml-1 text-blue-600 hover:text-blue-800"
+                                            >
+                                                <Icon name="x" className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Sizes/Storage Section */}
+                    <div className="mb-4">
+                        <h2 className="text-xl font-bold text-gray-800 mb-2 flex items-center">
+                            <Icon name="hard-drive" className="w-6 h-6 mr-2 text-green-500" /> Storage Sizes (Optional)
+                        </h2>
+                        <p className="text-gray-500 text-sm mb-3">Add available storage sizes for this product. Users will be able to select from these options.</p>
+                        
+                        {/* Predefined sizes */}
+                        <div className="mb-3">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Quick Add Sizes:</label>
+                            <div className="flex flex-wrap gap-2">
+                                {PREDEFINED_SIZES.map(size => (
+                                    <button
+                                        key={size}
+                                        type="button"
+                                        onClick={() => addPredefinedSize(size)}
+                                        disabled={sizes.includes(size)}
+                                        className={`px-3 py-1 text-sm rounded-full border transition-colors ${
+                                            sizes.includes(size)
+                                                ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        {size}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Custom size input */}
+                        <div className="flex gap-2 mb-3">
+                            <Input
+                                label="Add Custom Size"
+                                value={newSize}
+                                onChange={e => setNewSize(e.target.value)}
+                                placeholder="e.g., 32GB"
+                                onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), addSize())}
+                            />
+                            <Button
+                                type="button"
+                                onClick={addSize}
+                                variant="secondary"
+                                className="mt-6 h-10"
+                                disabled={!newSize.trim()}
+                            >
+                                Add
+                            </Button>
+                        </div>
+
+                        {/* Selected sizes */}
+                        {sizes.length > 0 && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Selected Sizes:</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {sizes.map(size => (
+                                        <div
+                                            key={size}
+                                            className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm"
+                                        >
+                                            <span>{size}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => removeSize(size)}
+                                                className="ml-1 text-green-600 hover:text-green-800"
+                                            >
+                                                <Icon name="x" className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="mb-4">
                         <h2 className="text-xl font-bold text-gray-800 mb-2 flex items-center">
                             <Icon name="image" className="w-6 h-6 mr-2 text-green-500" /> Product Images
@@ -348,7 +439,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
                         <h2 className="text-xl font-bold text-gray-800 mb-2 flex items-center">
                             <Icon name="edit" className="w-6 h-6 mr-2 text-yellow-500" /> Description
                         </h2>
-                        <TextArea label={<span>Description <span className="text-red-500">*</span></span>} name="description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Detailed product description..." rows={4} required error={errors.description} />
+                        <TextArea label="Description" name="description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Detailed product description..." rows={4} required error={errors.description} />
                     </div>
                     <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100 mt-2">
                         <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>

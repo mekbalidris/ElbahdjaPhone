@@ -40,8 +40,8 @@ function AppContent({ Component, pageProps }) {
     if (!isMounted) {
         return (
             <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white">
-                <span className="text-4xl font-extrabold font-serif tracking-widest mb-8 text-yellow-700 animate-fadeIn">Arena Fashion</span>
-                <div className="w-16 h-16 border-4 border-yellow-700 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-4xl font-extrabold font-serif tracking-widest mb-8 text-primary-500 animate-fadeIn">Elbahdja Phone</span>
+                <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -51,8 +51,8 @@ function AppContent({ Component, pageProps }) {
             <Toaster position="top-center" />
             {isLoading && (
                 <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/60">
-                    <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                    <span className="text-xl font-bold text-yellow-500">Chargement...</span>
+                    <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <span className="text-xl font-bold text-primary-500">Chargement...</span>
                 </div>
             )}
             <div className="min-h-screen flex flex-col">

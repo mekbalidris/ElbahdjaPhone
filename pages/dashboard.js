@@ -500,7 +500,17 @@ const SellerDashboardPage = () => {
                                                     className="h-12 w-12 rounded-md object-cover"
                                                 />
                                                 <div className="ml-4">
-                                                    <h3 className="text-lg font-medium text-gray-900 break-words max-w-[150px] sm:max-w-none">{product.name}</h3>
+                                                    <h3 className="text-lg font-medium text-gray-900 break-words max-w-[150px] sm:max-w-none">
+                                                        <a 
+                                                            href={`/products/${product._id}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="hover:text-blue-600 hover:underline transition-colors cursor-pointer"
+                                                            title="View product details"
+                                                        >
+                                                            {product.name}
+                                                        </a>
+                                                    </h3>
                                                     <p className="text-sm text-gray-500">{product.category}</p>
                                                 </div>
                                             </div>

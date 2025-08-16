@@ -38,7 +38,9 @@ import {
     ArrowRight,
     MessageSquare,
     Columns3,
-    Columns4
+    Columns4,
+    Palette,
+    HardDrive
 } from 'lucide-react';
 
 const Icon = ({ name, className, ...props }) => {
@@ -88,6 +90,8 @@ const Icon = ({ name, className, ...props }) => {
         playCircle: PlayCircle,
         arrowRight: ArrowRight,
         messageSquare: MessageSquare,
+        palette: Palette,
+        hardDrive: HardDrive,
         grid3: (props) => (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className={props.className} {...props}>
                 {[0,1,2].map(i => [0,1,2].map(j => (

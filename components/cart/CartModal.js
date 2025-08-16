@@ -47,16 +47,16 @@ const CartModal = ({ isOpen, onClose }) => {
                                 leaveTo="translate-x-full"
                             >
                                 <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
-                                    <div className="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
+                                    <div className="flex h-full flex-col overflow-y-scroll bg-black shadow-xl">
                                         <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
                                             <div className="flex items-start justify-between">
-                                                <Dialog.Title className="text-lg font-bold text-gray-900">
-                                                    Shopping Cart
+                                                <Dialog.Title className="text-lg font-bold text-white">
+                                                    Panier d'achat
                                                 </Dialog.Title>
                                                 <div className="ml-3 flex h-7 items-center">
                                                     <button
                                                         type="button"
-                                                        className="-m-2 p-2 text-white hover:text-gray-500"
+                                                        className="-m-2 p-2 text-gray-300 hover:text-white"
                                                         onClick={onClose}
                                                     >
                                                         <span className="sr-only">Close panel</span>
@@ -68,11 +68,11 @@ const CartModal = ({ isOpen, onClose }) => {
                                             <div className="mt-8">
                                                 <div className="flow-root">
                                                     {cartItems.length > 0 ? (
-                                                        <ul role="list" className="-my-6 divide-y divide-gray-200">
+                                                        <ul role="list" className="-my-6 divide-y divide-gray-700">
                                                             {cartItems.map((item) => (
                                                                 <li key={item._id + (item.size || '') + (item.color || '')} className="flex py-6">
                                                                     <button
-                                                                        className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200 p-0 bg-transparent"
+                                                                        className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-600 p-0 bg-transparent"
                                                                         onClick={() => { onClose(); router.push(`/products/${item._id}`); }}
                                                                         aria-label={`Voir ${item.name}`}
                                                                     >
@@ -110,7 +110,7 @@ const CartModal = ({ isOpen, onClose }) => {
                                                                             </p>
                                                                         </div>
                                                                         <div className="flex flex-1 items-end justify-between text-sm">
-                                                                            <div className="flex items-center border border-gray-200 rounded">
+                                                                            <div className="flex items-center border border-gray-600 rounded">
                                                                                 <button onClick={() => updateQuantity(item._id, item.quantity - 1, item.size, item.color)} className="p-1.5" disabled={item.quantity <= 1}><Minus size={14}/></button>
                                                                                 <p className="px-2 text-white">Qty {item.quantity}</p>
                                                                                 <button onClick={() => updateQuantity(item._id, item.quantity + 1, item.size, item.color)} className="p-1.5"><Plus size={14}/></button>
@@ -132,7 +132,7 @@ const CartModal = ({ isOpen, onClose }) => {
                                                         </ul>
                                                     ) : (
                                                         <div className="text-center py-10">
-                                                            <p className="text-gray-500">Your cart is empty.</p>
+                                                            <p className="text-gray-400">Your cart is empty.</p>
                                                         </div>
                                                     )}
                                                 </div>
@@ -140,20 +140,20 @@ const CartModal = ({ isOpen, onClose }) => {
                                         </div>
 
                                         {cartItems.length > 0 && (
-                                            <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
-                                                <div className="flex justify-between text-base font-medium text-gray-900">
+                                            <div className="border-t border-gray-700 px-4 py-6 sm:px-6">
+                                                <div className="flex justify-between text-base font-medium text-white">
                                                     <p>Subtotal</p>
                                                     <p>{subtotal.toLocaleString()} DZD</p>
                                                 </div>
-                                                 <div className="flex justify-between mt-2 text-sm text-gray-500">
+                                                 <div className="flex justify-between mt-2 text-sm text-gray-400">
                                                     <p>Shipping</p>
                                                     <p>{shippingFee > 0 ? `${shippingFee.toLocaleString()} DZD` : 'FREE'}</p>
                                                 </div>
-                                                 <div className="flex justify-between mt-4 text-base font-bold text-gray-900 border-t border-gray-200 pt-4">
+                                                 <div className="flex justify-between mt-4 text-base font-bold text-white border-t border-gray-700 pt-4">
                                                     <p>Total</p>
                                                     <p>{total.toLocaleString()} DZD</p>
                                                 </div>
-                                                <p className="mt-0.5 text-sm text-gray-500">Shipping and taxes calculated at checkout.</p>
+                                                <p className="mt-0.5 text-sm text-gray-400">Shipping and taxes calculated at checkout.</p>
                                                 <div className="mt-6">
                                                     <Button
                                                         onClick={handleCheckout}
@@ -162,7 +162,7 @@ const CartModal = ({ isOpen, onClose }) => {
                                                         Checkout
                                                     </Button>
                                                 </div>
-                                                <div className="mt-6 flex justify-center text-center text-sm text-gray-500">
+                                                <div className="mt-6 flex justify-center text-center text-sm text-gray-400">
                                                     <p>
                                                         or{' '}
                                                         <button

@@ -167,13 +167,13 @@ const ProductCard = forwardRef(function ProductCard({ product, setGlobalLoading 
         <>
             <div
                 ref={ref}
-                className="bg-white rounded-lg overflow-hidden shadow-sm  cursor-pointer flex flex-col transition-all duration-300 hover:shadow-xl relative w-full max-w-[300px] group"
+                className="bg-white rounded-xl overflow-hidden shadow-md border border-gray-200 cursor-pointer flex flex-col transition-all duration-300 hover:shadow-xl hover:border-primary-300 relative w-full max-w-[280px] group"
                 onClick={handleViewDetails}
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
             >
                 {/* Product Image Container */}
-                <div className="relative w-full h-[20rem] overflow-hidden bg-gray-100">
+                <div className="relative w-full h-64 sm:h-72 overflow-hidden bg-gray-100 p-4">
                     <div className={`w-full h-full transition-opacity duration-${FADE_DURATION} ${isFading ? 'opacity-0' : 'opacity-100'}`}
                         style={{ position: 'absolute', inset: 0 }}
                     >
@@ -182,7 +182,7 @@ const ProductCard = forwardRef(function ProductCard({ product, setGlobalLoading 
                             alt={product.name || "Product image"}
                             fill
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            className="object-cover object-center w-full h-full transition-transform duration-200 sm:group-hover:scale-105"
+                            className="object-contain object-center w-full h-full transition-transform duration-200 sm:group-hover:scale-105"
                             onError={(e) => {
                                 e.target.src = `https://placehold.co/600x400/e2e8f0/94a3b8?text=${encodeURIComponent(product.name || "Image")}`;
                             }}
@@ -199,7 +199,7 @@ const ProductCard = forwardRef(function ProductCard({ product, setGlobalLoading 
                                 </div>
                                 <button
                                     onClick={e => { e.stopPropagation(); handleViewDetails(); }}
-                                    className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent hover:bg-accent transition-colors duration-200"
+                                    className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent hover:bg-primary-500 transition-colors duration-200"
                                     aria-label="Voir détails"
                                 >
                                     <Search className="w-5 h-5 text-white" />
@@ -213,7 +213,7 @@ const ProductCard = forwardRef(function ProductCard({ product, setGlobalLoading 
                                 </div>
                                 <button
                                     onClick={handleAddToFavorites}
-                                    className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 ${isProductFavorite ? 'bg-accent' : 'bg-transparent'} hover:bg-accent`}
+                                    className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors duration-200 ${isProductFavorite ? 'bg-primary-500' : 'bg-transparent'} hover:bg-primary-500`}
                                     aria-label={isProductFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
                                 >
                                     <Heart className="w-5 h-5 text-red-500" fill={isProductFavorite ? 'currentColor' : 'none'} />
@@ -227,7 +227,7 @@ const ProductCard = forwardRef(function ProductCard({ product, setGlobalLoading 
                                 </div>
                                 <button
                                     onClick={handleAddToCartClick}
-                                    className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent hover:bg-accent transition-colors duration-200"
+                                    className="flex items-center justify-center w-10 h-10 rounded-full bg-transparent hover:bg-primary-500 transition-colors duration-200"
                                     aria-label="Ajouter au panier"
                                 >
                                     <ShoppingCart className="w-5 h-5 text-white" />
@@ -240,6 +240,12 @@ const ProductCard = forwardRef(function ProductCard({ product, setGlobalLoading 
                             Promo
                         </span>
                     )}
+                    {/* Old price positioned at bottom right of image on mobile */}
+                    {isMobile && product.oldPrice && (
+                        <div className="absolute bottom-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg z-10">
+                            <span className="line-through">{product.oldPrice?.toLocaleString()} DA</span>
+                        </div>
+                    )}
                     {!isAvailable && (
                         <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
                             <span className="bg-gray-800 text-white text-sm font-bold px-4 py-2 rounded-full uppercase tracking-wider">
@@ -249,15 +255,16 @@ const ProductCard = forwardRef(function ProductCard({ product, setGlobalLoading 
                     )}
                 </div>
                 {/* Product Info */}
-                <div className="p-4 flex flex-col flex-grow">
-                    <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider">{product.category}</p>
-                    <h3 className="font-semibold text-gray-800 truncate text-base mb-2">{product.name}</h3>
+                <div className="p-4 flex flex-col flex-grow border-t border-gray-100">
+                    <p className="text-xs text-primary-600 mb-1 uppercase tracking-wider font-medium">{product.category}</p>
+                    <h3 className="font-semibold text-neutral-800 truncate text-base mb-2">{product.name}</h3>
                     <div className="flex items-baseline justify-start gap-2 mt-2">
-                        <span className="font-bold text-xl text-red-600 whitespace-nowrap">
+                        <span className="font-bold text-xl text-primary-600 whitespace-nowrap">
                             {product.price?.toLocaleString()} <span className="text-base">DA</span>
                         </span>
-                        {product.oldPrice && (
-                            <span className="text-gray-400 line-through text-xs align-top whitespace-nowrap ml-1">
+                        {/* Show old price below current price only on desktop */}
+                        {!isMobile && product.oldPrice && (
+                            <span className="text-neutral-400 line-through text-xs align-top whitespace-nowrap ml-1">
                                 {product.oldPrice?.toLocaleString()} DA
                             </span>
                         )}
@@ -401,7 +408,7 @@ const ProductCard = forwardRef(function ProductCard({ product, setGlobalLoading 
                                 </button>
                                 <button
                                     onClick={handleProceedToCheckout}
-                                    className="w-full px-4 py-3 bg-yellow-700 text-white rounded-md hover:bg-yellow-800 font-semibold transition-colors"
+                                    className="w-full px-4 py-3 bg-primary-500 text-white rounded-md hover:bg-primary-600 font-semibold transition-colors"
                                 >
                                     Procéder au paiement
                                 </button>

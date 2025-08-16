@@ -4,26 +4,44 @@ import { MessageSquare, X, Send, Info } from 'lucide-react';
 import { Transition } from '@headlessui/react';
 
 const CATEGORIES = {
-    en: ['Men', 'Women', 'Shoes', 'Accessories'],
-    fr: ['Hommes', 'Femmes', 'Chaussures', 'Accessoires'],
-    ar: ['رجال', 'نساء', 'أحذية', 'إكسسوارات']
+    fr: [
+        "📱 Smartphones",
+        "💻 Ordinateurs portables", 
+        "🎧 Accessoires",
+        "⌚ Montres connectées"
+    ],
+    ar: [
+        "📱 الهواتف الذكية",
+        "💻 أجهزة الكمبيوتر المحمولة",
+        "🎧 الملحقات",
+        "⌚ الساعات الذكية"
+    ],
+    en: [
+        "📱 Smartphones",
+        "💻 Laptops",
+        "🎧 Accessories", 
+        "⌚ Smartwatches"
+    ]
 };
 
 const BRANDS = {
-    men: {
-        en: ['Nike', 'Adidas', 'Puma', 'Under Armour', 'Levi\'s', 'Calvin Klein', 'Tommy Hilfiger'],
-        fr: ['Nike', 'Adidas', 'Puma', 'Under Armour', 'Levi\'s', 'Calvin Klein', 'Tommy Hilfiger'],
-        ar: ['نايك', 'أديداس', 'بوما', 'أندر أرمور', 'ليفايز', 'كالفن كلاين', 'تومي هيلفيغر']
+    fr: {
+        "📱 Smartphones": ["Apple", "Samsung", "Xiaomi", "Huawei", "Oppo", "Vivo", "OnePlus", "Google", "Autres"],
+        "💻 Ordinateurs portables": ["Apple", "Dell", "HP", "Lenovo", "ASUS", "Acer", "MSI", "Razer", "Autres"],
+        "🎧 Accessoires": ["Apple", "Samsung", "Sony", "JBL", "Logitech", "Anker", "Belkin", "Autres"],
+        "⌚ Montres connectées": ["Apple", "Samsung", "Autres"]
     },
-    women: {
-        en: ['Zara', 'H&M', 'Mango', 'Forever 21', 'Victoria\'s Secret', 'Gap', 'Uniqlo'],
-        fr: ['Zara', 'H&M', 'Mango', 'Forever 21', 'Victoria\'s Secret', 'Gap', 'Uniqlo'],
-        ar: ['زارا', 'إتش آند إم', 'مانجو', 'فوريفر 21', 'فيكتوريا سيكريت', 'غاب', 'يونيكلو']
+    ar: {
+        "📱 الهواتف الذكية": ["Apple", "Samsung", "Xiaomi", "Huawei", "Oppo", "Vivo", "OnePlus", "Google", "أخرى"],
+        "💻 أجهزة الكمبيوتر المحمولة": ["Apple", "Dell", "HP", "Lenovo", "ASUS", "Acer", "MSI", "Razer", "أخرى"],
+        "🎧 الملحقات": ["Apple", "Samsung", "Sony", "JBL", "Logitech", "Anker", "Belkin", "أخرى"],
+        "⌚ الساعات الذكية": ["Apple", "Samsung", "أخرى"]
     },
-    shoes: {
-        en: ['Nike', 'Adidas', 'Puma', 'Converse', 'Vans', 'New Balance'],
-        fr: ['Nike', 'Adidas', 'Puma', 'Converse', 'Vans', 'New Balance'],
-        ar: ['نايك', 'أديداس', 'بوما', 'كونفيرس', 'فانز', 'نيو بالانس']
+    en: {
+        "📱 Smartphones": ["Apple", "Samsung", "Xiaomi", "Huawei", "Oppo", "Vivo", "OnePlus", "Google", "Other"],
+        "💻 Laptops": ["Apple", "Dell", "HP", "Lenovo", "ASUS", "Acer", "MSI", "Razer", "Other"],
+        "🎧 Accessories": ["Apple", "Samsung", "Sony", "JBL", "Logitech", "Anker", "Belkin", "Other"],
+        "⌚ Smartwatches": ["Apple", "Samsung", "Other"]
     }
 };
 
@@ -38,11 +56,11 @@ const WEBSITE_INFO = {
         help: "You can ask me about our products, categories, brands, shipping, or warranty information."
     },
     fr: {
-        welcome: "Bienvenue dans notre boutique en ligne ! Comment puis-je vous aider aujourd'hui ?",
+        welcome: "Bienvenue chez Elbahdja Phone ! Comment puis-je vous aider aujourd'hui ?",
         categories: "Nous proposons des produits dans les catégories suivantes :",
         brands: "Nous proposons des produits de ces marques :",
         shipping: "Nous proposons une livraison rapide dans les 58 Wilayas d'Algérie.",
-        warranty: "Tous les produits sont garantis 12 mois officiellement.",
+        warranty: "Tous nos produits sont garantis officiellement.",
         payment: "Nous acceptons différents modes de paiement, y compris le paiement à la livraison.",
         help: "Vous pouvez me poser des questions sur nos produits, catégories, marques, livraison ou garantie."
     },
@@ -177,14 +195,14 @@ const ChatBot = () => {
             "Feel free to ask me anything about our clothing store!"
         ],
         fr: [
-            "👋 Bienvenue chez l'Assistant Arena Fashion !",
+            "👋 Bienvenue chez l'Assistant Elbahdja Phone !",
             "Je peux vous aider avec :",
             "• Informations et prix des produits",
-            "• Catégories de vêtements et marques disponibles",
+            "• Catégories de téléphones et technologies",
             "• Détails de livraison",
-            "• Options de taille et couleur",
+            "• Options de stockage et couleur",
             "• Méthodes de paiement",
-            "N'hésitez pas à me poser des questions sur notre boutique de vêtements !"
+            "N'hésitez pas à me poser des questions sur notre boutique de téléphones !"
         ],
         ar: [
             "�� مرحباً بك في مساعد أرينا فاشن!",
@@ -237,7 +255,7 @@ const ChatBot = () => {
                         <div className="fixed bottom-6 right-6 w-[95vw] max-w-xs sm:max-w-sm md:max-w-md bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all pointer-events-auto flex flex-col" style={{height: '450px'}}>
                             {/* Header */}
                             <div className="bg-gray-900 text-white px-4 py-3 flex justify-between items-center">
-                                <h3 className="text-base font-semibold">Assistant Arena Fashion</h3>
+                                <h3 className="text-base font-semibold">Assistant Elbahdja Phone</h3>
                                 <button
                                     onClick={() => setIsOpen(false)}
                                     className="text-gray-300 hover:text-white transition-colors"

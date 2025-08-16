@@ -210,8 +210,6 @@ const HomepageManagement = () => {
                 <p className="text-gray-600 mt-1">Control the content displayed on your homepage.</p>
             </header>
 
-            {isAdmin && <AdminCommentApproval />}
-
             {/* Showcase Video Management */}
             <section className="bg-white shadow-xl rounded-lg p-6 mb-8">
                 <h2 className="text-2xl font-semibold text-gray-700 mb-5 border-b pb-3">Showcase Video</h2>
@@ -371,83 +369,5 @@ const HomepageManagement = () => {
         </div>
     );
 };
-
-function AdminCommentApproval() {
-    const [pendingComments, setPendingComments] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-
-    useEffect(() => {
-        async function fetchComments() {
-            setLoading(true);
-            setError('');
-            try {
-                const res = await fetch('/api/products');
-                const products = await res.json();
-                // Flatten all unapproved comments with product info
-                const comments = [];
-                for (const product of products) {
-                    if (product.comments) {
-                        for (const comment of product.comments) {
-                            if (!comment.approved) {
-                                comments.push({
-                                    ...comment,
-                                    productId: product._id,
-                                    productName: product.name,
-                                });
-                            }
-                        }
-                    }
-                }
-                setPendingComments(comments);
-            } catch (e) {
-                setError('Erreur lors du chargement des commentaires.');
-            }
-            setLoading(false);
-        }
-        fetchComments();
-    }, []);
-
-    async function approveComment(productId, commentId) {
-        try {
-            const res = await fetch(`/api/products/${productId}?approve=1&commentId=${commentId}`, {
-                method: 'PATCH',
-            });
-            if (res.ok) {
-                setPendingComments(pendingComments.filter(c => c._id !== commentId));
-            } else {
-                alert('Erreur lors de l\'approbation du commentaire.');
-            }
-        } catch {
-            alert('Erreur lors de l\'approbation du commentaire.');
-        }
-    }
-
-    return (
-        <section className="my-10 p-6 bg-white rounded shadow">
-            <h2 className="text-xl font-bold mb-4">Commentaires en attente d'approbation</h2>
-            {loading ? (
-                <div>Chargement...</div>
-            ) : error ? (
-                <div className="text-red-500">{error}</div>
-            ) : pendingComments.length === 0 ? (
-                <div className="text-gray-500">Aucun commentaire en attente.</div>
-            ) : (
-                <div className="space-y-4">
-                    {pendingComments.map(comment => (
-                        <div key={comment._id} className="bg-gray-50 rounded-lg p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between">
-                            <div>
-                                <div className="font-semibold text-gray-800">{comment.userName} sur <span className="text-yellow-900">{comment.productName}</span></div>
-                                <div className="text-gray-700 mt-1 mb-2">{comment.text}</div>
-                                <div className="text-xs text-gray-400">{new Date(comment.createdAt).toLocaleDateString()}</div>
-                            </div>
-                            <button onClick={() => approveComment(comment.productId, comment._id)} className="mt-2 md:mt-0 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-semibold text-sm">Approuver</button>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </section>
-    );
-}
 
 export default HomepageManagement;

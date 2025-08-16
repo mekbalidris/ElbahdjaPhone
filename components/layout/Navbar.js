@@ -13,7 +13,7 @@ const NavLink = ({ href, children }) => {
         <Link href={href}>
             <span className={`inline-block relative py-2 text-sm font-medium transition-colors duration-200 ease-in-out cursor-pointer ${isActive ? 'text-white' : 'text-gray-400 hover:text-white'}`}>
                 {children}
-                <span className={`absolute bottom-0 left-0 block h-0.5 bg-accent transition-all duration-300 ${isActive ? 'w-full' : 'w-0'} group-hover:w-full`}></span>
+                <span className={`absolute bottom-0 left-0 block h-0.5 bg-primary-500 transition-all duration-300 ${isActive ? 'w-full' : 'w-0'} group-hover:w-full`}></span>
             </span>
         </Link>
     );
@@ -33,16 +33,21 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
-            if (currentScrollY < 50) {
+            // Always show navbar when at the top
+            if (currentScrollY < 100) {
                 setShowNavbar(true);
-            } else if (currentScrollY > lastScrollY.current) {
-                setShowNavbar(false); // scrolling down
-            } else {
-                setShowNavbar(true); // scrolling up
+            } else if (currentScrollY > lastScrollY.current + 10) {
+                // Scrolling down - hide navbar
+                setShowNavbar(false);
+            } else if (currentScrollY < lastScrollY.current - 10) {
+                // Scrolling up - show navbar
+                setShowNavbar(true);
             }
             lastScrollY.current = currentScrollY;
         };
-        window.addEventListener('scroll', handleScroll);
+        
+        // Use passive listener for better performance
+        window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
@@ -66,27 +71,48 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
 
     const navLinks = [
         { name: 'Accueil', href: '/' },
-        { name: 'Boutique', href: '/products' },
-        { name: 'Qui sommes-nous ?', href: '/about' },
+        { name: 'Produits', href: '/products' },
+        { name: 'À propos', href: '/about' },
         { name: 'Contact', href: '/contact' },
     ];
 
     return (
-        <header className={`fixed top-0 z-40 w-full bg-black/60 backdrop-blur-md shadow-sm transition-transform duration-300 ${showNavbar ? 'translate-y-0' : '-translate-y-full'}`}>
+        <header className={`fixed top-0 z-50 w-full bg-black/80 backdrop-blur-md shadow-lg border-b border-gray-800 transition-all duration-300 ${showNavbar ? 'translate-y-0' : '-translate-y-full'}`}>
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
-                    {/* Mobile Menu Button */}
-                    <div className="lg:hidden">
-                        <button onClick={() => setMobileMenuOpen(true)} className="text-white p-2 rounded-md bg-transparent">
-                            <MenuIcon size={24} />
-                        </button>
-                    </div>
+                    {/* Mobile Menu Button and Logo */}
+                    <div className="flex items-center gap-3">
+                        <div className="lg:hidden">
+                            <button onClick={() => setMobileMenuOpen(true)} className="text-white p-2 rounded-md bg-transparent">
+                                <MenuIcon size={24} />
+                            </button>
+                        </div>
 
-                    {/* Logo */}
-                    <div className="flex-shrink-0">
-                        <Link href="/">
-                            <img src="/logo.png" alt="Arena Fashion Logo" className="h-14 w-auto" />
-                        </Link>
+                        {/* Logo and Brand Name */}
+                        <div className="flex-shrink-0 flex items-center gap-3">
+                            <Link href="/" className="flex items-center gap-3">
+                                {/* Logo */}
+                                <div className="rounded-lg overflow-hidden">
+                                    <img 
+                                        src="/logo.png" 
+                                        alt="Elbahdja Phone Logo" 
+                                        className="w-6 h-10"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.nextSibling.style.display = 'flex';
+                                        }}
+                                    />
+                                    <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-700 flex items-center justify-center" style={{ display: 'none' }}>
+                                        <span className="text-white font-bold text-lg">EP</span>
+                                    </div>
+                                </div>
+                                {/* Brand Name with two colors */}
+                                <div className="hidden md:block text-2xl font-bold cursor-pointer">
+                                    <span className="text-primary-500">Elbahdja</span>
+                                    <span className="text-accent-500">Phone</span>
+                                </div>
+                            </Link>
+                        </div>
                     </div>
 
                     {/* Desktop Navigation */}
@@ -102,7 +128,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                         <div className="relative">
                             <button
                                 onClick={() => setShowSearch((v) => !v)}
-                                className={`text-white hover:text-accent transition-colors duration-200 p-2 rounded-full bg-transparent`}
+                                className={`text-white hover:text-primary-500 transition-colors duration-200 p-2 rounded-full bg-transparent`}
                                 title="Rechercher un produit"
                             >
                                 <SearchIcon className="w-6 h-6 text-white" />
@@ -114,19 +140,19 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                             >
                                 <input
                                     type="text"
-                                    className="px-4 py-2 rounded-l-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-accent text-sm bg-black text-white placeholder:text-gray-400"
+                                    className="px-4 py-2 rounded-l-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm bg-black text-white placeholder:text-gray-400"
                                     placeholder="Rechercher un produit..."
                                     value={searchTerm}
                                     onChange={e => setSearchTerm(e.target.value)}
                                     autoFocus={showSearch}
                                 />
-                                <button type="submit" className="px-3 py-2 bg-accent text-black rounded-r-lg hover:bg-primary transition">Rechercher</button>
+                                <button type="submit" className="px-3 py-2 bg-primary-500 text-white rounded-r-lg hover:bg-primary-600 transition">Rechercher</button>
                             </form>
                         </div>
                         {/* Favorites Heart Icon */}
                         <button
                             onClick={handleFavoritesClick}
-                            className="relative text-gray-300 hover:text-red-500 transition-colors duration-200 bg-transparent p-0 rounded-full focus:outline-none focus:ring-2 focus:ring-accent hover:bg-accent"
+                            className="relative text-gray-300 transition-colors duration-200 bg-transparent p-0 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 hover:bg-primary-500"
                             title="Mes favoris"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
@@ -138,7 +164,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                 </span>
                             )}
                         </button>
-                        <button onClick={onCartClick} className="relative text-gray-300 hover:text-accent transition-colors duration-200 bg-transparent p-0 rounded-full focus:outline-none focus:ring-2 focus:ring-accent hover:bg-accent">
+                        <button onClick={onCartClick} className="relative text-gray-300 hover:bg-gray-300 transition-colors duration-200 bg-transparent p-0 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 hover:bg-primary-500">
                             <ShoppingCart size={24} />
                             {cartItemCount > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-xs font-medium text-white">
@@ -188,7 +214,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                         {(currentUser.role === 'admin' || currentUser.role === 'seller') && (
                                             <Menu.Item>
                                                 {({ active }) => (
-                                                    <Link href="/dashboard" className={`${active ? 'bg-gray-100' : ''} flex items-center px-4 py-2 text-sm text-white`}>
+                                                    <Link href="/dashboard" className={`${active ? 'bg-gray-100' : ''} flex items-center px-4 py-2 text-sm text-black`}>
                                                         <LayoutDashboard size={16} className="mr-2" />
                                                         Dashboard
                                                     </Link>
@@ -199,7 +225,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                             {({ active }) => {
                                                 const isActive = router.pathname === '/profile';
                                                 return (
-                                                    <Link href="/profile" className={`${isActive ? 'bg-accent text-black' : active ? 'bg-gray-100' : ''} flex items-center px-4 py-2 text-sm font-semibold`}>
+                                                    <Link href="/profile" className={`${isActive ? 'bg-primary-500 text-white' : active ? 'bg-gray-100' : ''} flex items-center px-4 py-2 text-sm font-semibold`}>
                                                         <User size={16} className="mr-2" />
                                                         Mon profil
                                                     </Link>
@@ -208,8 +234,8 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                         </Menu.Item>
                                         <Menu.Item>
                                             {({ active }) => (
-                                                <button onClick={handleLogout} className={`w-full text-left flex items-center px-4 py-2 text-sm font-semibold rounded-md bg-red-600 text-black ${active ? 'ring-2 ring-red-800' : ''}`}>
-                                                    <LogOut size={16} className="mr-2 text-black" />
+                                                <button onClick={handleLogout} className={`w-full text-left flex items-center px-4 py-2 text-sm font-semibold rounded-md bg-red-600 text-white ${active ? 'ring-2 ring-red-800' : ''}`}>
+                                                    <LogOut size={16} className="mr-2" />
                                                     Se déconnecter
                                                 </button>
                                             )}
@@ -255,8 +281,25 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                         >
                             <Dialog.Panel className="relative mr-auto flex h-full w-full max-w-xs flex-col overflow-y-auto bg-black py-4 pb-12 shadow-xl">
                                 <div className="flex items-center justify-between px-4">
-                                     <Link href="/">
-                                        <span className="text-2xl font-bold text-white cursor-pointer">Arena Fashion</span>
+                                                                           <Link href="/" className="flex items-center gap-3">
+                                          <div className="w-8 h-8 rounded-lg overflow-hidden">
+                                              <img 
+                                                  src="/logo.png" 
+                                                  alt="Elbahdja Phone Logo" 
+                                                  className="w-full h-full object-cover"
+                                                  onError={(e) => {
+                                                      e.target.style.display = 'none';
+                                                      e.target.nextSibling.style.display = 'flex';
+                                                  }}
+                                              />
+                                              <div className="w-full h-full bg-gradient-to-br from-primary-500 to-accent-700 flex items-center justify-center" style={{ display: 'none' }}>
+                                                  <span className="text-white font-bold text-sm">EP</span>
+                                              </div>
+                                          </div>
+                                        <div className="text-xl font-bold">
+                                            <span className="text-primary-500">Elbahdja</span>
+                                            <span className="text-accent-500">Phone</span>
+                                        </div>
                                     </Link>
                                     <button
                                         type="button"
@@ -274,7 +317,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                             <Link href={link.href} key={link.name}>
                                                 <span
                                                     onClick={() => setMobileMenuOpen(false)}
-                                                    className={`block py-2 text-lg font-medium rounded-md ${isActive ? 'bg-accent text-black' : 'text-white hover:text-accent hover:bg-black'}`}
+                                                    className={`block py-2 text-lg font-medium rounded-md ${isActive ? 'bg-primary-500 text-white' : 'text-white hover:text-primary-500 hover:bg-black'}`}
                                                 >
                                                     {link.name}
                                                 </span>
@@ -286,23 +329,23 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                                             handleFavoritesClick();
                                             setMobileMenuOpen(false);
                                         }}
-                                        className={`w-full text-left block py-2 text-lg font-medium rounded-md ${router.pathname === '/favorites' ? 'bg-accent text-black' : 'text-white hover:text-accent hover:bg-black'}`}
+                                        className={`w-full text-left block py-2 text-lg font-medium rounded-md ${router.pathname === '/favorites' ? 'bg-primary-500 text-white' : 'text-white hover:text-primary-500 hover:bg-black'}`}
                                     >
                                         Mes favoris {favoritesCount > 0 && `(${favoritesCount})`}
                                     </button>
                                     <Link href="/profile">
                                         <span
                                             onClick={() => setMobileMenuOpen(false)}
-                                            className={`block py-2 text-lg font-medium rounded-md ${router.pathname === '/profile' ? 'bg-accent text-black' : 'text-white hover:text-accent hover:bg-black'}`}
+                                            className={`block py-2 text-lg font-medium rounded-md ${router.pathname === '/profile' ? 'bg-primary-500 text-white' : 'text-white hover:text-primary-500 hover:bg-black'}`}
                                         >
                                             Mon profil
                                         </span>
                                     </Link>
                                     <button
                                         onClick={handleLogout}
-                                        className="w-full text-left block py-2 text-lg font-medium rounded-md bg-red-600 text-black flex items-center gap-2 mt-4"
+                                        className="w-full text-left block py-2 text-lg font-medium rounded-md bg-red-600 text-white flex items-center gap-2 mt-4"
                                     >
-                                        <LogOut size={20} className="text-black" />
+                                        <LogOut size={20} />
                                         Se déconnecter
                                     </button>
                                 </nav>
