@@ -134,7 +134,7 @@ const CategoryMarquee = ({ categories, direction = 'left', products = [] }) => {
     };
 
     return (
-        <div className="w-full group py-2 relative bg-gradient-to-r from-orange-50 to-amber-50 overflow-hidden rounded-xl">
+        <div className="w-full group py-2 relative bg-gradient-to-r from-orange-300 to-purple-500 overflow-hidden rounded-xl">
             {/* This new container handles the manual dragging */}
             <div
                 ref={scrollContainerRef}
@@ -156,7 +156,6 @@ const CategoryMarquee = ({ categories, direction = 'left', products = [] }) => {
                             if (cat.key === 'samsung') return brandVal === 'samsung' && catVal === 'phones';
                             if (cat.key === 'anti-choc') return catVal === 'accessories' && p.type === 'anti-choc';
                             if (cat.key === 'headphones') return catVal === 'accessories' && (p.type === 'headphones' || p.type === 'casques');
-                            if (cat.key === 'cases') return catVal === 'accessories' && (p.type === 'cases' || p.type === 'coques');
                             return catVal === cat.filter.toLowerCase();
                         });
                         const image = product?.images?.[0];
@@ -233,7 +232,6 @@ const CategoryGrid = ({ products = [] }) => {
     const accessoryCategories = [
         { title: 'Anti-Choc', key: 'anti-choc', filter: 'anti-choc' },
         { title: 'Casques', key: 'headphones', filter: 'headphones' },
-        { title: 'Coques', key: 'cases', filter: 'cases' },
         { title: 'Accessoires', key: 'accessories', filter: 'accessories' }
     ];
 

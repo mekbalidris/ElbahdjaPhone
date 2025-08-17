@@ -160,49 +160,79 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product }) => {
         }
     };
 
-    const compressImage = (base64String, maxWidth = 800) => {
-        return new Promise((resolve) => {
-            const img = new Image();
-            img.src = base64String;
+    const compressImage = (file, maxWidth = 800, quality = 0.8) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            // Create image element differently for Next.js compatibility
+            const img = document.createElement('img');
             img.onload = () => {
-                const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-                
-                if (width > maxWidth) {
-                    height = Math.round((height * maxWidth) / width);
-                    width = maxWidth;
-                }
-                
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                // Convert to JPEG with 0.8 quality
-                resolve(canvas.toDataURL('image/jpeg', 0.8));
+              const canvas = document.createElement('canvas');
+              let width = img.width;
+              let height = img.height;
+      
+              if (width > maxWidth) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+              }
+      
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+      
+              canvas.toBlob(
+                (blob) => {
+                  if (!blob) {
+                    reject(new Error('Canvas to Blob conversion failed'));
+                    return;
+                  }
+                  const newReader = new FileReader();
+                  newReader.onloadend = () => {
+                    resolve(newReader.result);
+                  };
+                  newReader.readAsDataURL(blob);
+                },
+                'image/jpeg',
+                quality
+              );
             };
+            img.onerror = () => reject(new Error('Image loading failed'));
+            img.src = event.target.result;
+          };
+          reader.onerror = () => reject(new Error('File reading failed'));
+          reader.readAsDataURL(file);
         });
-    };
-
-    const handleImageChange = async (idx, file) => {
+      };
+      
+      const handleImageChange = async (idx, file) => {
         if (!file) return;
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-            try {
-                const compressedImage = await compressImage(reader.result);
-                const newImages = [...images];
-                const newPreviews = [...imagePreviews];
-                newImages[idx] = compressedImage;
-                newPreviews[idx] = compressedImage;
-                setImages(newImages);
-                setImagePreviews(newPreviews);
-            } catch (err) {
-                toast.error('Failed to process image');
-            }
-        };
-        reader.readAsDataURL(file);
-    };
+        
+        // Check file type
+        if (!file.type.match('image.*')) {
+          toast.error('Please select an image file');
+          return;
+        }
+      
+        // Check file size (limit to 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error('Image size should be less than 5MB');
+          return;
+        }
+      
+        try {
+          const compressedImage = await compressImage(file);
+          const newImages = [...images];
+          const newPreviews = [...imagePreviews];
+          newImages[idx] = compressedImage;
+          newPreviews[idx] = compressedImage;
+          setImages(newImages);
+          setImagePreviews(newPreviews);
+        } catch (err) {
+          console.error('Image processing error:', err);
+          toast.error('Failed to process image. Please try another image.');
+        }
+      };
 
     const handleRemoveImage = (idx) => {
         const newImages = [...images];
