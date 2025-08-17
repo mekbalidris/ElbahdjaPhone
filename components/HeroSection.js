@@ -15,10 +15,10 @@ const HeroSection = () => {
     }, []);
 
     const features = [
-        { icon: Shield, text: "Garantie Officielle", delay: "delay-300" },
-        { icon: Truck, text: "Livraison Rapide", delay: "delay-500" },
-        { icon: Clock, text: "Support 24/7", delay: "delay-700" },
-        { icon: Star, text: "Produits Authentiques", delay: "delay-900" }
+        { icon: Shield, text: "Garantie Officielle"},
+        { icon: Truck, text: "Livraison Rapide"},
+        { icon: Clock, text: "Support 24/7"},
+        { icon: Star, text: "Produits Authentiques"}
     ];
 
     return (
@@ -103,12 +103,12 @@ const HeroSection = () => {
                     </div>
 
                     {/* Features Grid */}
-                    <div className={`mb-10 transition-all duration-1000 delay-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                    <div className={`mb-10 transition-all ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
                             {features.map((feature, index) => (
                                 <div 
                                     key={index}
-                                    className={`flex flex-col items-center p-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 ${feature.delay}`}
+                                    className={`flex flex-col items-center p-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all hover:scale-105 ${feature.delay}`}
                                 >
                                     <feature.icon className="w-8 h-8 text-primary-300 mb-2" />
                                     <span className="text-sm font-medium text-gray-200 text-center">{feature.text}</span>

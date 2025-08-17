@@ -88,9 +88,11 @@ const HomePage = ({ products, error }) => {
                                             className="w-full h-auto"
                                             poster={showcaseData.thumbnailUrl || '/video-thumbnail.jpg'}
                                             muted={isMuted}
+                                            preload="metadata"
                                             onPlay={() => setIsVideoPlaying(true)}
                                             onPause={() => setIsVideoPlaying(false)}
                                             onEnded={() => setIsVideoPlaying(false)}
+                                            style={{ maxHeight: '400px', objectFit: 'contain' }}
                                         >
                                             <source src={showcaseData.videoUrl} type="video/mp4" />
                                             Votre navigateur ne supporte pas la lecture de vidéos.

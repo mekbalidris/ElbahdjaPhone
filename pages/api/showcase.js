@@ -17,7 +17,14 @@ export default async function handler(req, res) {
         });
       }
       
-      res.status(200).json(showcase);
+      // Check if video exists in the database
+      const videoExists = await db.collection('showcase').findOne({ _id: 'video' });
+      const videoUrl = videoExists && videoExists.videoData ? '/api/showcase/video' : '';
+      
+      res.status(200).json({
+        ...showcase,
+        videoUrl
+      });
     } catch (error) {
       console.error('Error fetching showcase data:', error);
       res.status(500).json({ error: 'Failed to fetch showcase data' });
@@ -25,13 +32,13 @@ export default async function handler(req, res) {
   } else if (req.method === 'PUT') {
     try {
       const { db } = await connectToDatabase();
-      const { videoUrl, thumbnailUrl, title, subtitle, description, ctaText } = req.body;
+      const { thumbnailUrl, title, subtitle, description, ctaText } = req.body;
       
       const result = await db.collection('showcase').updateOne(
         {},
         {
           $set: {
-            videoUrl: videoUrl || '',
+            videoUrl: '/api/showcase/video', // Always use the video serving endpoint
             thumbnailUrl: thumbnailUrl || '',
             title: title || 'Offre Spéciale',
             subtitle: subtitle || 'Découvrez nos meilleures offres',

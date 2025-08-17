@@ -85,13 +85,13 @@ const OrderDetailPage = () => {
      }
 
     return (
-        <div className="bg-black min-h-screen py-8 sm:py-12 mt-[1.5rem]">
+        <div className="bg-white min-h-screen py-8 sm:py-12 mt-[1.5rem]">
             <div className="container mx-auto px-4 max-w-3xl">
-                <div className="bg-black rounded-xl shadow-xl p-6 sm:p-8">
+                <div className="bg-white rounded-xl shadow-xl p-6 sm:p-8">
                     <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between border-b border-gray-800 pb-6 mb-6">
                         <div className="text-center sm:text-left mb-4 sm:mb-0">
                             <h1 className="text-2xl sm:text-3xl font-bold text-accent mb-1">Thank You for Your Order!</h1>
-                            <p className="text-white">Your order has been placed successfully.</p>
+                            <p className="text-black">Your order has been placed successfully.</p>
                         </div>
                         <div className="flex items-center">
                              <Icon name="package" className="w-8 h-8 text-accent mr-2" />
@@ -102,23 +102,23 @@ const OrderDetailPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <h2 className="text-lg font-semibold text-accent mb-3 flex items-center"><Icon name="user" className="w-5 h-5 mr-2 text-accent" /> Contact Information</h2>
-                            <p className="text-white"><span className="font-medium text-accent">Name:</span> {order.contactInfo?.fullName || 'N/A'}</p>
-                            <p className="text-white"><span className="font-medium text-accent">Email:</span> {order.contactInfo?.email || 'N/A'}</p>
-                            <p className="text-white"><span className="font-medium text-accent">Phone:</span> {order.contactInfo?.phone || 'N/A'}</p>
+                            <p className="text-black"><span className="font-medium text-accent">Name:</span> {order.contactInfo?.fullName || 'N/A'}</p>
+                            <p className="text-black"><span className="font-medium text-accent">Email:</span> {order.contactInfo?.email || 'N/A'}</p>
+                            <p className="text-black"><span className="font-medium text-accent">Phone:</span> {order.contactInfo?.phone || 'N/A'}</p>
                         </div>
                         <div>
                             <h2 className="text-lg font-semibold text-accent mb-3 flex items-center"><Icon name="mapPin" className="w-5 h-5 mr-2 text-accent" /> Delivery Address</h2>
-                            <p className="text-white">{order.deliveryAddress?.address || 'N/A'}</p>
-                            {order.deliveryAddress?.aptSuite && <p className="text-white">Apt/Suite: {order.deliveryAddress.aptSuite}</p>}
-                            <p className="text-white">{order.deliveryAddress?.city || 'N/A'}, {order.deliveryAddress?.wilaya || 'N/A'}</p>
-                            <p className="text-white">Payment Method: <span className="text-accent">{order.paymentMethod || 'N/A'}</span></p>
+                            <p className="text-black">{order.deliveryAddress?.address || 'N/A'}</p>
+                            {order.deliveryAddress?.aptSuite && <p className="text-black">Apt/Suite: {order.deliveryAddress.aptSuite}</p>}
+                            <p className="text-black">{order.deliveryAddress?.city || 'N/A'}, {order.deliveryAddress?.wilaya || 'N/A'}</p>
+                            <p className="text-black">Payment Method: <span className="text-accent">{order.paymentMethod || 'N/A'}</span></p>
                         </div>
                     </div>
                     
                     {order.orderNotes && (
                         <div className="mb-6 p-4 bg-black rounded-lg border border-gray-800">
                             <h2 className="text-lg font-semibold text-accent mb-2 flex items-center"><Icon name="edit" className="w-5 h-5 mr-2 text-accent" /> Order Notes</h2>
-                            <p className="text-white">{order.orderNotes}</p>
+                            <p className="text-black">{order.orderNotes}</p>
                         </div>
                     )}
 
@@ -131,9 +131,9 @@ const OrderDetailPage = () => {
                                          <Image src={item.imageUrl || '/placeholder.png'} alt={item.name} fill className="object-cover rounded-lg" />
                                      </div>
                                      <div className="flex-1 flex flex-col justify-center">
-                                         <p className="text-sm font-medium text-white">{item.name || 'Unnamed Item'}</p>
+                                         <p className="text-sm font-medium text-black">{item.name || 'Unnamed Item'}</p>
                                          {item.attributes && <p className="text-xs text-accent">{item.attributes}</p>}
-                                         <p className="text-xs text-white mt-0.5">Qty: {item.quantity || 0}</p>
+                                         <p className="text-xs text-black mt-0.5">Qty: {item.quantity || 0}</p>
                                      </div>
                                      <p className="text-sm font-semibold text-accent ml-4">DA{((item.price || 0) * (item.quantity || 0)).toFixed(2)}</p>
                                  </li>
@@ -141,7 +141,7 @@ const OrderDetailPage = () => {
                          </ul>
                     </div>
 
-                     <div className="space-y-1.5 text-sm text-white pt-4 border-t border-gray-800">
+                     <div className="space-y-1.5 text-sm text-black pt-4 border-t border-gray-800">
                          <div className="flex justify-between items-center">
                              <span>Subtotal</span>
                              <span className="font-medium">DA{order.totals?.subtotal?.toFixed(2) || '0.00'}</span>
@@ -176,7 +176,7 @@ const OrderDetailPage = () => {
                 </div>
                  {/* Small text at the bottom */}
                  <p className="text-xs text-accent mt-6 text-center">
-                     Order placed on {order.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A'}. Order status: <span className="text-white">{order.status || 'N/A'}</span>.
+                     Order placed on {order.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A'}. Order status: <span className="text-black">{order.status || 'N/A'}</span>.
                  </p>
             </div>
         </div>

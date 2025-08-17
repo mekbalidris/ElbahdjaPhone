@@ -44,25 +44,70 @@ const HomepageManagement = () => {
     }));
   };
 
-  const handleFileUpload = (e, type) => {
+  const handleFileUpload = async (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (type === 'video') {
-        setShowcaseData(prev => ({
-          ...prev,
-          videoUrl: event.target.result
-        }));
-      } else if (type === 'thumbnail') {
+    // Check file size (50MB limit)
+    if (file.size > 50 * 1024 * 1024) {
+      showMessage('Le fichier est trop volumineux. Taille maximum: 50MB', 'error');
+      return;
+    }
+
+    // For video files, upload directly to server
+    if (type === 'video') {
+      setLoading(true);
+      try {
+        const formData = new FormData();
+        formData.append('video', file);
+
+        const response = await fetch('/api/showcase/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setShowcaseData(prev => ({
+            ...prev,
+            videoUrl: `/api/showcase/video` // Use the video serving endpoint
+          }));
+          showMessage('Vidéo uploadée avec succès !', 'success');
+        } else {
+          let errorMessage = 'Erreur lors de l\'upload';
+          
+          // Handle different error status codes
+          if (response.status === 413) {
+            errorMessage = 'Le fichier est trop volumineux. Taille maximum: 50MB';
+          } else {
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.error || errorMessage;
+            } catch (parseError) {
+              // If response is not JSON, use status text
+              errorMessage = response.statusText || errorMessage;
+            }
+          }
+          
+          throw new Error(errorMessage);
+        }
+      } catch (error) {
+        console.error('Error uploading video:', error);
+        showMessage(error.message || 'Erreur lors de l\'upload de la vidéo', 'error');
+      } finally {
+        setLoading(false);
+      }
+    } else if (type === 'thumbnail') {
+      // For thumbnails, use base64 (smaller files)
+      const reader = new FileReader();
+      reader.onload = (event) => {
         setShowcaseData(prev => ({
           ...prev,
           thumbnailUrl: event.target.result
         }));
-      }
-    };
-    reader.readAsDataURL(file);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const removeFile = (type) => {
@@ -85,12 +130,15 @@ const HomepageManagement = () => {
     setMessage('');
 
     try {
+      // Remove video data from payload since it's stored separately
+      const { videoUrl, ...dataToSave } = showcaseData;
+      
       const response = await fetch('/api/showcase', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(showcaseData),
+        body: JSON.stringify(dataToSave),
       });
 
       if (response.ok) {
@@ -154,9 +202,12 @@ const HomepageManagement = () => {
           {showcaseData.videoUrl ? (
             <div className="relative">
               <video
-                src={showcaseData.videoUrl}
-                className="w-full max-w-md h-auto rounded-lg border border-gray-200"
+                src={showcaseData.videoUrl.startsWith('data:') ? showcaseData.videoUrl : `/api/showcase/video`}
+                className="w-full max-w-sm h-auto rounded-lg border border-gray-200"
                 controls
+                preload="metadata"
+                poster={showcaseData.thumbnailUrl || ''}
+                style={{ maxHeight: '300px', objectFit: 'contain' }}
               />
               <button
                 type="button"
@@ -174,18 +225,33 @@ const HomepageManagement = () => {
                 onChange={(e) => handleFileUpload(e, 'video')}
                 className="hidden"
                 id="video-upload"
+                disabled={loading}
               />
               <label
                 htmlFor="video-upload"
-                className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
+                className={`flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 rounded-lg transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                <span className="text-lg font-medium text-gray-700 mb-2">
-                  Sélectionner une vidéo
-                </span>
-                <span className="text-sm text-gray-500">
-                  Formats acceptés: MP4, WebM, OGG (max 50MB)
-                </span>
+                {loading ? (
+                  <>
+                    <Loader className="w-12 h-12 text-primary-500 animate-spin mb-4" />
+                    <span className="text-lg font-medium text-gray-700 mb-2">
+                      Upload en cours...
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      Veuillez patienter
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-12 h-12 text-gray-400 mb-4" />
+                    <span className="text-lg font-medium text-gray-700 mb-2">
+                      Sélectionner une vidéo
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      Formats acceptés: MP4, WebM, OGG (max 50MB)
+                    </span>
+                  </>
+                )}
               </label>
             </div>
           )}

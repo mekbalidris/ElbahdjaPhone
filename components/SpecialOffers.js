@@ -64,14 +64,30 @@ const SpecialOffers = ({ products = [] }) => {
   const totalPages = Math.ceil(packs.length / itemsPerView);
 
   const handlePrev = () => {
+    if (scrollRef.current) {
+      const cardWidth = 160 + 16; // card width + gap
+      const scrollAmount = cardWidth * itemsPerView;
+      scrollRef.current.scrollBy({
+        left: -scrollAmount,
+        behavior: 'smooth'
+      });
+    }
     setCurrentIndex(prev => Math.max(0, prev - 1));
   };
 
   const handleNext = () => {
+    if (scrollRef.current) {
+      const cardWidth = 160 + 16; // card width + gap
+      const scrollAmount = cardWidth * itemsPerView;
+      scrollRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+    }
     setCurrentIndex(prev => Math.min(totalPages - 1, prev + 1));
   };
 
-  // Touch scroll functionality
+  // Touch scroll functionality and scroll position tracking
   useEffect(() => {
     const scrollContainer = scrollRef.current;
     if (!scrollContainer || !isMobile) return;
@@ -124,6 +140,13 @@ const SpecialOffers = ({ products = [] }) => {
       scrollContainer.scrollLeft = scrollLeft - walk;
     };
 
+    // Update current index based on scroll position
+    const updateCurrentIndex = () => {
+      const cardWidth = 160 + 16; // card width + gap
+      const newIndex = Math.round(scrollContainer.scrollLeft / (cardWidth * itemsPerView));
+      setCurrentIndex(Math.max(0, Math.min(newIndex, totalPages - 1)));
+    };
+
     // Add event listeners
     scrollContainer.addEventListener('mousedown', handleMouseDown);
     scrollContainer.addEventListener('mouseleave', handleMouseLeave);
@@ -132,6 +155,7 @@ const SpecialOffers = ({ products = [] }) => {
     scrollContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
     scrollContainer.addEventListener('touchend', handleTouchEnd);
     scrollContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+    scrollContainer.addEventListener('scroll', updateCurrentIndex);
 
     return () => {
       scrollContainer.removeEventListener('mousedown', handleMouseDown);
@@ -141,8 +165,9 @@ const SpecialOffers = ({ products = [] }) => {
       scrollContainer.removeEventListener('touchstart', handleTouchStart);
       scrollContainer.removeEventListener('touchend', handleTouchEnd);
       scrollContainer.removeEventListener('touchmove', handleTouchMove);
+      scrollContainer.removeEventListener('scroll', updateCurrentIndex);
     };
-  }, [isMobile]);
+  }, [isMobile, totalPages, itemsPerView]);
 
   return (
     <section className="mb-16">

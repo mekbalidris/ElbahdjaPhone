@@ -180,9 +180,9 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                             <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
                         ) : currentUser ? (
                             <Menu as="div" className="relative">
-                                <Menu.Button className="flex text-sm bg-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900">
+                                <Menu.Button className="flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900">
                                     <span className="sr-only">Open user menu</span>
-                                    <User size={24} className="text-gray-600 p-0.5" />
+                                    <User size={24} className="text-white hover:text-gray-200 transition-colors" />
                                 </Menu.Button>
                                 <Transition
                                     as={Fragment}
@@ -248,7 +248,7 @@ const Navbar = ({ onCartClick, cartItemCount = 0 }) => {
                             </Menu>
                         ) : (
                             <Link href="/auth">
-                                <span className="text-gray-600 hover:text-gray-900">
+                                <span className="text-white hover:text-gray-200">
                                     <User size={24} />
                                 </span>
                             </Link>
