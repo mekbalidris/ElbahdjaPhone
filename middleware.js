@@ -3,6 +3,10 @@ import { NextResponse } from 'next/server';
 export async function middleware(request) {
     const { pathname } = request.nextUrl;
 
+
+
+    
+
     // Protected admin routes
     const adminRoutes = ['/dashboard', '/admin'];
     const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route));
